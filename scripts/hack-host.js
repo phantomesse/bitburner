@@ -1,8 +1,7 @@
 /**
  * Small script that continuously hacks the host passed in the argument.
  *
- * Usage: `run hack-host.ns <hostname>`
- *
+ * @example run hack-host.ns <hostname>
  * @param {import(".").NS } ns
  */
 export async function main(ns) {
