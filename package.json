@@ -2,6 +2,8 @@
   "name": "bitburner",
   "version": "1.0.0",
   "description": "My scripts and backup file for the game bitburner.",
-  "scripts": {},
+  "scripts": {
+    "start": "node server.js"
+  },
   "type": "module"
 }
