@@ -3,7 +3,7 @@
  *
  * Usage: `run hack-host.ns <hostname>`
  *
- * @param {NS} ns
+ * @param {import(".").NS } ns
  */
 export async function main(ns) {
   while (true) await ns.hack(ns.args[0]);
