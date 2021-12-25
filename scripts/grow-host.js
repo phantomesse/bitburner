@@ -1,9 +1,17 @@
 /**
- * Small script that continuously grows the host passed in the argument.
+ * Small script that grows the host.
  *
- * @example run grow-host.ns <hostname>
- * @param {import('../.').NS } ns
+ * If the number of times is passed into the argument, then only runs for that
+ * many times. Otherwise, runs infinitely.
+ *
+ * @example run grow-host.ns <hostname> <number of times>
+ * @param {import('..').NS } ns
  */
 export async function main(ns) {
-  while (true) await ns.grow(ns.args[0]);
+  const host = ns.args[0];
+  const numberOfTimes = parseInt(ns.args[1]);
+  let index = 0;
+  while (isNaN(numberOfTimes) ? true : index++ < numberOfTimes) {
+    await ns.grow(host);
+  }
 }

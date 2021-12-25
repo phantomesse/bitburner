@@ -1,7 +1,7 @@
 /**
  * Manages buying and upgrading hacknet nodes.
  *
- * @param {import('../.').NS } ns
+ * @param {import('..').NS } ns
  */
 export async function main(ns) {
   while (true) {

@@ -45,6 +45,19 @@ export async function main(ns) {
         await latestScript.download(ns, scriptsPrefix);
       }
     }
+
+    // Delete any files that were in the current scripts but are not in the
+    // latest scripts.
+    for await (const currentScript of currentScripts) {
+      const latestScript = latestScripts.find(
+        script => script.fileName === currentScript.fileName
+      );
+      if (latestScript === undefined) {
+        ns.rm(currentScript.fileName);
+        ns.tprint(`removed ${currentScript.fileName}`);
+      }
+    }
+
     currentScripts = latestScripts;
 
     await ns.sleep(1000);
