@@ -63,6 +63,9 @@ export async function main(ns) {
       if (ns.hasRootAccess(server)) {
         rootAccessServers.push(server);
         await copyScriptsToServer(ns, server);
+
+        // Kill all scripts on this server.
+        ns.killall(server);
       }
     }
 
@@ -110,7 +113,11 @@ export async function main(ns) {
     killScript(ns, rootAccessServers, WEAKEN_HOST_SCRIPT);
 
     // Hack the server until it's completely depleted.
-    while (ns.getServerMoneyAvailable(serverToHack) > 0) {
+    while (
+      Math.floor(
+        ns.hackAnalyze(serverToHack) * ns.getServerMoneyAvailable(serverToHack)
+      ) > 0
+    ) {
       ns.print(
         `hacking ${serverToHack} - ${formatMoney(
           ns.getServerMoneyAvailable(serverToHack)
