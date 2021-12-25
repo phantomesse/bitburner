@@ -2,7 +2,7 @@ import {
   formatMoney,
   formatPercent,
   getAllServers,
-  sortByHackGrowWeakenTime,
+  sortByHackingHeuristic,
 } from './utils.js';
 
 const DISABLE_LOGGING_FUNCTIONS = [
@@ -74,7 +74,7 @@ export async function main(ns) {
         ns.getServerMoneyAvailable(server) > MIN_MONEY_TO_CONSIDER_HACKABLE &&
         ns.getServerRequiredHackingLevel(server) <= ns.getHackingLevel()
     );
-    sortByHackGrowWeakenTime(ns, hackableServers);
+    sortByHackingHeuristic(ns, hackableServers);
     if (hackableServers.length === 0) return;
     const serverToHack = hackableServers[0];
     ns.tprint(

@@ -44,14 +44,18 @@ export function formatTime(timeMs) {
 }
 
 /** @param {import('..').NS } ns */
-export function sortByHackGrowWeakenTime(ns, hosts) {
+export function sortByHackingHeuristic(ns, hosts) {
   hosts.sort(
     (server1, server2) =>
-      ns.getHackTime(server1) +
-      ns.getWeakenTime(server1) +
-      ns.getGrowTime(server1) -
-      ns.getHackTime(server2) -
-      ns.getWeakenTime(server2) -
-      ns.getGrowTime(server2)
+      getHackingHeuristic(ns, server2) - getHackingHeuristic(ns, server1)
+  );
+}
+
+/** @param {import('..').NS } ns */
+export function getHackingHeuristic(ns, host) {
+  return (
+    ns.hackAnalyzeChance(host) *
+    ns.hackAnalyze(host) *
+    ns.getServerMoneyAvailable(host)
   );
 }

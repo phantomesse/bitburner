@@ -2,8 +2,9 @@ import {
   getAllServers,
   formatMoney,
   formatPercent,
-  sortByHackGrowWeakenTime,
+  sortByHackingHeuristic,
   formatTime,
+  getHackingHeuristic,
 } from './utils.js';
 
 /**
@@ -18,7 +19,7 @@ export async function main(ns) {
       ns.hackAnalyzeChance(host) > 0 &&
       ns.getServerRequiredHackingLevel(host) <= ns.getHackingLevel()
   );
-  sortByHackGrowWeakenTime(ns, hackableHostNames);
+  sortByHackingHeuristic(ns, hackableHostNames);
   const hackableHosts = hackableHostNames.map(host => new Host(ns, host));
 
   const namePrintLength = getPrintLength(hackableHosts, host => host.name);
@@ -26,31 +27,34 @@ export async function main(ns) {
 
   let rows = [
     [
-      rightBuffer('host name', namePrintLength),
-      leftBuffer('money available', moneyPrintLength),
+      'host name'.padEnd(namePrintLength),
+      'money available'.padStart(moneyPrintLength),
       'hack chance',
       'hack time',
       'grow time',
       'weaken time',
+      'heuristic',
     ].join(' | '),
     [
-      getUnderline(namePrintLength),
-      getUnderline(moneyPrintLength),
-      getUnderline('hack chance'.length),
-      getUnderline('hack time'.length),
-      getUnderline('grow time'.length),
-      getUnderline('weaken time'.length),
+      ''.padStart(namePrintLength, '-'),
+      ''.padStart(moneyPrintLength, '-'),
+      ''.padStart('hack chance'.length, '-'),
+      ''.padStart('hack time'.length, '-'),
+      ''.padStart('grow time'.length, '-'),
+      ''.padStart('weaken time'.length, '-'),
+      ''.padStart('heuristic'.length, '-'),
     ].join('-+-'),
   ];
   for (const host of hackableHosts) {
     rows.push(
       [
-        rightBuffer(host.name, namePrintLength),
-        leftBuffer(host.money, moneyPrintLength),
-        leftBuffer(formatPercent(host.hackChance), 'hack chance'.length),
-        leftBuffer(formatTime(host.hackTime), 'hack time'.length),
-        leftBuffer(formatTime(host.growTime), 'grow time'.length),
-        leftBuffer(formatTime(host.weakenTime), 'weaken time'.length),
+        host.name.padEnd(namePrintLength),
+        host.money.padStart(moneyPrintLength),
+        formatPercent(host.hackChance).padStart('hack chance'.length),
+        formatTime(host.hackTime).padStart('hack time'.length),
+        formatTime(host.growTime).padStart('grow time'.length),
+        formatTime(host.weakenTime).padStart('weaken time'.length),
+        host.hackingHeuristic.padStart('heuristic'.length),
       ].join(' | ')
     );
   }
@@ -69,6 +73,8 @@ class Host {
     this.hackTime = ns.getHackTime(name);
     this.growTime = ns.getGrowTime(name);
     this.weakenTime = ns.getWeakenTime(name);
+
+    this.hackingHeuristic = getHackingHeuristic(ns, name).toFixed(2);
   }
 
   get money() {
@@ -83,22 +89,4 @@ function getPrintLength(hosts, valueFn) {
   return hosts
     .map(valueFn)
     .reduce((prev, curr) => (curr.length > prev.length ? curr : prev)).length;
-}
-
-function rightBuffer(str, printLength) {
-  let buffer = '';
-  for (let i = str.length; i < printLength; i++) buffer += ' ';
-  return str + buffer;
-}
-
-function leftBuffer(str, printLength) {
-  let buffer = '';
-  for (let i = str.length; i < printLength; i++) buffer += ' ';
-  return buffer + str;
-}
-
-function getUnderline(printLength) {
-  let line = '';
-  for (let i = 0; i < printLength; i++) line += '-';
-  return line;
 }
