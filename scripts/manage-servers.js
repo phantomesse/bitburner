@@ -36,11 +36,22 @@ export async function main(ns) {
     const rootAccessServers = [];
     for await (const server of allServers) {
       // Attempt to gain root access to any servers without root access.
-      if (ns.fileExists('BruteSSH.exe')) ns.brutessh(server);
-      if (ns.fileExists('FTPCrack.exe')) ns.ftpcrack(server);
-      if (ns.fileExists('relaySMTP.exe')) ns.relaysmtp(server);
-      if (ns.fileExists('HTTPWorm.exe')) ns.httpworm(server);
-      if (ns.fileExists('SQLInject.exe')) ns.sqlinject(server);
+      const serverInfo = ns.getServer(server);
+      if (ns.fileExists('BruteSSH.exe') && !serverInfo.sshPortOpen) {
+        ns.brutessh(server);
+      }
+      if (ns.fileExists('FTPCrack.exe') && !serverInfo.ftpPortOpen) {
+        ns.ftpcrack(server);
+      }
+      if (ns.fileExists('relaySMTP.exe') && !serverInfo.smtpPortOpen) {
+        ns.relaysmtp(server);
+      }
+      if (ns.fileExists('HTTPWorm.exe') && !serverInfo.httpPortOpen) {
+        Pns.httpworm(server);
+      }
+      if (ns.fileExists('SQLInject.exe') && !serverInfo.sqlPortOpen) {
+        ns.sqlinject(server);
+      }
       if (!ns.hasRootAccess(server)) {
         try {
           ns.nuke(server);
