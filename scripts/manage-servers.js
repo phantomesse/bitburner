@@ -6,22 +6,18 @@ import {
 } from './utils.js';
 
 const DISABLE_LOGGING_FUNCTIONS = [
-  'getServerMaxRam',
-  'getServerUsedRam',
-  'getServerMoneyAvailable',
-  'getServerMaxMoney',
   'getHackingLevel',
+  'getServerMaxMoney',
+  'getServerMaxRam',
+  'getServerMoneyAvailable',
   'getServerRequiredHackingLevel',
+  'getServerUsedRam',
   'sleep',
+  'scan',
 ];
 const GROW_HOST_SCRIPT = 'grow-host.js';
 const HACK_HOST_SCRIPT = 'hack-host.js';
 const WEAKEN_HOST_SCRIPT = 'weaken-host.js';
-const SCRIPTS_TO_COPY = [
-  GROW_HOST_SCRIPT,
-  HACK_HOST_SCRIPT,
-  WEAKEN_HOST_SCRIPT,
-];
 const MIN_MONEY_TO_CONSIDER_HACKABLE = 10000;
 
 /**
@@ -40,14 +36,14 @@ export async function main(ns) {
     const rootAccessServers = [];
     for await (const server of allServers) {
       // Attempt to gain root access to any servers without root access.
+      if (ns.fileExists('BruteSSH.exe')) ns.brutessh(server);
+      if (ns.fileExists('FTPCrack.exe')) ns.ftpcrack(server);
+      if (ns.fileExists('relaySMTP.exe')) ns.relaysmtp(server);
+      if (ns.fileExists('HTTPWorm.exe')) ns.httpworm(server);
+      if (ns.fileExists('SQLInject.exe')) ns.sqlinject(server);
       if (!ns.hasRootAccess(server)) {
-        if (ns.fileExists('BruteSSH.exe')) ns.brutessh(server);
-        if (ns.fileExists('FTPCrack.exe')) ns.ftpcrack(server);
-        if (ns.fileExists('relaySMTP.exe')) ns.relaysmtp(server);
-        if (ns.fileExists('HTTPWorm.exe')) ns.httpworm(server);
-        if (ns.fileExists('SQLInject.exe')) ns.sqlinject(server);
         try {
-          ns.nuke(host);
+          ns.nuke(server);
         } catch (_) {}
       }
 
@@ -66,25 +62,24 @@ export async function main(ns) {
         ns.getServerMoneyAvailable(server) > MIN_MONEY_TO_CONSIDER_HACKABLE &&
         ns.getServerRequiredHackingLevel(server) <= ns.getHackingLevel()
     );
-    sortByHackGrowWeakenTime(hackableServers);
+    sortByHackGrowWeakenTime(ns, hackableServers);
     if (hackableServers.length === 0) return;
     const serverToHack = hackableServers[0];
     ns.tprint(
       `targetting ${serverToHack} with ${formatPercent(
         ns.hackAnalyzeChance(serverToHack)
-      )} and ${formatMoney(ns.getServerMoneyAvailable(serverToHack))})}`
+      )} and ${formatMoney(ns.getServerMoneyAvailable(serverToHack))}`
     );
 
-    // Grow the server until it is at least half its max amount.
+    // Grow the server until it is at least 5% of its max amount.
     while (
       ns.getServerMoneyAvailable(serverToHack) <
-      ns.getServerMaxMoney(serverToHack) / 2
+      ns.getServerMaxMoney(serverToHack) * 0.05
     ) {
       ns.print(
-        'growing ' +
-          serverToHack +
-          ' ' +
-          formatMoney(ns.getServerMoneyAvailable(serverToHack))
+        `growing ${serverToHack} - ${formatMoney(
+          ns.getServerMoneyAvailable(serverToHack)
+        )} available`
       );
       executeScript(ns, rootAccessServers, GROW_HOST_SCRIPT, serverToHack);
       await ns.sleep(1000 * 60); // Wait a minute.
@@ -94,10 +89,9 @@ export async function main(ns) {
     // Weaken the server to hack until it is at least 60% hackable.
     while (ns.hackAnalyzeChance(serverToHack) < 0.6) {
       ns.print(
-        'weakening  ' +
-          serverToHack +
-          ' ' +
-          formatPercent(ns.hackAnalyzeChance(serverToHack))
+        `weakening ${serverToHack} - hack chance ${formatPercent(
+          ns.hackAnalyzeChance(serverToHack)
+        )}`
       );
       executeScript(ns, rootAccessServers, WEAKEN_HOST_SCRIPT, serverToHack);
       await ns.sleep(1000 * 60); // Wait a minute.
@@ -107,10 +101,9 @@ export async function main(ns) {
     // Hack the server until it's completely depleted.
     while (ns.getServerMoneyAvailable(serverToHack) > 0) {
       ns.print(
-        'hacking ' +
-          serverToHack +
-          ' ' +
-          formatMoney(ns.getServerMoneyAvailable(serverToHack))
+        `hacking ${serverToHack} - ${formatMoney(
+          ns.getServerMoneyAvailable(serverToHack)
+        )} available`
       );
       executeScript(ns, rootAccessServers, HACK_HOST_SCRIPT, serverToHack);
       await ns.sleep(1000 * 60); // Wait a minute.
@@ -124,7 +117,8 @@ export async function main(ns) {
  * @param {string} server
  */
 async function copyScriptsToServer(ns, server) {
-  for await (const script of SCRIPTS_TO_COPY) await ns.scp(script, server);
+  const scripts = [GROW_HOST_SCRIPT, HACK_HOST_SCRIPT, WEAKEN_HOST_SCRIPT];
+  for await (const script of scripts) await ns.scp(script, server);
 }
 
 /**
@@ -137,9 +131,10 @@ async function copyScriptsToServer(ns, server) {
  */
 function executeScript(ns, servers, fileName, ...args) {
   for (const server of servers) {
+    if (ns.isRunning(fileName, server, ...args)) continue;
     const freeRam = ns.getServerMaxRam(server) - ns.getServerUsedRam(server);
     const threadCount = Math.floor(freeRam / ns.getScriptRam(fileName));
-    if (threadCount === 0) return;
+    if (threadCount === 0) continue;
     ns.exec(fileName, server, threadCount, ...args);
   }
 }

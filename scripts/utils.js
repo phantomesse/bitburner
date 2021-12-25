@@ -42,6 +42,7 @@ export function formatTime(timeMs) {
   return (minutes > 0 ? `${minutes}m ` : '') + `${seconds}s`;
 }
 
+/** @param {import('..').NS } ns */
 export function sortByHackGrowWeakenTime(ns, hosts) {
   hosts.sort(
     (server1, server2) =>

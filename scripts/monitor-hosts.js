@@ -18,7 +18,9 @@ export async function main(ns) {
     )
     .filter(
       host =>
-        ns.getServerMoneyAvailable(host) > 0 && ns.hackAnalyzeChance(host) > 0
+        ns.getServerMoneyAvailable(host) > 0 &&
+        ns.hackAnalyzeChance(host) > 0 &&
+        ns.getServerRequiredHackingLevel(host) <= ns.getHackingLevel()
     );
   sortByHackGrowWeakenTime(ns, hackableHostNames);
   const hackableHosts = hackableHostNames.map(host => new Host(ns, host));
@@ -63,8 +65,10 @@ class Host {
   /**  @param {import('..').NS } ns */
   constructor(ns, name) {
     this.name = name;
+
     this.availableMoney = ns.getServerMoneyAvailable(name);
     this.percentOfMaxMoney = this.availableMoney / ns.getServerMaxMoney(name);
+
     this.hackChance = ns.hackAnalyzeChance(name);
     this.hackTime = ns.getHackTime(name);
     this.growTime = ns.getGrowTime(name);
