@@ -15,7 +15,9 @@ export async function main(ns) {
     const files = ns.ls(server).filter(fileName => !fileName.endsWith('.js'));
     if (files.length > 0) {
       serverPrintBlocks.push(
-        `${server} (${getPath(ns, server).join(' → ')})\n${files.join('\t')}`
+        `${server}\n${getPath(ns, server)
+          .map(path => `connect ${path}`)
+          .join('; ')}\n${files.join('\t')}`
       );
     }
   }
