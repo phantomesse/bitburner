@@ -29,9 +29,7 @@ export async function main(ns) {
   DISABLE_LOGGING_FUNCTIONS.forEach(ns.disableLog);
 
   while (true) {
-    const allServers = [...getAllServers(ns)].filter(
-      server => server !== 'home'
-    );
+    const allServers = [...getAllServers(ns)];
 
     const rootAccessServers = [];
     for await (const server of allServers) {

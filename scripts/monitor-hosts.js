@@ -12,16 +12,12 @@ import {
  * @param {import('..').NS } ns
  */
 export async function main(ns) {
-  const hackableHostNames = [...getAllServers(ns)]
-    .filter(
-      server => server !== 'home' && !ns.getPurchasedServers().includes(server)
-    )
-    .filter(
-      host =>
-        ns.getServerMoneyAvailable(host) > 0 &&
-        ns.hackAnalyzeChance(host) > 0 &&
-        ns.getServerRequiredHackingLevel(host) <= ns.getHackingLevel()
-    );
+  const hackableHostNames = [...getAllServers(ns)].filter(
+    host =>
+      ns.getServerMoneyAvailable(host) > 0 &&
+      ns.hackAnalyzeChance(host) > 0 &&
+      ns.getServerRequiredHackingLevel(host) <= ns.getHackingLevel()
+  );
   sortByHackGrowWeakenTime(ns, hackableHostNames);
   const hackableHosts = hackableHostNames.map(host => new Host(ns, host));
 

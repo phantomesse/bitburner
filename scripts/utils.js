@@ -8,6 +8,7 @@
  * @returns {Set<string>}
  */
 export function getAllServers(ns, root, parent) {
+  if (parent === undefined) parent = 'home';
   const children = ns.scan(root).filter(child => child !== parent);
   let servers = new Set(children);
   for (const child of children) {
