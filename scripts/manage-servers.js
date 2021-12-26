@@ -69,11 +69,6 @@ export async function main(ns) {
       availableMoney / ns.getServerMaxMoney(targetServerName);
     const needsToGrow = availableMoneyPercent < 0.1;
     if (needsToGrow) {
-      ns.print(
-        `growing ${targetServerName} - ${formatMoney(
-          availableMoney
-        )} (${formatPercent(availableMoneyPercent)})`
-      );
       executeScript(
         ns,
         rootAccessServerNames,
@@ -81,39 +76,51 @@ export async function main(ns) {
         targetServerName,
         1
       );
+      if (successfulExecutes > 0) {
+        const successfulExecutes = ns.print(
+          `growing ${targetServerName} on ${successfulExecutes} servers - ${formatMoney(
+            availableMoney
+          )} (${formatPercent(availableMoneyPercent)})`
+        );
+      }
     }
 
     // Weaken the server to hack until it is at least 60% hackable.
     const needsToWeaken = hackChance < 0.6;
     if (needsToWeaken) {
-      ns.print(
-        `weakening ${targetServerName} - hack chance ${formatPercent(
-          hackChance
-        )}`
-      );
-      executeScript(
+      const successfulExecutes = executeScript(
         ns,
         rootAccessServerNames,
         WEAKEN_SCRIPT,
         targetServerName,
         1
       );
+      if (successfulExecutes > 0) {
+        ns.print(
+          `weakening ${targetServerName} on ${successfulExecutes} servers - hack chance ${formatPercent(
+            hackChance
+          )}`
+        );
+      }
     }
 
     // Hack the server.
     if (!needsToGrow && !needsToWeaken) {
-      ns.print(
-        `hacking ${targetServerName} with ${formatMoney(
-          availableMoney
-        )} available and hack chance of ${formatPercent(hackChance)}`
-      );
-      executeScript(
+      const successfulExecutes = executeScript(
         ns,
         rootAccessServerNames,
         HACK_SCRIPT,
         targetServerName,
         1
       );
+      if (successfulExecutes > 0) {
+        ns.print(
+          `hacking ${targetServerName} on ${successfulExecutes} servers with
+          ${formatMoney(
+            availableMoney
+          )} available and hack chance of ${formatPercent(hackChance)}`
+        );
+      }
     }
 
     await ns.sleep(1000); // Wait a second.
@@ -191,8 +198,10 @@ async function copyScriptsToServer(ns, serverName) {
  * @param {string[]} serverNames
  * @param {string} script
  * @param {string[]} args
+ * @returns {int} number of servers that successfully executed the script
  */
 function executeScript(ns, serverNames, script, ...args) {
+  let serverCount = 0;
   for (const serverName of serverNames) {
     if (ns.isRunning(script, serverName, ...args)) continue;
     const freeRam =
@@ -201,6 +210,8 @@ function executeScript(ns, serverNames, script, ...args) {
       (serverName === HOME_SERVER_NAME ? RESERVED_RAM_FOR_HOME_SERVER : 0);
     const threadCount = Math.floor(freeRam / ns.getScriptRam(script));
     if (threadCount === 0) continue;
-    ns.exec(script, serverName, threadCount, ...args);
+    serverCount +=
+      ns.exec(script, serverName, threadCount, ...args) === 0 ? 0 : 1;
   }
+  return serverCount;
 }
