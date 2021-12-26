@@ -15,11 +15,6 @@ export async function main(ns) {
       if (ns.getPlayer().money > cost) {
         const server = ns.purchaseServer(HOSTNAME, ram);
         ns.tprint(`bought server (${server}) with ${ram} RAM`);
-
-        // Restart manage-servers.js
-        ns.scriptKill('manage-servers.js', 'home');
-        ns.run('manage-servers.js');
-        break;
       }
     }
 

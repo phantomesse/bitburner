@@ -1,5 +1,5 @@
 import {
-  getAllServers,
+  getAllServerNames,
   formatMoney,
   formatPercent,
   sortByHackingHeuristic,
@@ -13,7 +13,7 @@ import {
  * @param {import('..').NS } ns
  */
 export async function main(ns) {
-  const hackableHostNames = [...getAllServers(ns)].filter(
+  const hackableHostNames = [...getAllServerNames(ns)].filter(
     host =>
       ns.getServerMoneyAvailable(host) > 0 &&
       ns.hackAnalyzeChance(host) > 0 &&

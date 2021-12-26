@@ -1,24 +1,29 @@
 import {
   formatMoney,
   formatPercent,
-  getAllServers,
+  getAllServerNames,
+  isHackable,
   sortByHackingHeuristic,
 } from './utils.js';
 
 const DISABLE_LOGGING_FUNCTIONS = [
+  'nuke',
   'getHackingLevel',
   'getServerMaxMoney',
   'getServerMaxRam',
   'getServerMoneyAvailable',
   'getServerRequiredHackingLevel',
   'getServerUsedRam',
-  'sleep',
   'scan',
+  'sleep',
 ];
-const GROW_HOST_SCRIPT = 'grow-host.js';
-const HACK_HOST_SCRIPT = 'hack-host.js';
-const WEAKEN_HOST_SCRIPT = 'weaken-host.js';
-const MIN_MONEY_TO_CONSIDER_HACKABLE = 10000;
+
+const HOME_SERVER_NAME = 'home';
+const RESERVED_RAM_FOR_HOME_SERVER = 10;
+
+const GROW_SCRIPT = 'grow.js';
+const HACK_SCRIPT = 'hack.js';
+const WEAKEN_SCRIPT = 'weaken.js';
 
 /**
  * Manages hacking servers.
@@ -27,141 +32,175 @@ const MIN_MONEY_TO_CONSIDER_HACKABLE = 10000;
  */
 export async function main(ns) {
   DISABLE_LOGGING_FUNCTIONS.forEach(ns.disableLog);
+  let currentTargetServerName;
 
   while (true) {
-    const allServers = [...getAllServers(ns)];
+    // Get all servers where we have root access including home.
+    const rootAccessServerNames = [
+      HOME_SERVER_NAME,
+      ...getAllServerNames(ns),
+    ].filter(serverName => gainRootAccess(ns, serverName));
 
-    const rootAccessServers = [];
-    for await (const server of allServers) {
-      // Attempt to gain root access to any servers without root access.
-      const serverInfo = ns.getServer(server);
-      if (ns.fileExists('BruteSSH.exe') && !serverInfo.sshPortOpen) {
-        ns.brutessh(server);
-      }
-      if (ns.fileExists('FTPCrack.exe') && !serverInfo.ftpPortOpen) {
-        ns.ftpcrack(server);
-      }
-      if (ns.fileExists('relaySMTP.exe') && !serverInfo.smtpPortOpen) {
-        ns.relaysmtp(server);
-      }
-      if (ns.fileExists('HTTPWorm.exe') && !serverInfo.httpPortOpen) {
-        Pns.httpworm(server);
-      }
-      if (ns.fileExists('SQLInject.exe') && !serverInfo.sqlPortOpen) {
-        ns.sqlinject(server);
-      }
-      if (!ns.hasRootAccess(server)) {
-        try {
-          ns.nuke(server);
-        } catch (_) {}
-      }
-
-      // Install hack-host.js, grow-host.js, and weaken-host.js on each server
-      // that we have root access for.
-      if (ns.hasRootAccess(server)) {
-        rootAccessServers.push(server);
-        await copyScriptsToServer(ns, server);
-
-        // Kill all scripts on this server.
-        ns.killall(server);
-      }
+    // Copy scripts to every root access server.
+    for await (const serverName of rootAccessServerNames) {
+      if (serverName === HOME_SERVER_NAME) continue;
+      await copyScriptsToServer(ns, serverName);
     }
 
-    // Get all servers that we can hack sorted by least amount of time it takes
-    // to hack, weaken, and grow.
-    const hackableServers = allServers.filter(
-      server =>
-        ns.getServerMoneyAvailable(server) > MIN_MONEY_TO_CONSIDER_HACKABLE &&
-        ns.getServerRequiredHackingLevel(server) <= ns.getHackingLevel()
+    // Select the most hackable server.
+    const hackableServerNames = sortByHackingHeuristic(
+      ns,
+      rootAccessServerNames.filter(serverName => isHackable(ns, serverName))
     );
-    sortByHackingHeuristic(ns, hackableServers);
-    if (hackableServers.length === 0) return;
-    const serverToHack = hackableServers[0];
-    ns.tprint(
-      `targetting ${serverToHack} with ${formatPercent(
-        ns.hackAnalyzeChance(serverToHack)
-      )} and ${formatMoney(ns.getServerMoneyAvailable(serverToHack))}`
-    );
-
-    // Grow the server until it is at least 5% of its max amount.
-    while (
-      ns.getServerMoneyAvailable(serverToHack) <
-      ns.getServerMaxMoney(serverToHack) * 0.05
-    ) {
-      ns.print(
-        `growing ${serverToHack} - ${formatMoney(
-          ns.getServerMoneyAvailable(serverToHack)
-        )} available`
+    const targetServerName = hackableServerNames[0];
+    const hackChance = ns.hackAnalyzeChance(targetServerName);
+    const availableMoney = ns.getServerMoneyAvailable(targetServerName);
+    if (targetServerName !== currentTargetServerName) {
+      ns.tprint(
+        `targetting ${targetServerName} with ${formatMoney(
+          availableMoney
+        )} available and hack chance of ${formatPercent(hackChance)}`
       );
-      executeScript(ns, rootAccessServers, GROW_HOST_SCRIPT, serverToHack);
-      await ns.sleep(1000 * 60); // Wait a minute.
+      currentTargetServerName = targetServerName;
     }
-    killScript(ns, rootAccessServers, GROW_HOST_SCRIPT);
+
+    // Grow the server until it is at least 10% of its max amount.
+    const availableMoneyPercent =
+      availableMoney / ns.getServerMaxMoney(targetServerName);
+    const needsToGrow = availableMoneyPercent < 0.1;
+    if (needsToGrow) {
+      ns.print(
+        `growing ${targetServerName} - ${formatMoney(
+          availableMoney
+        )} (${formatPercent(availableMoneyPercent)})`
+      );
+      executeScript(
+        ns,
+        rootAccessServerNames,
+        GROW_SCRIPT,
+        targetServerName,
+        1
+      );
+    }
 
     // Weaken the server to hack until it is at least 60% hackable.
-    while (ns.hackAnalyzeChance(serverToHack) < 0.6) {
+    const needsToWeaken = hackChance < 0.6;
+    if (needsToWeaken) {
       ns.print(
-        `weakening ${serverToHack} - hack chance ${formatPercent(
-          ns.hackAnalyzeChance(serverToHack)
+        `weakening ${targetServerName} - hack chance ${formatPercent(
+          hackChance
         )}`
       );
-      executeScript(ns, rootAccessServers, WEAKEN_HOST_SCRIPT, serverToHack);
-      await ns.sleep(1000 * 60); // Wait a minute.
-    }
-    killScript(ns, rootAccessServers, WEAKEN_HOST_SCRIPT);
-
-    // Hack the server until it's completely depleted.
-    while (
-      Math.floor(
-        ns.hackAnalyze(serverToHack) * ns.getServerMoneyAvailable(serverToHack)
-      ) > 0
-    ) {
-      ns.print(
-        `hacking ${serverToHack} - ${formatMoney(
-          ns.getServerMoneyAvailable(serverToHack)
-        )} available`
+      executeScript(
+        ns,
+        rootAccessServerNames,
+        WEAKEN_SCRIPT,
+        targetServerName,
+        1
       );
-      executeScript(ns, rootAccessServers, HACK_HOST_SCRIPT, serverToHack);
-      await ns.sleep(1000 * 60); // Wait a minute.
     }
-    killScript(ns, rootAccessServers, HACK_HOST_SCRIPT);
+
+    // Hack the server.
+    if (!needsToGrow && !needsToWeaken) {
+      ns.print(
+        `hacking ${targetServerName} with ${formatMoney(
+          availableMoney
+        )} available and hack chance of ${formatPercent(hackChance)}`
+      );
+      executeScript(
+        ns,
+        rootAccessServerNames,
+        HACK_SCRIPT,
+        targetServerName,
+        1
+      );
+    }
+
+    await ns.sleep(1000); // Wait a second.
   }
 }
 
 /**
- * @param {import('..').NS} ns
- * @param {string} server
+ * Open all the ports that we can open and attempt to gain root access to a
+ * given server.
+ *
+ * @param {import('..').NS } ns
+ * @param {string} serverName
+ * @returns {boolean} true if we now have root access and false if otherwise
  */
-async function copyScriptsToServer(ns, server) {
-  const scripts = [GROW_HOST_SCRIPT, HACK_HOST_SCRIPT, WEAKEN_HOST_SCRIPT];
-  for await (const script of scripts) await ns.scp(script, server);
+function gainRootAccess(ns, serverName) {
+  const server = ns.getServer(serverName);
+
+  // Attempt to open all ports even if we already have root access.
+  if (ns.fileExists('BruteSSH.exe') && !server.sshPortOpen) {
+    ns.brutessh(serverName);
+  }
+  if (ns.fileExists('FTPCrack.exe') && !server.ftpPortOpen) {
+    ns.ftpcrack(serverName);
+  }
+  if (ns.fileExists('relaySMTP.exe') && !server.smtpPortOpen) {
+    ns.relaysmtp(serverName);
+  }
+  if (ns.fileExists('HTTPWorm.exe') && !server.httpPortOpen) {
+    ns.httpworm(serverName);
+  }
+  if (ns.fileExists('SQLInject.exe') && !server.sqlPortOpen) {
+    ns.sqlinject(serverName);
+  }
+
+  if (ns.hasRootAccess(serverName)) return true;
+  try {
+    ns.nuke(serverName);
+  } catch (_) {
+    return false;
+  }
+}
+
+/**
+ * Copies grow, hack, and weaken scripts to a given server and deletes any other
+ * js scripts from that server.
+ *
+ * @param {import('..').NS} ns
+ * @param {string} serverName
+ */
+async function copyScriptsToServer(ns, serverName) {
+  const scriptsToCopy = [GROW_SCRIPT, HACK_SCRIPT, WEAKEN_SCRIPT];
+  const scriptsOnServer = ns
+    .ls(serverName)
+    .filter(script => script.endsWith('.js'));
+
+  for await (const script of scriptsToCopy) {
+    // Don't copy scripts over if they already exist.
+    if (scriptsOnServer.includes(script)) continue;
+
+    // Copy script over.
+    await ns.scp(script, serverName);
+  }
+
+  // Delete any other scripts on the server.
+  for (const script of scriptsOnServer) {
+    if (scriptsToCopy.includes(script)) continue;
+    ns.rm(script, serverName);
+  }
 }
 
 /**
  * Executes a script on multiple servers.
  *
  * @param {import('..').NS} ns
- * @param {string[]} servers
- * @param {string} fileName
+ * @param {string[]} serverNames
+ * @param {string} script
  * @param {string[]} args
  */
-function executeScript(ns, servers, fileName, ...args) {
-  for (const server of servers) {
-    if (ns.isRunning(fileName, server, ...args)) continue;
-    const freeRam = ns.getServerMaxRam(server) - ns.getServerUsedRam(server);
-    const threadCount = Math.floor(freeRam / ns.getScriptRam(fileName));
+function executeScript(ns, serverNames, script, ...args) {
+  for (const serverName of serverNames) {
+    if (ns.isRunning(script, serverName, ...args)) continue;
+    const freeRam =
+      ns.getServerMaxRam(serverName) -
+      ns.getServerUsedRam(serverName) -
+      (serverName === HOME_SERVER_NAME ? RESERVED_RAM_FOR_HOME_SERVER : 0);
+    const threadCount = Math.floor(freeRam / ns.getScriptRam(script));
     if (threadCount === 0) continue;
-    ns.exec(fileName, server, threadCount, ...args);
+    ns.exec(script, serverName, threadCount, ...args);
   }
-}
-
-/**
- * Kills a script on multiple servers.
- *
- * @param {import('..').NS} ns
- * @param {string[]} servers
- * @param {string} fileName
- */
-function killScript(ns, servers, fileName) {
-  for (const server of servers) ns.scriptKill(fileName, server);
 }

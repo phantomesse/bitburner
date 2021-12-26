@@ -1,5 +1,5 @@
 /**
- * Retrieves all servers including `home` and personal servers.
+ * Retrieves all servers including personal servers but excluding 'home'.
  *
  * @example getAllServers(ns)
  * @param {import('..').NS } ns
@@ -7,12 +7,12 @@
  * @param {string} [parent]
  * @returns {Set<string>}
  */
-export function getAllServers(ns, root, parent) {
+export function getAllServerNames(ns, root, parent) {
   if (parent === undefined) parent = 'home';
   const children = ns.scan(root).filter(child => child !== parent);
   let servers = new Set(children);
   for (const child of children) {
-    servers = new Set([...servers, ...getAllServers(ns, child, root)]);
+    servers = new Set([...servers, ...getAllServerNames(ns, child, root)]);
   }
   return servers;
 }
@@ -43,12 +43,23 @@ export function formatTime(timeMs) {
   return (minutes > 0 ? `${minutes}m ` : '') + `${seconds}s`;
 }
 
+/** Returns whether a server is hackable. */
+export function isHackable(ns, serverName) {
+  return (
+    serverName !== 'home' &&
+    ns.getServerMoneyAvailable(serverName) > 0 &&
+    ns.hackAnalyzeChance(serverName) > 0 &&
+    ns.getServerRequiredHackingLevel(serverName) <= ns.getHackingLevel()
+  );
+}
+
 /** @param {import('..').NS } ns */
 export function sortByHackingHeuristic(ns, hosts) {
   hosts.sort(
     (server1, server2) =>
       getHackingHeuristic(ns, server2) - getHackingHeuristic(ns, server1)
   );
+  return hosts;
 }
 
 /** @param {import('..').NS } ns */
