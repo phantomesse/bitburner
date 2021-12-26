@@ -19,7 +19,7 @@ const DISABLE_LOGGING_FUNCTIONS = [
 ];
 
 const HOME_SERVER_NAME = 'home';
-const RESERVED_RAM_FOR_HOME_SERVER = 10;
+const RESERVED_RAM_FOR_HOME_SERVER = 15;
 
 const GROW_SCRIPT = 'grow.js';
 const HACK_SCRIPT = 'hack.js';
