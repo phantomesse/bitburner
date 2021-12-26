@@ -1,4 +1,4 @@
-import { getAllServers } from './utils.js';
+import { getAllServerNames } from './utils.js';
 
 /**
  * List all the files on each server.
@@ -6,12 +6,12 @@ import { getAllServers } from './utils.js';
  * @param {import('..').NS } ns
  */
 export async function main(ns) {
-  const servers = [...getAllServers(ns)].filter(
+  const serverNames = [...getAllServerNames(ns)].filter(
     server => server !== 'home' && !ns.getPurchasedServers().includes(server)
   );
 
   const serverPrintBlocks = [];
-  for (const server of servers) {
+  for (const server of serverNames) {
     const files = ns.ls(server).filter(fileName => !fileName.endsWith('.js'));
     if (files.length > 0) {
       serverPrintBlocks.push(
