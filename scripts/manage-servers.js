@@ -69,7 +69,7 @@ export async function main(ns) {
       availableMoney / ns.getServerMaxMoney(targetServerName);
     const needsToGrow = availableMoneyPercent < 0.1;
     if (needsToGrow) {
-      executeScript(
+      const successfulExecutes = executeScript(
         ns,
         rootAccessServerNames,
         GROW_SCRIPT,
@@ -77,7 +77,7 @@ export async function main(ns) {
         1
       );
       if (successfulExecutes > 0) {
-        const successfulExecutes = ns.print(
+        ns.print(
           `growing ${targetServerName} on ${successfulExecutes} servers - ${formatMoney(
             availableMoney
           )} (${formatPercent(availableMoneyPercent)})`
