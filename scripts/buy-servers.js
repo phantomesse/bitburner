@@ -25,7 +25,7 @@ export async function main(ns) {
       if (ns.getPurchasedServers().length === purchasedServerLimit) {
         const lowestRamServerName = getLowestRamPurchasedServer(ns);
         const lowestRam = ns.getServerMaxRam(lowestRamServerName);
-        if (ram === lowestRam) continue;
+        if (ram <= lowestRam) continue;
         ns.killall(lowestRamServerName);
         if (ns.deleteServer(lowestRamServerName)) {
           ns.tprint(
@@ -43,7 +43,7 @@ export async function main(ns) {
         if (ns.getPurchasedServers().length === purchasedServerLimit) {
           const lowestRamServerName = getLowestRamPurchasedServer(ns);
           const lowestRam = ns.getServerMaxRam(lowestRamServerName);
-          if (lowestRam !== lowestRamAcceptable) {
+          if (lowestRam > lowestRamAcceptable) {
             lowestRamAcceptable = lowestRam;
             ns.tprint(
               `now only buying servers >= ${lowestRamAcceptable}GB RAM`
