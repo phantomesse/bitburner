@@ -67,6 +67,7 @@ export function getHackingHeuristic(ns, host) {
   return (
     ns.hackAnalyzeChance(host) *
     ns.hackAnalyze(host) *
+    ns.getHackTime(host) *
     ns.getServerMoneyAvailable(host)
   );
 }

@@ -33,7 +33,7 @@ export async function main(ns) {
       'hack time',
       'grow time',
       'weaken time',
-      'heuristic',
+      'hack heuristic',
     ].join(' | '),
     [
       ''.padStart(namePrintLength, '-'),
@@ -42,7 +42,7 @@ export async function main(ns) {
       ''.padStart('hack time'.length, '-'),
       ''.padStart('grow time'.length, '-'),
       ''.padStart('weaken time'.length, '-'),
-      ''.padStart('heuristic'.length, '-'),
+      ''.padStart('hack heuristic'.length, '-'),
     ].join('-+-'),
   ];
   for (const host of hackableHosts) {
@@ -54,7 +54,7 @@ export async function main(ns) {
         formatTime(host.hackTime).padStart('hack time'.length),
         formatTime(host.growTime).padStart('grow time'.length),
         formatTime(host.weakenTime).padStart('weaken time'.length),
-        host.hackingHeuristic.padStart('heuristic'.length),
+        host.hackingHeuristic.padStart('hack heuristic'.length),
       ].join(' | ')
     );
   }
