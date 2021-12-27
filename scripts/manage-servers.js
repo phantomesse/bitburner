@@ -70,6 +70,12 @@ export async function main(ns) {
     // max amount.
     const availableMoneyPercent =
       availableMoney / ns.getServerMaxMoney(targetServerName);
+    if (availableMoneyPercent === 1) {
+      // Kill any grow since money is at max.
+      for (const server of rootAccessServerNames) {
+        ns.kill(GROW_SCRIPT, server, targetServerName, 1);
+      }
+    }
     const needsToGrow = availableMoneyPercent < MIN_AVAILABLE_MONEY_PERCENT;
     if (needsToGrow) {
       const successfulExecutes = executeScript(
@@ -89,6 +95,12 @@ export async function main(ns) {
     }
 
     // Weaken the server to hack until it is at least `MIN_HACK_CHANCE`.
+    if (hackChance === 1) {
+      // Kill any weaken since hack chance is at max.
+      for (const server of rootAccessServerNames) {
+        ns.kill(WEAKEN_SCRIPT, server, targetServerName, 1);
+      }
+    }
     const needsToWeaken = hackChance < MIN_HACK_CHANCE;
     if (needsToWeaken) {
       const successfulExecutes = executeScript(
