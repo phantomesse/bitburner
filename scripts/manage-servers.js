@@ -19,7 +19,6 @@ const DISABLE_LOGGING_FUNCTIONS = [
 ];
 
 const HOME_SERVER_NAME = 'home';
-const RESERVED_RAM_FOR_HOME_SERVER = 15;
 
 const GROW_SCRIPT = 'grow.js';
 const HACK_SCRIPT = 'hack.js';
@@ -207,11 +206,20 @@ function executeScript(ns, serverNames, script, ...args) {
     const freeRam =
       ns.getServerMaxRam(serverName) -
       ns.getServerUsedRam(serverName) -
-      (serverName === HOME_SERVER_NAME ? RESERVED_RAM_FOR_HOME_SERVER : 0);
+      (serverName === HOME_SERVER_NAME ? getRamToReserveOnHome(ns) : 0);
     const threadCount = Math.floor(freeRam / ns.getScriptRam(script));
     if (threadCount === 0) continue;
     serverCount +=
       ns.exec(script, serverName, threadCount, ...args) === 0 ? 0 : 1;
   }
   return serverCount;
+}
+
+/** @param {import('..').NS} ns */
+function getRamToReserveOnHome(ns) {
+  return ns
+    .ls(HOME_SERVER_NAME)
+    .filter(fileName => fileName.endsWith('.js'))
+    .map(script => ns.getScriptRam(script))
+    .reduce((a, b) => a + b);
 }

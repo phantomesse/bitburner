@@ -1,16 +1,33 @@
+import { getAllServerNames } from './utils.js';
+
 /**
  * Prints out the connect commands to run in order to get to a given server.
  *
- * @param {import('..').NS } ns
+ * @param {import('..').NS} ns
  */
 
 export async function main(ns) {
-  ns.tprint('\n' + getPathCommands(ns, ns.args[0]));
+  if (ns.args.length > 0) {
+    ns.tprint('\n' + getPathCommands(ns, ns.args[0]));
+    return;
+  }
+
+  // If no args, then print path commands for every server.
+  const commands = [...getAllServerNames(ns)]
+    .map(serverName => getPathCommands(ns, serverName))
+    .join('\n');
+  ns.tprint('\n' + commands);
 }
 
-export function getPathCommands(ns, server) {
+/**
+ *
+ * @param {import('..').NS} ns
+ * @param {string} serverName
+ * @returns
+ */
+export function getPathCommands(ns, serverName) {
   return (
-    getPath(ns, server)
+    getPath(ns, serverName)
       .map(path => `connect ${path}`)
       .join('; ') + '; '
   );
