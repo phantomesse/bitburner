@@ -24,6 +24,9 @@ const GROW_SCRIPT = 'grow.js';
 const HACK_SCRIPT = 'hack.js';
 const WEAKEN_SCRIPT = 'weaken.js';
 
+const MIN_AVAILABLE_MONEY_PERCENT = 0.1;
+const MIN_HACK_CHANCE = 0.6;
+
 /**
  * Manages hacking servers.
  *
@@ -63,10 +66,11 @@ export async function main(ns) {
       currentTargetServerName = targetServerName;
     }
 
-    // Grow the server until it is at least 10% of its max amount.
+    // Grow the server until it is at least `MIN_AVAILABLE_MONEY_PERCENT` of its
+    // max amount.
     const availableMoneyPercent =
       availableMoney / ns.getServerMaxMoney(targetServerName);
-    const needsToGrow = availableMoneyPercent < 0.1;
+    const needsToGrow = availableMoneyPercent < MIN_AVAILABLE_MONEY_PERCENT;
     if (needsToGrow) {
       const successfulExecutes = executeScript(
         ns,
@@ -84,8 +88,8 @@ export async function main(ns) {
       }
     }
 
-    // Weaken the server to hack until it is at least 60% hackable.
-    const needsToWeaken = hackChance < 0.6;
+    // Weaken the server to hack until it is at least `MIN_HACK_CHANCE`.
+    const needsToWeaken = hackChance < MIN_HACK_CHANCE;
     if (needsToWeaken) {
       const successfulExecutes = executeScript(
         ns,
