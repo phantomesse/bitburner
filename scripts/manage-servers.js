@@ -12,10 +12,13 @@ const DISABLE_LOGGING_FUNCTIONS = [
   'getServerMaxMoney',
   'getServerMaxRam',
   'getServerMoneyAvailable',
+  'getServerSecurityLevel',
   'getServerRequiredHackingLevel',
   'getServerUsedRam',
+  'getServerMinSecurityLevel',
   'scan',
   'sleep',
+  'kill',
 ];
 
 const HOME_SERVER_NAME = 'home';
@@ -24,7 +27,7 @@ const GROW_SCRIPT = 'grow.js';
 const HACK_SCRIPT = 'hack.js';
 const WEAKEN_SCRIPT = 'weaken.js';
 
-const MIN_AVAILABLE_MONEY_PERCENT = 0.1;
+const MIN_AVAILABLE_MONEY = 5000000;
 const MIN_HACK_CHANCE = 0.6;
 
 /**
@@ -34,7 +37,6 @@ const MIN_HACK_CHANCE = 0.6;
  */
 export async function main(ns) {
   DISABLE_LOGGING_FUNCTIONS.forEach(ns.disableLog);
-  let currentTargetServerName;
 
   while (true) {
     // Get all servers where we have root access including home.
@@ -49,92 +51,32 @@ export async function main(ns) {
       await copyScriptsToServer(ns, serverName);
     }
 
-    // Select the most hackable server.
     const hackableServerNames = sortByHackingHeuristic(
       ns,
       rootAccessServerNames.filter(serverName => isHackable(ns, serverName))
     );
-    const targetServerName = hackableServerNames[0];
-    const hackChance = ns.hackAnalyzeChance(targetServerName);
-    const availableMoney = ns.getServerMoneyAvailable(targetServerName);
-    if (targetServerName !== currentTargetServerName) {
-      ns.tprint(
-        `targetting ${targetServerName} with ${formatMoney(
-          availableMoney
-        )} available and hack chance of ${formatPercent(hackChance)}`
-      );
-      currentTargetServerName = targetServerName;
-    }
+    for (const targetServerName of hackableServerNames) {
+      let freeRam = rootAccessServerNames
+        .map(serverName => getFreeRam(ns, serverName))
+        .reduce((a, b) => a + b);
+      if (freeRam === 0) break;
 
-    // Grow the server until it is at least `MIN_AVAILABLE_MONEY_PERCENT` of its
-    // max amount.
-    const availableMoneyPercent =
-      availableMoney / ns.getServerMaxMoney(targetServerName);
-    if (availableMoneyPercent === 1) {
-      // Kill any grow since money is at max.
-      for (const server of rootAccessServerNames) {
-        ns.kill(GROW_SCRIPT, server, targetServerName, 1);
-      }
-    }
-    const needsToGrow = availableMoneyPercent < MIN_AVAILABLE_MONEY_PERCENT;
-    if (needsToGrow) {
-      const successfulExecutes = executeScript(
-        ns,
-        rootAccessServerNames,
-        GROW_SCRIPT,
-        targetServerName,
-        1
-      );
-      if (successfulExecutes > 0) {
-        ns.print(
-          `growing ${targetServerName} on ${successfulExecutes} servers - ${formatMoney(
-            availableMoney
-          )} (${formatPercent(availableMoneyPercent)})`
-        );
-      }
-    }
+      const hackChance = ns.hackAnalyzeChance(targetServerName);
+      const availableMoney = ns.getServerMoneyAvailable(targetServerName);
 
-    // Weaken the server to hack until it is at least `MIN_HACK_CHANCE`.
-    if (hackChance === 1) {
-      // Kill any weaken since hack chance is at max.
-      for (const server of rootAccessServerNames) {
-        ns.kill(WEAKEN_SCRIPT, server, targetServerName, 1);
-      }
-    }
-    const needsToWeaken = hackChance < MIN_HACK_CHANCE;
-    if (needsToWeaken) {
-      const successfulExecutes = executeScript(
-        ns,
-        rootAccessServerNames,
-        WEAKEN_SCRIPT,
-        targetServerName,
-        1
-      );
-      if (successfulExecutes > 0) {
-        ns.print(
-          `weakening ${targetServerName} on ${successfulExecutes} servers - hack chance ${formatPercent(
-            hackChance
-          )}`
-        );
-      }
-    }
+      // Grow the server until it is at least MIN_AVAILABLE_MONEY or the max.
+      const needsToGrow =
+        availableMoney <
+        Math.min(MIN_AVAILABLE_MONEY, ns.getServerMaxMoney(targetServerName));
+      if (needsToGrow) grow(ns, targetServerName, rootAccessServerNames);
 
-    // Hack the server.
-    if (!needsToGrow && !needsToWeaken) {
-      const successfulExecutes = executeScript(
-        ns,
-        rootAccessServerNames,
-        HACK_SCRIPT,
-        targetServerName,
-        1
-      );
-      if (successfulExecutes > 0) {
-        ns.print(
-          `hacking ${targetServerName} on ${successfulExecutes} servers with
-          ${formatMoney(
-            availableMoney
-          )} available and hack chance of ${formatPercent(hackChance)}`
-        );
+      // Weaken the server to hack until it is at least `MIN_HACK_CHANCE`.
+      const needsToWeaken = hackChance < MIN_HACK_CHANCE;
+      if (needsToWeaken) weaken(ns, targetServerName, rootAccessServerNames);
+
+      // Hack the server.
+      if (!needsToGrow && !needsToWeaken) {
+        hack(ns, targetServerName, rootAccessServerNames);
       }
     }
 
@@ -207,35 +149,159 @@ async function copyScriptsToServer(ns, serverName) {
 }
 
 /**
- * Executes a script on multiple servers.
- *
  * @param {import('..').NS} ns
- * @param {string[]} serverNames
- * @param {string} script
- * @param {string[]} args
- * @returns {int} number of servers that successfully executed the script
+ * @param {string} targetServerName
+ * @param {string[]} rootAccessServerNames
  */
-function executeScript(ns, serverNames, script, ...args) {
-  let serverCount = 0;
-  for (const serverName of serverNames) {
-    if (ns.isRunning(script, serverName, ...args)) continue;
-    const freeRam =
-      ns.getServerMaxRam(serverName) -
-      ns.getServerUsedRam(serverName) -
-      (serverName === HOME_SERVER_NAME ? getRamToReserveOnHome(ns) : 0);
-    const threadCount = Math.floor(freeRam / ns.getScriptRam(script));
-    if (threadCount === 0) continue;
-    serverCount +=
-      ns.exec(script, serverName, threadCount, ...args) === 0 ? 0 : 1;
+function grow(ns, targetServerName, rootAccessServerNames) {
+  // Get number of threads needed to get money to get to the min available money
+  const availableMoney = ns.getServerMoneyAvailable(targetServerName);
+  const maxMoney = ns.getServerMaxMoney(targetServerName);
+  const minAvailableMoney = Math.min(MIN_AVAILABLE_MONEY, maxMoney);
+  let estimatedThreadCount = ns.growthAnalyze(
+    targetServerName,
+    minAvailableMoney / availableMoney
+  );
+  if (estimatedThreadCount === 0) return;
+  ns.print(
+    `\nestimated ${estimatedThreadCount} threads to grow ${targetServerName} ` +
+      `from ${formatMoney(availableMoney)} to ${formatMoney(minAvailableMoney)}`
+  );
+
+  // Use only the estimated thread count to grow the target server.
+  for (const serverName of rootAccessServerNames) {
+    estimatedThreadCount -= runScript(
+      ns,
+      serverName,
+      GROW_SCRIPT,
+      estimatedThreadCount,
+      targetServerName,
+      1
+    );
+    if (estimatedThreadCount <= 0) return;
   }
-  return serverCount;
 }
 
-/** @param {import('..').NS} ns */
-function getRamToReserveOnHome(ns) {
-  return ns
-    .ls(HOME_SERVER_NAME)
-    .filter(fileName => fileName.endsWith('.js'))
-    .map(script => ns.getScriptRam(script))
-    .reduce((a, b) => a + b);
+/**
+ * @param {import('..').NS} ns
+ * @param {string} targetServerName
+ * @param {string[]} rootAccessServerNames
+ */
+function weaken(ns, targetServerName, rootAccessServerNames) {
+  // Get number of threads needed to get hack chance to get to minimum security
+  // level.
+  const currentSecurityLevel = ns.getServerSecurityLevel(targetServerName);
+  const minSecurityLevel = ns.getServerMinSecurityLevel(targetServerName);
+  let estimatedThreadCount = 1;
+  do {
+    estimatedThreadCount++;
+  } while (
+    currentSecurityLevel - ns.weakenAnalyze(estimatedThreadCount) >
+    minSecurityLevel
+  );
+  if (estimatedThreadCount === 0) return;
+  ns.print(
+    `\nestimated ${estimatedThreadCount} threads to weaken ` +
+      `${targetServerName} from ${currentSecurityLevel} to ${minSecurityLevel}`
+  );
+
+  // Use only the estimated thread count to weaken the target server.
+  for (const serverName of rootAccessServerNames) {
+    estimatedThreadCount -= runScript(
+      ns,
+      serverName,
+      WEAKEN_SCRIPT,
+      estimatedThreadCount,
+      targetServerName,
+      1
+    );
+    if (estimatedThreadCount <= 0) return;
+  }
+}
+
+/**
+ * @param {import('..').NS} ns
+ * @param {string} targetServerName
+ * @param {string[]} rootAccessServerNames
+ */
+function hack(ns, targetServerName, rootAccessServerNames) {
+  // Get number of threads needed to hack all the money from the server.
+  const availableMoney = ns.getServerMoneyAvailable(targetServerName);
+  const maxMoney = ns.getServerMaxMoney(targetServerName);
+  let estimatedThreadCount = ns.hackAnalyzeThreads(
+    targetServerName,
+    maxMoney - availableMoney
+  );
+
+  // Use only the estimated thread count to hack the target srver.
+  for (const serverName of rootAccessServerNames) {
+    estimatedThreadCount -= runScript(
+      ns,
+      serverName,
+      HACK_SCRIPT,
+      estimatedThreadCount,
+      targetServerName,
+      1
+    );
+    if (estimatedThreadCount <= 0) return;
+  }
+}
+
+function getAvailableThreadCount(ns, serverName, scriptName) {
+  return Math.floor(getFreeRam(ns, serverName) / ns.getScriptRam(scriptName));
+}
+
+/**
+ *
+ * @param {import('..').NS} ns
+ * @param {string} serverName
+ * @param {string} scriptName
+ * @param {number} threadCount
+ * @param  {...any} args
+ * @returns {number} number of threads that we were able to run the script at
+ */
+function runScript(ns, serverName, scriptName, threadCount, ...args) {
+  if (ns.isRunning(scriptName, serverName, ...args)) {
+    const script = ns.getRunningScript(scriptName, serverName, ...args);
+    ns.print(
+      `already running ${scriptName} ${args} on ${serverName} with ` +
+        `${script.threads} threads`
+    );
+    return 0;
+  }
+
+  const availableThreadCount = getAvailableThreadCount(
+    ns,
+    serverName,
+    scriptName
+  );
+  const actualThreadCount =
+    availableThreadCount > threadCount ? threadCount : availableThreadCount;
+  if (actualThreadCount <= 0) return 0;
+  const success = ns.exec(scriptName, serverName, actualThreadCount, ...args);
+  if (success === 0) return 0;
+  ns.print(
+    `running ${scriptName} ${args} on ${serverName} with ${actualThreadCount} threads`
+  );
+  return actualThreadCount;
+}
+
+/**
+ * @param {import('..').NS} ns
+ * @param {string} serverName
+ */
+function getFreeRam(ns, serverName) {
+  const maxRam = ns.getServerMaxRam(serverName);
+  const usedRam = ns.getServerUsedRam(serverName);
+  return (
+    maxRam -
+    usedRam -
+    (serverName === HOME_SERVER_NAME
+      ? ns
+          .ls(HOME_SERVER_NAME)
+          .filter(fileName => fileName.endsWith('.js'))
+          .map(script => ns.getScriptRam(script))
+          .reduce((a, b) => a + b)
+      : 0)
+  );
 }
