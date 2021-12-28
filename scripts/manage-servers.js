@@ -75,7 +75,7 @@ export async function main(ns) {
       if (needsToWeaken) weaken(ns, targetServerName, rootAccessServerNames);
 
       // Hack the server.
-      if (!needsToGrow && !needsToWeaken) {
+      if (availableMoney > 0 && !needsToGrow && !needsToWeaken) {
         hack(ns, targetServerName, rootAccessServerNames);
       }
     }
@@ -158,9 +158,11 @@ function grow(ns, targetServerName, rootAccessServerNames) {
   const availableMoney = ns.getServerMoneyAvailable(targetServerName);
   const maxMoney = ns.getServerMaxMoney(targetServerName);
   const minAvailableMoney = Math.min(MIN_AVAILABLE_MONEY, maxMoney);
-  let estimatedThreadCount = ns.growthAnalyze(
-    targetServerName,
-    minAvailableMoney / availableMoney
+  let estimatedThreadCount = Math.floor(
+    ns.growthAnalyze(
+      targetServerName,
+      minAvailableMoney / (availableMoney === 0 ? 1 : availableMoney)
+    )
   );
   if (estimatedThreadCount === 0) return;
   ns.print(
@@ -226,11 +228,14 @@ function weaken(ns, targetServerName, rootAccessServerNames) {
  */
 function hack(ns, targetServerName, rootAccessServerNames) {
   // Get number of threads needed to hack all the money from the server.
-  const availableMoney = ns.getServerMoneyAvailable(targetServerName);
-  const maxMoney = ns.getServerMaxMoney(targetServerName);
-  let estimatedThreadCount = ns.hackAnalyzeThreads(
-    targetServerName,
-    maxMoney - availableMoney
+  let estimatedThreadCount = Math.floor(
+    ns.hackAnalyzeThreads(
+      targetServerName,
+      ns.getServerMoneyAvailable(targetServerName)
+    )
+  );
+  ns.print(
+    `\nestimated ${estimatedThreadCount} threads to hack ${targetServerName}`
   );
 
   // Use only the estimated thread count to hack the target srver.

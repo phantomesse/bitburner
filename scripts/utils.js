@@ -43,12 +43,15 @@ export function formatTime(timeMs) {
   return (minutes > 0 ? `${minutes}m ` : '') + `${seconds}s`;
 }
 
-/** Returns whether a server is hackable. */
+/**
+ * Returns whether a server is hackable.
+ *
+ * @param {import('..').NS } ns
+ * @param {string} serverName
+ */
 export function isHackable(ns, serverName) {
   return (
-    serverName !== 'home' &&
-    ns.getServerMoneyAvailable(serverName) > 0 &&
-    ns.hackAnalyzeChance(serverName) > 0 &&
+    ns.getServerMaxMoney(serverName) > 0 &&
     ns.getServerRequiredHackingLevel(serverName) <= ns.getHackingLevel()
   );
 }

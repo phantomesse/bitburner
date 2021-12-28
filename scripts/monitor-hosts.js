@@ -5,6 +5,7 @@ import {
   sortByHackingHeuristic,
   formatTime,
   getHackingHeuristic,
+  isHackable,
 } from './utils.js';
 
 /**
@@ -13,11 +14,8 @@ import {
  * @param {import('..').NS } ns
  */
 export async function main(ns) {
-  const hackableHostNames = [...getAllServerNames(ns)].filter(
-    host =>
-      ns.getServerMoneyAvailable(host) > 0 &&
-      ns.hackAnalyzeChance(host) > 0 &&
-      ns.getServerRequiredHackingLevel(host) <= ns.getHackingLevel()
+  const hackableHostNames = [...getAllServerNames(ns)].filter(host =>
+    isHackable(ns, host)
   );
   sortByHackingHeuristic(ns, hackableHostNames);
   const hackableHosts = hackableHostNames.map(host => new Host(ns, host));
@@ -80,7 +78,9 @@ class Host {
   get money() {
     return (
       formatMoney(this.availableMoney) +
-      ` (${formatPercent(this.percentOfMaxMoney)} of max)`
+      ` (${formatPercent(this.percentOfMaxMoney)} of max)`.padStart(
+        ' (100.00% of max)'.length
+      )
     );
   }
 }
