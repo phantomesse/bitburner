@@ -31,7 +31,7 @@ export async function main(ns) {
     );
     for (const symbol of symbols) sellStock(ns, symbol);
 
-    await ns.sleep(1000);
+    await ns.sleep(6000); // Sleep for 6 seconds.
   }
 }
 
@@ -49,12 +49,23 @@ function buyStock(ns, symbol) {
   );
   if (sharesToBuy <= 0) return;
 
+  if (
+    ns.stock.purchase4SMarketDataTixApi() &&
+    ns.stock.getForecast(symbol) < 0.5
+  ) {
+    return;
+  }
+
   const sharePrice = ns.stock.buy(symbol, sharesToBuy);
   ns.print(
     `bought ${sharesToBuy} shares of ${symbol} at ${formatMoney(sharePrice)}`
   );
 }
 
+/**
+ * @param {import('..').NS } ns
+ * @param {string} symbol
+ */
 function sellStock(ns, symbol) {
   const position = ns.stock.getPosition(symbol);
   const ownedShareCount = position[0];
@@ -67,8 +78,15 @@ function sellStock(ns, symbol) {
   // If profit is less than 1, then we won't be profitting.
   if (profit < 1) return;
 
-  const sharePrice = ns.stock.sell(symbol, ownedShareCount);
+  let sharesToSell = ownedShareCount;
+  if (ns.stock.purchase4SMarketDataTixApi()) {
+    const forecast = ns.stock.getForecast(symbol);
+    if (forecast > 0.5) return;
+    sharesToSell = (0.5 - forecast) * sharesToSell;
+  }
+
+  const sharePrice = ns.stock.sell(symbol, sharesToSell);
   ns.print(
-    `sold ${ownedShareCount} shares of ${symbol} at ${formatMoney(sharePrice)}`
+    `sold ${sharesToSell} shares of ${symbol} at ${formatMoney(sharePrice)}`
   );
 }
