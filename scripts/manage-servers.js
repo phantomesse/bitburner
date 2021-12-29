@@ -1,6 +1,5 @@
 import {
   formatMoney,
-  formatPercent,
   getAllServerNames,
   isHackable,
   sortByHackingHeuristic,
@@ -56,7 +55,7 @@ export async function main(ns) {
       rootAccessServerNames.filter(serverName => isHackable(ns, serverName))
     );
     for (const targetServerName of hackableServerNames) {
-      let freeRam = rootAccessServerNames
+      const freeRam = rootAccessServerNames
         .map(serverName => getFreeRam(ns, serverName))
         .reduce((a, b) => a + b);
       if (freeRam === 0) break;
@@ -65,10 +64,14 @@ export async function main(ns) {
       const availableMoney = ns.getServerMoneyAvailable(targetServerName);
 
       // Grow the server until it is at least MIN_AVAILABLE_MONEY or the max.
-      const needsToGrow =
-        availableMoney <
-        Math.min(MIN_AVAILABLE_MONEY, ns.getServerMaxMoney(targetServerName));
-      if (needsToGrow) grow(ns, targetServerName, rootAccessServerNames);
+      const minAvailableMoney = Math.min(
+        MIN_AVAILABLE_MONEY,
+        ns.getServerMaxMoney(targetServerName)
+      );
+      const needsToGrow = availableMoney < minAvailableMoney;
+      if (needsToGrow) {
+        grow(ns, targetServerName, rootAccessServerNames, minAvailableMoney);
+      }
 
       // Weaken the server to hack until it is at least `MIN_HACK_CHANCE`.
       const needsToWeaken = hackChance < MIN_HACK_CHANCE;
@@ -76,6 +79,35 @@ export async function main(ns) {
 
       // Hack the server.
       if (availableMoney > 0 && !needsToGrow && !needsToWeaken) {
+        hack(ns, targetServerName, rootAccessServerNames);
+      }
+    }
+
+    // Use up any leftover RAM.
+    for (const targetServerName of hackableServerNames) {
+      const freeRam = rootAccessServerNames
+        .map(serverName => getFreeRam(ns, serverName))
+        .reduce((a, b) => a + b);
+      if (freeRam === 0) break;
+
+      const availableMoney = ns.getServerMoneyAvailable(targetServerName);
+
+      // Grow if server is not maxed on money.
+      const maxMoney = ns.getServerMaxMoney(targetServerName);
+      if (availableMoney < maxMoney) {
+        grow(ns, targetServerName, rootAccessServerNames, maxMoney);
+      }
+
+      // Weaken if server is not at min security.
+      if (
+        ns.getServerSecurityLevel(targetServerName) >
+        ns.getServerMinSecurityLevel(targetServerName)
+      ) {
+        weaken(ns, targetServerName, rootAccessServerNames);
+      }
+
+      // Hack the server.
+      if (availableMoney > 0 && ns.hackAnalyzeChance(targetServerName) > 0) {
         hack(ns, targetServerName, rootAccessServerNames);
       }
     }
@@ -153,11 +185,10 @@ async function copyScriptsToServer(ns, serverName) {
  * @param {string} targetServerName
  * @param {string[]} rootAccessServerNames
  */
-function grow(ns, targetServerName, rootAccessServerNames) {
+function grow(ns, targetServerName, rootAccessServerNames, minAvailableMoney) {
   // Get number of threads needed to get money to get to the min available money
   const availableMoney = ns.getServerMoneyAvailable(targetServerName);
   const maxMoney = ns.getServerMaxMoney(targetServerName);
-  const minAvailableMoney = Math.min(MIN_AVAILABLE_MONEY, maxMoney);
   let estimatedThreadCount = Math.floor(
     ns.growthAnalyze(
       targetServerName,
