@@ -186,9 +186,16 @@ async function copyScriptsToServer(ns, serverName) {
  * @param {string[]} rootAccessServerNames
  */
 function grow(ns, targetServerName, rootAccessServerNames, minAvailableMoney) {
-  // Get number of threads needed to get money to get to the min available money
   const availableMoney = ns.getServerMoneyAvailable(targetServerName);
   const maxMoney = ns.getServerMaxMoney(targetServerName);
+
+  // Kill any threads that are still growing for the target server if we are at
+  // max money.
+  if (availableMoney === maxMoney) {
+    killScript(ns, rootAccessServerNames, GROW_SCRIPT, targetServerName, 1);
+  }
+
+  // Get number of threads needed to get money to get to the min available money
   let estimatedThreadCount = Math.floor(
     ns.growthAnalyze(
       targetServerName,
@@ -221,10 +228,17 @@ function grow(ns, targetServerName, rootAccessServerNames, minAvailableMoney) {
  * @param {string[]} rootAccessServerNames
  */
 function weaken(ns, targetServerName, rootAccessServerNames) {
-  // Get number of threads needed to get hack chance to get to minimum security
-  // level.
   const currentSecurityLevel = ns.getServerSecurityLevel(targetServerName);
   const minSecurityLevel = ns.getServerMinSecurityLevel(targetServerName);
+
+  // Kill any threads that are still weakening for the target server if we are
+  // at min security.
+  if (currentSecurityLevel === minSecurityLevel) {
+    killScript(ns, rootAccessServerNames, WEAKEN_SCRIPT, targetServerName, 1);
+  }
+
+  // Get number of threads needed to get hack chance to get to minimum security
+  // level.
   let estimatedThreadCount = 1;
   do {
     estimatedThreadCount++;
@@ -258,12 +272,17 @@ function weaken(ns, targetServerName, rootAccessServerNames) {
  * @param {string[]} rootAccessServerNames
  */
 function hack(ns, targetServerName, rootAccessServerNames) {
+  const availableMoney = ns.getServerMoneyAvailable(targetServerName);
+
+  // Kill any threads that are still hacking for the target server if we are
+  // at no available money.
+  if (availableMoney === 0) {
+    killScript(ns, rootAccessServerNames, HACK_SCRIPT, targetServerName, 1);
+  }
+
   // Get number of threads needed to hack all the money from the server.
   let estimatedThreadCount = Math.floor(
-    ns.hackAnalyzeThreads(
-      targetServerName,
-      ns.getServerMoneyAvailable(targetServerName)
-    )
+    ns.hackAnalyzeThreads(targetServerName, availableMoney)
   );
   ns.print(
     `\nestimated ${estimatedThreadCount} threads to hack ${targetServerName}`
@@ -288,7 +307,6 @@ function getAvailableThreadCount(ns, serverName, scriptName) {
 }
 
 /**
- *
  * @param {import('..').NS} ns
  * @param {string} serverName
  * @param {string} scriptName
@@ -320,6 +338,19 @@ function runScript(ns, serverName, scriptName, threadCount, ...args) {
     `running ${scriptName} ${args} on ${serverName} with ${actualThreadCount} threads`
   );
   return actualThreadCount;
+}
+
+/**
+ * @param {import('..').NS} ns
+ * @param {string[]} serverNames to kill scripts
+ * @param {string} scriptName
+ * @param  {...any} args
+ */
+function killScript(ns, serverNames, scriptName, ...args) {
+  for (const serverName of serverNames) {
+    if (!ns.isRunning(scriptName, serverName, ...args)) continue;
+    ns.kill(scriptName, serverName, ...args);
+  }
 }
 
 /**
