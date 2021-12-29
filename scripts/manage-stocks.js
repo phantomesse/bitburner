@@ -36,7 +36,7 @@ export async function main(ns) {
     );
     for (const symbol of symbols) sellStock(ns, symbol);
 
-    await ns.sleep(1000); // Sleep for 1 second.
+    await ns.sleep(6000); // Sleep for 6 seconds.
   }
 }
 

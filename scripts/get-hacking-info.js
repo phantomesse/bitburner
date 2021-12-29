@@ -4,6 +4,8 @@ const GROW_SCRIPT = 'grow.js';
 const HACK_SCRIPT = 'hack.js';
 const WEAKEN_SCRIPT = 'weaken.js';
 
+export const autocomplete = data => [...data.servers];
+
 /**
  * Prints out which servers are currently growing, weakening, or hacking the
  * given server.
