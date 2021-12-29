@@ -98,6 +98,6 @@ async function getScripts(scriptsPrefix) {
  * @param {string} fileName
  */
 async function getFileContents(scriptsPrefix, fileName) {
-  const response = await fetch(scriptsPrefix + fileName);
+  const response = await fetch(scriptsPrefix + 'scripts/' + fileName);
   return await response.text();
 }

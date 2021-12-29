@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "description": "My scripts and backup file for the game bitburner.",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
 }
