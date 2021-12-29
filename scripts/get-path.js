@@ -5,7 +5,6 @@ import { getAllServerNames } from './utils.js';
  *
  * @param {import('..').NS} ns
  */
-
 export async function main(ns) {
   if (ns.args.length > 0) {
     ns.tprint('\n' + getPathCommands(ns, ns.args[0]));

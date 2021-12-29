@@ -52,6 +52,7 @@ export function formatTime(timeMs) {
 export function isHackable(ns, serverName) {
   return (
     ns.getServerMaxMoney(serverName) > 0 &&
+    ns.hasRootAccess(serverName) &&
     ns.getServerRequiredHackingLevel(serverName) <= ns.getHackingLevel()
   );
 }

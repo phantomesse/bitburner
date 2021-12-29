@@ -2,7 +2,12 @@ import { formatMoney } from './utils.js';
 
 const COMMISSION_FEE = 100000;
 
-const DISABLE_LOGGING_FUNCTIONS = ['sleep', 'stock.buy', 'stock.sell'];
+const DISABLE_LOGGING_FUNCTIONS = [
+  'sleep',
+  'stock.buy',
+  'stock.sell',
+  'stock.purchase4SMarketDataTixApi',
+];
 
 /**
  * Manages buying and selling stocks.
@@ -31,7 +36,7 @@ export async function main(ns) {
     );
     for (const symbol of symbols) sellStock(ns, symbol);
 
-    await ns.sleep(6000); // Sleep for 6 seconds.
+    await ns.sleep(1000); // Sleep for 1 second.
   }
 }
 
@@ -41,7 +46,7 @@ export async function main(ns) {
  */
 function buyStock(ns, symbol) {
   const ownedShareCount = ns.stock.getPosition(symbol)[0];
-  const sharesToBuy = Math.min(
+  let sharesToBuy = Math.min(
     Math.floor(
       (ns.getPlayer().money - COMMISSION_FEE) / ns.stock.getAskPrice(symbol)
     ),
@@ -49,11 +54,10 @@ function buyStock(ns, symbol) {
   );
   if (sharesToBuy <= 0) return;
 
-  if (
-    ns.stock.purchase4SMarketDataTixApi() &&
-    ns.stock.getForecast(symbol) < 0.5
-  ) {
-    return;
+  if (ns.stock.purchase4SMarketDataTixApi()) {
+    const forecast = ns.stock.getForecast(symbol);
+    if (forecast < 0.5) return;
+    sharesToBuy = forecast * sharesToBuy;
   }
 
   const sharePrice = ns.stock.buy(symbol, sharesToBuy);
