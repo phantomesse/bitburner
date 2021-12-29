@@ -1,5 +1,7 @@
 import { getAllServerNames } from './utils.js';
 
+export const autocomplete = data => [...data.servers];
+
 /**
  * Prints out the connect commands to run in order to get to a given server.
  *

@@ -15,3 +15,5 @@ export async function main(ns) {
     await ns.weaken(host);
   }
 }
+
+export const autocomplete = data => [...data.servers];

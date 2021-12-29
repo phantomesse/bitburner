@@ -15,3 +15,5 @@ export async function main(ns) {
     await ns.hack(host);
   }
 }
+
+export const autocomplete = data => [...data.servers];
