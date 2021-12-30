@@ -1,3 +1,4 @@
+import { sort } from '/utils/misc.js';
 import { formatMoney } from '/utils/format.js';
 
 const COMMISSION_FEE = 100000;
@@ -22,18 +23,12 @@ export async function main(ns) {
   while (true) {
     // Sort stock symbols sorted from lowest to highest ask price and buy stock
     // starting with the cheapest stock.
-    symbols.sort(
-      (symbol1, symbol2) =>
-        ns.stock.getAskPrice(symbol1) - ns.stock.getAskPrice(symbol2)
-    );
+    sort(symbols, ns.stock.getAskPrice);
     for (const symbol of symbols) buyStock(ns, symbol);
 
     // Sort stock symbols sorted from highest to lowest bid price and sell stock
     // starting at the most expensive stock.
-    symbols.sort(
-      (symbol1, symbol2) =>
-        ns.stock.getBidPrice(symbol2) - ns.stock.getBidPrice(symbol1)
-    );
+    sort(symbols, ns.stock.getBidPrice);
     for (const symbol of symbols) sellStock(ns, symbol);
 
     await ns.sleep(6000); // Sleep for 6 seconds.
@@ -73,24 +68,30 @@ function buyStock(ns, symbol) {
 function sellStock(ns, symbol) {
   const position = ns.stock.getPosition(symbol);
   const ownedShareCount = position[0];
-  if (ownedShareCount === 0) return;
+  if (ownedShareCount === 0) return; // Nothing to sell.
 
-  const ownedAvgShareCost = position[1];
-  const gain = ns.stock.getSaleGain(symbol, ownedShareCount, 'Long');
-  const profit = gain / (ownedAvgShareCost * ownedShareCount);
+  const ownedAvgSharePrice = position[1];
+  const bidPrice = ns.stock.getBidPrice(symbol);
+  if (bidPrice < ownedAvgSharePrice) return; // We won't make a profit.
 
-  // If profit is less than 1, then we won't be profitting.
-  if (profit < 1) return;
-
+  // Determine how much to sell.
   let sharesToSell = ownedShareCount;
   if (ns.stock.purchase4SMarketDataTixApi()) {
     const forecast = ns.stock.getForecast(symbol);
-    if (forecast > 0.5) return;
-    sharesToSell = Math.ceil((0.5 - forecast) * sharesToSell);
+    if (forecast > 0.5) return; // Stock will go up.
+    sharesToSell = Math.ceil((forecast / 0.5) * sharesToSell);
   }
+  if (sharesToSell === 0) return; // Nothing to sell.
+  const gain = ns.stock.getSaleGain(symbol, sharesToSell, 'Long');
+  const profit =
+    (gain - ownedAvgSharePrice * ownedShareCount) /
+    (ownedAvgSharePrice * ownedShareCount);
+  if (profit < 0) return; // We won't make a profit.
 
   const sharePrice = ns.stock.sell(symbol, sharesToSell);
   ns.print(
-    `sold ${sharesToSell} shares of ${symbol} at ${formatMoney(sharePrice)}`
+    `sold ${sharesToSell} shares of ${symbol} at ${formatMoney(
+      sharePrice
+    )} with profit of ${formatMoney(profit)}`
   );
 }

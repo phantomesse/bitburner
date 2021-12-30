@@ -30,13 +30,14 @@ export function isHackable(ns, serverName) {
  * A heuristic that determines how hackable a server is.
  *
  * @param {import('../..').NS } ns
+ * @param {string} serverName
  * @returns {number} higher number means better to hack
  */
-export function getHackingHeuristic(ns, host) {
+export function getHackingHeuristic(ns, serverName) {
   return (
-    ns.hackAnalyzeChance(host) *
-    ns.hackAnalyze(host) *
-    ns.getHackTime(host) *
-    ns.getServerMoneyAvailable(host)
+    ns.hackAnalyzeChance(serverName) *
+    ns.hackAnalyze(serverName) *
+    ns.getHackTime(serverName) *
+    ns.getServerMoneyAvailable(serverName)
   );
 }
