@@ -27,7 +27,6 @@ export async function main(ns) {
         ns.stock.getAskPrice(symbol1) - ns.stock.getAskPrice(symbol2)
     );
     for (const symbol of symbols) buyStock(ns, symbol);
-    for (let i = symbols.length - 1; i >= 0; i--) buyShort(symbol);
 
     // Sort stock symbols sorted from highest to lowest bid price and sell stock
     // starting at the most expensive stock.
