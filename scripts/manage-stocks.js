@@ -27,6 +27,7 @@ export async function main(ns) {
         ns.stock.getAskPrice(symbol1) - ns.stock.getAskPrice(symbol2)
     );
     for (const symbol of symbols) buyStock(ns, symbol);
+    for (let i = symbols.length - 1; i >= 0; i--) buyShort(symbol);
 
     // Sort stock symbols sorted from highest to lowest bid price and sell stock
     // starting at the most expensive stock.
@@ -57,7 +58,7 @@ function buyStock(ns, symbol) {
   if (ns.stock.purchase4SMarketDataTixApi()) {
     const forecast = ns.stock.getForecast(symbol);
     if (forecast < 0.5) return;
-    sharesToBuy = forecast * sharesToBuy;
+    sharesToBuy = Math.ceil(forecast * sharesToBuy);
   }
 
   const sharePrice = ns.stock.buy(symbol, sharesToBuy);
@@ -86,7 +87,7 @@ function sellStock(ns, symbol) {
   if (ns.stock.purchase4SMarketDataTixApi()) {
     const forecast = ns.stock.getForecast(symbol);
     if (forecast > 0.5) return;
-    sharesToSell = (0.5 - forecast) * sharesToSell;
+    sharesToSell = Math.ceil((0.5 - forecast) * sharesToSell);
   }
 
   const sharePrice = ns.stock.sell(symbol, sharesToSell);
