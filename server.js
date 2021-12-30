@@ -65,17 +65,39 @@ server.listen(port, () => {
   );
 });
 
-// Watch the scripts folder and update `scripts.txt` if new scripts are added,
-// renamed, or removed.
+/**
+ * @typedef {Object} Script
+ * @property {string} name path of the script file from
+ *   {@link SCRIPTS_FOLDER} (e.g. "manage-servers.js", "utils/format-utils.js")
+ * @property {number} lastModifiedTime last modified time in milliseconds
+ */
+
+/**
+ * @param {string} folder
+ * @returns {Script[]} all scripts recursively in the given folder
+ */
+function getScripts(folder) {
+  if (!folder.endsWith('/')) folder = folder + '/';
+  const paths = readdirSync(folder).map(fileName => folder + fileName);
+  let scripts = paths
+    .filter(path => path.endsWith('.js'))
+    .map(path => ({
+      name: path.replace(SCRIPTS_FOLDER, ''),
+      lastModifiedTime: statSync(path).mtimeMs,
+    }));
+  const subdirs = paths.filter(path => statSync(path).isDirectory());
+  for (const subdir of subdirs) scripts = scripts.concat(getScripts(subdir));
+  return scripts;
+}
+
+/**
+ * Watch the scripts folder and update `scripts.txt` if new scripts are added,
+ * renamed, or removed.
+ */
 function writeScriptsTxt() {
-  const scripts = readdirSync(SCRIPTS_FOLDER).filter(fileName =>
-    fileName.endsWith('.js')
+  const contents = getScripts(SCRIPTS_FOLDER).map(
+    script => `${script.name}\t${script.lastModifiedTime}`
   );
-  const contents = [];
-  for (const script of scripts) {
-    const lastModifiedTime = statSync(SCRIPTS_FOLDER + script).mtimeMs;
-    contents.push(`${script}\t${lastModifiedTime}`);
-  }
   writeFileSync(SCRIPTS_FOLDER + SCRIPTS_TXT, contents.join('\n'), 'utf-8');
 }
 writeScriptsTxt();
