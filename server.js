@@ -44,6 +44,9 @@ const server = createServer((request, response) => {
   try {
     const data = readFileSync(dirname('.') + request.url, 'utf-8');
     response.statusCode = 200;
+    if (request.url.endsWith('.js')) {
+      response.setHeader('Content-Type', 'application/javascript');
+    }
     response.end(data);
   } catch (error) {
     response.statusCode = 404;
@@ -57,7 +60,9 @@ port = isNaN(port) ? DEFAULT_PORT : port;
 
 // Listen.
 server.listen(port, () => {
-  console.log(`scripts serving from http://localhost:${port}/${SCRIPTS_TXT}`);
+  console.log(
+    `scripts serving from http://localhost:${port}/scripts/${SCRIPTS_TXT}`
+  );
 });
 
 // Watch the scripts folder and update `scripts.txt` if new scripts are added,

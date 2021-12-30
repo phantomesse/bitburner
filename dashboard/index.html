@@ -2,16 +2,48 @@
 <html lang="en">
 
 <head>
-	<meta charset="UTF-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Bitburner Dashboard</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bitburner Dashboard</title>
+  <link rel="stylesheet" href="/dashboard/styles.css">
 </head>
 
 <body>
+  <div id="app">
+    <section class="servers">
+      <h2>Servers</h2>
+      <server v-for="server in allServers" v-bind:server="server">
+      </server>
+    </section>
 
-	<script src="/dashboard/scripts.js"></script>
+    <section>
+      <h2>Hackable servers</h2>
+      <div class="hackable-server headers">
+        <div v-on:click="sortHackableServers('name')">server name</div>
+        <div v-on:click="sortHackableServers('moneyAvailable')">
+          money available
+        </div>
+        <div v-on:click="sortHackableServers('hackChance')">
+          hack chance
+        </div>
+        <div v-on:click="sortHackableServers('hackTime')">hack time</div>
+        <div v-on:click="sortHackableServers('growTime')">grow time</div>
+        <div v-on:click="sortHackableServers('weakenTime')">weaken time</div>
+        <div v-on:click="sortHackableServers('hackHeuristic')">
+          hacking heuristic
+        </div>
 
+      </div>
+      <hackable-server v-for="server in hackableServers" :key="server.name"
+        v-bind:server="server">
+      </hackable-server>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+  <script type="module" src="/scripts/utils.js"></script>
+  <script type="module" src="/dashboard/scripts.js"></script>
 </body>
 
 </html>
