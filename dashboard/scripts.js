@@ -1,4 +1,9 @@
-import { formatPercent, formatTime, formatMoney } from '../scripts/utils.js';
+import {
+  formatPercent,
+  formatTime,
+  formatMoney,
+  formatNumber,
+} from '../scripts/utils.js';
 
 const app = new Vue({
   el: '#app',
@@ -6,15 +11,17 @@ const app = new Vue({
     allServers: [],
     hackableServers: [],
     hackableServersSort: 'hackHeuristic',
+    stocks: [],
+    stocksSort: 'askPrice',
   },
   methods: {
     addOrUpdateServer: function (server) {
-      _addOrUpdateServers(this.allServers, server);
+      _addOrUpdate(this.allServers, server, server => server.name);
       this.allServers.sort((a, b) => a.name.localeCompare(b.name));
       this.$forceUpdate();
     },
     addOrUpdateHackableServer: function (server) {
-      _addOrUpdateServers(this.hackableServers, server);
+      _addOrUpdate(this.hackableServers, server, server => server.name);
       this.sortHackableServers(this.hackableServersSort);
       this.$forceUpdate();
     },
@@ -27,21 +34,31 @@ const app = new Vue({
         return b[property] - a[property];
       });
     },
+    addOrUpdateStock: function (stock) {
+      _addOrUpdate(this.stocks, stock, stock => stock.symbol);
+      this.sortStocks(this.stocksSort);
+      this.$forceUpdate();
+    },
+    sortStocks: function (property) {
+      this.stocksSort = property;
+      this.stocks.sort((a, b) => {
+        if (property === 'symbol') {
+          return a[property].localeCompare(b[property]);
+        }
+        return b[property] - a[property];
+      });
+    },
   },
 });
 
 /**
  
- * @param {any[]} servers
- * @param {any} serverToAddOrUpdate
+ * @param {any[]} array
+ * @param {any} item
  */
-function _addOrUpdateServers(servers, serverToAddOrUpdate) {
-  const index = servers.findIndex(
-    server => server.name === serverToAddOrUpdate.name
-  );
-  index === -1
-    ? servers.push(serverToAddOrUpdate)
-    : (servers[index] = serverToAddOrUpdate);
+function _addOrUpdate(array, item, keyFn) {
+  const index = array.findIndex(arrayItem => keyFn(arrayItem) === keyFn(item));
+  index === -1 ? array.push(item) : (array[index] = item);
 }
 
 Vue.component('server', {
@@ -77,11 +94,7 @@ Vue.component('hackable-server', {
       getTimeAndThreadCount: (time, threadCount) => {
         return (
           formatTime(time) +
-          (threadCount === 0
-            ? ''
-            : ` (${Intl.NumberFormat('en', { notation: 'compact' }).format(
-                threadCount
-              )})`)
+          (threadCount === 0 ? '' : ` (${formatNumber(threadCount, true)})`)
         );
       },
     };
@@ -98,6 +111,35 @@ Vue.component('hackable-server', {
     '</div>',
 });
 
+Vue.component('stock', {
+  props: ['stock'],
+  data: function () {
+    return {
+      getClasses: stock => {
+        return { stock: true, red: stock.forecast < 0.5 };
+      },
+      formatMoney: formatMoney,
+      formatNumber: formatNumber,
+      formatPercent: formatPercent,
+    };
+  },
+  template:
+    '<div v-bind:class="getClasses(stock)">' +
+    '<div>{{stock.symbol}}</div>' +
+    '<div>{{formatNumber(stock.maxShareCount, true)}}</div>' +
+    '<div>{{formatMoney(stock.askPrice)}}</div>' +
+    '<div>{{formatNumber(stock.ownedLongCount)}}</div>' +
+    '<div>{{formatMoney(stock.longGain)}}</div>' +
+    '<div>{{formatPercent(stock.longProfit)}}</div>' +
+    '<div>{{formatMoney(stock.bidPrice)}}</div>' +
+    '<div>{{formatNumber(stock.ownedShortCount)}}</div>' +
+    '<div>{{formatMoney(stock.shortGain)}}</div>' +
+    '<div>{{formatPercent(stock.shortProfit)}}</div>' +
+    '<div>{{formatPercent(stock.volatility)}}</div>' +
+    '<div>{{stock.forecast.toFixed(2)}}</div>' +
+    '</div>',
+});
+
 updateData();
 function updateData() {
   fetch('/dashboard/sync')
@@ -107,12 +149,13 @@ function updateData() {
 
 function processData(data) {
   const allServers = data.servers;
-  allServers.sort((a, b) => b.hackHeuristic - a.hackHeuristic);
 
   for (const server of allServers) {
     app.addOrUpdateServer(server);
     if (server.isHackable) app.addOrUpdateHackableServer(server);
   }
+
+  for (const stock of data.stocks) app.addOrUpdateStock(stock);
 
   window.setTimeout(updateData, 1000);
 }

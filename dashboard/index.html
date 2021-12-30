@@ -11,10 +11,24 @@
 
 <body>
   <div id="app">
-    <section class="servers">
-      <h2>Servers</h2>
-      <server v-for="server in allServers" v-bind:server="server">
-      </server>
+    <section>
+      <h2>Stock market</h2>
+      <div class="stock headers">
+        <div v-on:click="sortStocks('symbol')">symbol</div>
+        <div v-on:click="sortStocks('maxShareCount')">max shares</div>
+        <div v-on:click="sortStocks('askPrice')">ask price</div>
+        <div v-on:click="sortStocks('ownedLongCount')">owned longs</div>
+        <div v-on:click="sortStocks('longGain')">long gain</div>
+        <div v-on:click="sortStocks('longProfit')">long profit</div>
+        <div v-on:click="sortStocks('bidPrice')">bid price</div>
+        <div v-on:click="sortStocks('ownedShortCount')">owned shorts</div>
+        <div v-on:click="sortStocks('shortGain')">short gain</div>
+        <div v-on:click="sortStocks('shortProfit')">short profit</div>
+        <div v-on:click="sortStocks('volatility')">volatility</div>
+        <div v-on:click="sortStocks('forecast')">forecast</div>
+      </div>
+      <stock v-for="stock in stocks" :key="stock.symbol" v-bind:stock="stock">
+      </stock>
     </section>
 
     <section>
@@ -39,6 +53,13 @@
         v-bind:server="server">
       </hackable-server>
     </section>
+
+    <section class="servers">
+      <h2>Servers</h2>
+      <server v-for="server in allServers" v-bind:server="server">
+      </server>
+    </section>
+
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>

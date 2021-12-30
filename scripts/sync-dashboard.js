@@ -23,9 +23,13 @@ export async function main(ns) {
       getServerInfo(ns, serverName)
     );
 
+    const stockInfo = ns.stock
+      .getSymbols()
+      .map(symbol => getStockInfo(ns, symbol));
+
     await fetch(`${LOCALHOST_PREFIX}:${port}/dashboard/sync`, {
       method: 'post',
-      body: JSON.stringify({ servers: serverInfos }),
+      body: JSON.stringify({ servers: serverInfos, stocks: stockInfo }),
     });
 
     await ns.sleep(1000);
@@ -87,4 +91,37 @@ function getThreadCount(ns, scriptName, ...args) {
     threadCount += ns.getRunningScript(scriptName, serverName, ...args).threads;
   }
   return threadCount;
+}
+
+/**
+ * @param {import('..').NS} ns
+ * @param {string} symbol
+ */
+function getStockInfo(ns, symbol) {
+  const position = ns.stock.getPosition(symbol);
+  const info = {
+    symbol: symbol,
+    maxShareCount: ns.stock.getMaxShares(symbol),
+    askPrice: ns.stock.getAskPrice(symbol),
+    bidPrice: ns.stock.getBidPrice(symbol),
+    ownedLongCount: position[0],
+    ownedAvgLongPrice: position[1],
+    ownedShortCount: position[2],
+    ownedAvgShortPrice: position[3],
+  };
+  info.longGain = ns.stock.getSaleGain(symbol, info.ownedLongCount, 'Long');
+  info.shortGain = ns.stock.getSaleGain(symbol, info.ownedShortCount, 'Short');
+  info.longProfit =
+    (info.longGain - info.ownedLongCount * info.ownedAvgLongPrice) /
+    (info.ownedLongCount * info.ownedAvgLongPrice);
+  info.shortProfit =
+    (info.shortGain - info.ownedShortCount * info.ownedAvgShortPrice) /
+    (info.ownedShortCount * info.ownedAvgShortPrice);
+
+  if (ns.stock.purchase4SMarketDataTixApi()) {
+    info.forecast = ns.stock.getForecast(symbol);
+    info.volatility = ns.stock.getVolatility(symbol);
+  }
+
+  return info;
 }

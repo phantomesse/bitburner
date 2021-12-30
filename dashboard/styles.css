@@ -15,13 +15,17 @@ body {
   padding: 48px;
 }
 
+.red {
+  color: red;
+}
+
 *::-webkit-scrollbar {
   display: none;
 }
 
 .servers {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
   gap: 16px;
 }
 
@@ -30,7 +34,7 @@ body {
 }
 
 .server.no-root-access {
-  opacity: 0.5;
+  opacity: 0.2;
   pointer-events: none;
 }
 
@@ -38,6 +42,14 @@ body {
   border: 1px #333 solid;
   box-sizing: border-box;
   padding: 16px;
+}
+
+.server div:nth-of-type(1) {
+  float: left;
+}
+
+.server div:nth-of-type(2) {
+  text-align: right;
 }
 
 .server textarea {
@@ -61,8 +73,12 @@ body {
   gap: 16px;
 }
 
+.hackable-server:not(.headers):hover {
+  background: #333;
+}
+
 .hackable-server div:nth-of-type(1) {
-  width: 160px;
+  width: 180px;
 }
 
 .hackable-server div:nth-of-type(2) {
@@ -81,4 +97,23 @@ body {
 .hackable-server div:nth-of-type(7) {
   text-align: right;
   width: 180px;
+}
+
+.stock {
+  display: flex;
+}
+
+.stock > div {
+  text-align: right;
+  width: 170px;
+}
+
+.stock div:first-of-type {
+  text-align: left;
+  width: 30px;
+}
+
+.stock div:nth-of-type(5),
+.stock div:nth-of-type(9) {
+  width: 220px;
 }

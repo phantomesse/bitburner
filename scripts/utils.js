@@ -43,6 +43,12 @@ export function formatTime(timeMs) {
   return (minutes > 0 ? `${minutes}m ` : '') + `${seconds}s`;
 }
 
+export function formatNumber(number, isCompact) {
+  return Intl.NumberFormat('en', {
+    notation: isCompact ? 'compact' : 'standard',
+  }).format(number);
+}
+
 /**
  * Returns whether a server is hackable.
  *
