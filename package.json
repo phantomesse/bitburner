@@ -8,6 +8,7 @@
   },
   "type": "module",
   "devDependencies": {
+    "eslint": "^8.5.0",
     "nodemon": "^2.0.15"
   }
 }

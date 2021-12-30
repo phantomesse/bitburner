@@ -1,4 +1,4 @@
-import { formatMoney } from './utils.js';
+import { formatMoney } from '/utils/format.js';
 
 const COMMISSION_FEE = 100000;
 

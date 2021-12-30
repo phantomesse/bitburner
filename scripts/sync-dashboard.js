@@ -1,12 +1,12 @@
-import { getAllServerNames, isHackable, getHackingHeuristic } from './utils.js';
-import { getPathCommands } from './get-path.js';
-
-const DEFAULT_PORT = 1337;
-const LOCALHOST_PREFIX = 'http://localhost';
-
-const GROW_SCRIPT = 'grow.js';
-const HACK_SCRIPT = 'hack.js';
-const WEAKEN_SCRIPT = 'weaken.js';
+import {
+  isHackable,
+  getHackingHeuristic,
+  GROW_SCRIPT,
+  WEAKEN_SCRIPT,
+  HACK_SCRIPT,
+} from '/utils/hacking.js';
+import { getAllServerNames, getPath } from '/utils/servers.js';
+import { DEFAULT_PORT, LOCALHOST_PREFIX } from '/utils/misc.js';
 
 /**
  * Syncs all stats to an external dashboard running on localhost.
@@ -49,7 +49,7 @@ function getServerInfo(ns, serverName) {
     isPurchased: server.purchasedByPlayer,
     isHackable: isHackable(ns, serverName),
 
-    path: getPathCommands(ns, serverName),
+    path: getPath(ns, serverName),
     backdoorInstalled: server.backdoorInstalled,
     files: ns.ls(serverName),
 

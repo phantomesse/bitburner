@@ -1,5 +1,5 @@
-const DEFAULT_PORT = 1337;
-const LOCALHOST_PREFIX = 'http://localhost';
+import { DEFAULT_PORT, LOCALHOST_PREFIX } from '/utils/misc.js';
+
 const GITHUB_SCRIPTS_FOLDER =
   'https://raw.githubusercontent.com/phantomesse/bitburner/master/scripts/';
 const SCRIPTS_TXT = 'scripts.txt';
@@ -8,7 +8,7 @@ const SCRIPTS_TXT = 'scripts.txt';
  * Copy this file to the bitburner game to sync the rest of the scripts.
  *
  * @example run sync.js <port>
- * @param {import('.').NS } ns
+ * @param {import('..').NS } ns
  */
 export async function main(ns) {
   let port = parseInt(ns.args[0]);
@@ -75,12 +75,12 @@ class Script {
   }
 
   /**
-   * @param {import('.').NS } ns
+   * @param {import('..').NS } ns
    * @param {string} scriptsPrefix
    */
   async download(ns, scriptsPrefix) {
     const contents = await getFileContents(scriptsPrefix, this.fileName);
-    await ns.write(this.fileName, contents, 'w');
+    await ns.write('/' + this.fileName, contents, 'w');
     ns.tprint(`downloaded ${this.fileName}`);
   }
 }

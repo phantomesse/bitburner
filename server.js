@@ -102,3 +102,7 @@ function writeScriptsTxt() {
 }
 writeScriptsTxt();
 watch(SCRIPTS_FOLDER, writeScriptsTxt);
+readdirSync(SCRIPTS_FOLDER)
+  .map(fileName => SCRIPTS_FOLDER + fileName)
+  .filter(path => statSync(path).isDirectory())
+  .forEach(directory => watch(directory, writeScriptsTxt));

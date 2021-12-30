@@ -3,7 +3,7 @@ import {
   formatTime,
   formatMoney,
   formatNumber,
-} from '../scripts/utils.js';
+} from '../scripts/utils/format.js';
 
 const app = new Vue({
   el: '#app',
@@ -68,6 +68,13 @@ Vue.component('server', {
       getClasses: server => {
         return { server: true, 'no-root-access': !server.hasRootAccess };
       },
+      getBackdoorCommand: server => {
+        return [
+          'home;',
+          ...server.path.map(path => `connect ${path};`),
+          'backdoor',
+        ].join(' ');
+      },
     };
   },
   template:
@@ -75,7 +82,7 @@ Vue.component('server', {
     '<div>{{server.name}}</div>' +
     '<div>{{server.ramUsed}} / {{server.maxRam}}GB RAM</div>' +
     '<div v-if="!server.isPurchased && !server.backdoorInstalled">backdoor: {{server.backdoorInstalled}}</div>' +
-    '<textarea v-if="!server.isPurchased && !server.backdoorInstalled" onclick="this.select()">home; {{server.path}}backdoor</textarea>' +
+    '<textarea v-if="!server.isPurchased && !server.backdoorInstalled" onclick="this.select()">{{getBackdoorCommand(server)}}</textarea>' +
     '</div>',
 });
 
