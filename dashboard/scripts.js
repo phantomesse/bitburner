@@ -68,6 +68,9 @@ Vue.component('server', {
       getClasses: server => {
         return { server: true, 'no-root-access': !server.hasRootAccess };
       },
+      getConnectCommand: server => {
+        return server.path.map(path => `connect ${path}`).join(';');
+      },
       getBackdoorCommand: server => {
         return [
           'home;',
@@ -81,8 +84,9 @@ Vue.component('server', {
     '<div v-bind:class="getClasses(server)">' +
     '<div>{{server.name}}</div>' +
     '<div>{{server.ramUsed}} / {{server.maxRam}}GB RAM</div>' +
+    '<textarea onclick="this.select()">{{getConnectCommand(server)}}</textarea>' +
     '<div v-if="!server.isPurchased && !server.backdoorInstalled">backdoor: {{server.backdoorInstalled}}</div>' +
-    '<textarea v-if="!server.isPurchased && !server.backdoorInstalled" onclick="this.select()">{{getBackdoorCommand(server)}}</textarea>' +
+    '<textarea v-if="!server.isPurchased && server.isHackable && !server.backdoorInstalled" onclick="this.select()">{{getBackdoorCommand(server)}}</textarea>' +
     '</div>',
 });
 
@@ -92,7 +96,7 @@ Vue.component('hackable-server', {
     return {
       renderMoney: server => {
         const availbleMoneyPercent = server.moneyAvailable / server.maxMoney;
-        return `${formatMoney(server.moneyAvailable)} (${formatPercent(
+        return `${formatMoney(server.moneyAvailable, true)} (${formatPercent(
           availbleMoneyPercent
         )} of max)`;
       },
@@ -110,6 +114,7 @@ Vue.component('hackable-server', {
     '<div class="hackable-server">' +
     '<div>{{server.name}}</div>' +
     '<div>{{renderMoney(server)}}</div>' +
+    '<div>{{server.securityLevel.toFixed(2)}} (min {{server.minSecurityLevel}})</div>' +
     '<div>{{formatPercent(server.hackChance)}}</div>' +
     '<div>{{getTimeAndThreadCount(server.hackTime, server.currentlyHackingThreadCount)}}</div>' +
     '<div>{{getTimeAndThreadCount(server.growTime, server.currentlyGrowingThreadCount)}}</div>' +
@@ -136,11 +141,11 @@ Vue.component('stock', {
     '<div>{{formatNumber(stock.maxShareCount, true)}}</div>' +
     '<div>{{formatMoney(stock.askPrice)}}</div>' +
     '<div>{{formatNumber(stock.ownedLongCount)}}</div>' +
-    '<div>{{formatMoney(stock.longGain)}}</div>' +
+    '<div>{{formatMoney(stock.longGain, true)}}</div>' +
     '<div>{{formatPercent(stock.longProfit)}}</div>' +
     '<div>{{formatMoney(stock.bidPrice)}}</div>' +
     '<div>{{formatNumber(stock.ownedShortCount)}}</div>' +
-    '<div>{{formatMoney(stock.shortGain)}}</div>' +
+    '<div>{{formatMoney(stock.shortGain, true)}}</div>' +
     '<div>{{formatPercent(stock.shortProfit)}}</div>' +
     '<div>{{formatPercent(stock.volatility)}}</div>' +
     '<div>{{stock.forecast.toFixed(2)}}</div>' +

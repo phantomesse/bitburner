@@ -18,17 +18,18 @@
         <div v-on:click="sortStocks('maxShareCount')">max shares</div>
         <div v-on:click="sortStocks('askPrice')">ask price</div>
         <div v-on:click="sortStocks('ownedLongCount')">owned longs</div>
-        <div v-on:click="sortStocks('longGain')">long gain</div>
-        <div v-on:click="sortStocks('longProfit')">long profit</div>
+        <div v-on:click="sortStocks('longGain')">long gain*</div>
+        <div v-on:click="sortStocks('longProfit')">long profit*</div>
         <div v-on:click="sortStocks('bidPrice')">bid price</div>
         <div v-on:click="sortStocks('ownedShortCount')">owned shorts</div>
-        <div v-on:click="sortStocks('shortGain')">short gain</div>
-        <div v-on:click="sortStocks('shortProfit')">short profit</div>
+        <div v-on:click="sortStocks('shortGain')">short gain*</div>
+        <div v-on:click="sortStocks('shortProfit')">short profit*</div>
         <div v-on:click="sortStocks('volatility')">volatility</div>
         <div v-on:click="sortStocks('forecast')">forecast</div>
       </div>
       <stock v-for="stock in stocks" :key="stock.symbol" v-bind:stock="stock">
       </stock>
+      <p>* gains are profits are based on if we sold all shares</p>
     </section>
 
     <section>
@@ -37,6 +38,9 @@
         <div v-on:click="sortHackableServers('name')">server name</div>
         <div v-on:click="sortHackableServers('moneyAvailable')">
           money available
+        </div>
+        <div v-on:click="sortHackableServers('securityLevel')">
+          security level
         </div>
         <div v-on:click="sortHackableServers('hackChance')">
           hack chance

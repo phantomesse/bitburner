@@ -2,10 +2,15 @@
 
 /**
  * @param {float} money
+ * @param {boolean} isCompact
  * @returns {string}
  */
-export function formatMoney(money) {
-  return money.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+export function formatMoney(money, isCompact) {
+  return money.toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    notation: isCompact ? 'compact' : 'standard',
+  });
 }
 
 /**

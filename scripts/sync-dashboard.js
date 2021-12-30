@@ -58,6 +58,9 @@ function getServerInfo(ns, serverName) {
 
     maxMoney: server.moneyMax,
     moneyAvailable: server.moneyAvailable,
+
+    minSecurityLevel: server.minDifficulty,
+    securityLevel: server.hackDifficulty,
     hackChance: ns.hackAnalyzeChance(serverName),
 
     hackTime: ns.getHackTime(serverName),
