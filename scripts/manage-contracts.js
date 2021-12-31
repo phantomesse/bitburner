@@ -4,6 +4,7 @@ import { findLargestPrimeFactor } from '/contracts/find-largest-prime-factor.js'
 import { generateIpAddresses } from '/contracts/generate-ip-addresses.js';
 import { algorithmicStockTraderI } from '/contracts/algorithmic-stock-trader-i.js';
 import { algorithmicStockTraderIII } from '/contracts/algorithmic-stock-trader-iii.js';
+import { subarrayWithMaximumSum } from '/contracts/subarray-with-maximum-sum.js';
 import {
   getAllServerNames,
   getPath,
@@ -76,6 +77,9 @@ class Contract {
       case 'Algorithmic Stock Trader III':
         answer = algorithmicStockTraderIII(input);
         break;
+      case 'Subarray with Maximum Sum':
+        answer = subarrayWithMaximumSum(input);
+        break;
       default:
         return false;
     }
@@ -86,12 +90,10 @@ class Contract {
       { returnReward: true }
     );
     if (response === false) {
-      ns.tprint(
-        `could not solve ${this.fileName} (${this._getContractType(ns)})`
-      );
+      ns.tprint(`could not solve ${this.fileName} (${contractType})`);
       return false;
     }
-    ns.tprint(response);
+    ns.tprint(`solved ${this.fileName} (${contractType}): ${response}`);
     return true;
   }
 
