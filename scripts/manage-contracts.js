@@ -1,6 +1,7 @@
 import { totalWaysToSum } from '/contracts/total-ways-to-sum.js';
 import { arrayJumpingGame } from '/contracts/array-jumping-game.js';
 import { findLargestPrimeFactor } from '/contracts/find-largest-prime-factor.js';
+import { generateIpAddresses } from '/contracts/generate-ip-addresses.js';
 import {
   getAllServerNames,
   getPath,
@@ -64,6 +65,9 @@ class Contract {
       case 'Find Largest Prime Factor':
         answer = findLargestPrimeFactor(input);
         break;
+      case 'Generate IP Addresses':
+        answer = generateIpAddresses(input);
+        break;
       default:
         return false;
     }
@@ -74,7 +78,7 @@ class Contract {
       { returnReward: true }
     );
     if (response === false) return false;
-    ns.toast(response);
+    ns.tprint(response);
     return true;
   }
 
