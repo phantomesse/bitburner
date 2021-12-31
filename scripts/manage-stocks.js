@@ -28,7 +28,7 @@ export async function main(ns) {
     const netWorth = getNetWorth(ns);
     if (cash / netWorth < 1 - PERCENT_OF_NET_WORTH_IN_STOCK) {
       ns.print(
-        `not buying any stock because we want only ${formatPercent(
+        `\nnot buying any stock because we want only ${formatPercent(
           PERCENT_OF_NET_WORTH_IN_STOCK
         )} of our net worth in stocks and we currently have ${formatMoney(
           cash,
@@ -41,7 +41,8 @@ export async function main(ns) {
       // Sort stock symbols sorted from lowest to highest ask price and buy stock
       // starting with the cheapest stock.
       sort(symbols, ns.stock.getAskPrice);
-      for (const symbol of symbols) buyStock(ns, symbol);
+      for (const symbol of symbols)
+        buyStock(ns, symbol, (1 - PERCENT_OF_NET_WORTH_IN_STOCK) * netWorth);
     }
 
     // Sort stock symbols sorted from highest to lowest bid price and sell stock
@@ -56,13 +57,12 @@ export async function main(ns) {
 /**
  * @param {import('..').NS} ns
  * @param {string} symbol
+ * @param {number} moneyToSpend
  */
-function buyStock(ns, symbol) {
+function buyStock(ns, symbol, moneyToSpend) {
   const ownedShareCount = ns.stock.getPosition(symbol)[0];
   let sharesToBuy = Math.min(
-    Math.floor(
-      (getMoneyToSpend(ns) - COMMISSION_FEE) / ns.stock.getAskPrice(symbol)
-    ),
+    Math.floor((moneyToSpend - COMMISSION_FEE) / ns.stock.getAskPrice(symbol)),
     ns.stock.getMaxShares(symbol) - ownedShareCount
   );
   if (sharesToBuy <= 0) return;
