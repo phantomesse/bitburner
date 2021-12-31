@@ -10,16 +10,13 @@
  *
  * Your answer should be submitted as 1 or 0, representing true and false
  * respectively
+ *
+ * @param {int[]} input
+ * @returns {int} 1 if can reach the end, 0 if not
  */
-
-const maxJumps = [3, 5, 1, 2, 5, 4, 0, 8, 4, 0, 10, 1, 7, 0, 4, 3];
-console.log(
-  'max jumps' + maxJumps.map(maxJump => `${maxJump}`.padStart(3)).join(' ')
-);
-console.log(
-  'index    ' + maxJumps.map((_, index) => `${index}`.padStart(3)).join(' ')
-);
-console.log(getPathToLastIndex(maxJumps));
+export function arrayJumpingGame(input) {
+  return _getPathToLastIndex(input).length === 0 ? 0 : 1;
+}
 
 /**
  * @param {int[]} maxJumps List of numbers where each number represents max jump.
@@ -27,13 +24,13 @@ console.log(getPathToLastIndex(maxJumps));
  * @returns {string[]} The path to the last index where each member of the array is
  * 									the jump. Empty if no path.
  */
-function getPathToLastIndex(maxJumps, currentIndex) {
+function _getPathToLastIndex(maxJumps, currentIndex) {
   currentIndex = currentIndex || 0;
   if (currentIndex === maxJumps.length - 1) return ['end'];
 
   const maxJump = maxJumps[currentIndex];
   for (let n = 1; n <= maxJump; n++) {
-    const path = getPathToLastIndex(maxJumps, currentIndex + n);
+    const path = _getPathToLastIndex(maxJumps, currentIndex + n);
     if (path.length > 0)
       return [
         `jump from ${currentIndex} to ${
