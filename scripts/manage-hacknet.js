@@ -1,4 +1,6 @@
-const DISABLE_LOGGING_FUNCTIONS = ['sleep'];
+import { getMoneyToSpend } from '/utils/misc.js';
+
+const DISABLE_LOGGING_FUNCTIONS = ['sleep', 'getServerMoneyAvailable'];
 
 /**
  * Manages buying and upgrading hacknet nodes.
@@ -10,8 +12,12 @@ export async function main(ns) {
 
   while (true) {
     // Buy new nodes if we can.
+    const moneyToSpend = getMoneyToSpend(ns);
     let nodesPurchased = 0;
-    while (ns.hacknet.purchaseNode() > -1) nodesPurchased++;
+    while (ns.hacknet.getPurchaseNodeCost() < moneyToSpend) {
+      if (ns.hacknet.purchaseNode() === -1) break;
+      nodesPurchased++;
+    }
     if (nodesPurchased > 0) {
       ns.print(`purchased ${nodesPurchased} new hacknet nodes`);
     }
@@ -19,22 +25,34 @@ export async function main(ns) {
     // Upgrade nodes.
     for (let i = 0; i < ns.hacknet.numNodes(); i++) {
       // Upgrade cores.
-      let coresUpgraded = 0;
-      while (ns.hacknet.upgradeCore(i, 1)) coresUpgraded++;
+      const coresUpgraded = upgrade(
+        ns,
+        i,
+        ns.hacknet.getCoreUpgradeCost,
+        ns.hacknet.upgradeCore
+      );
       if (coresUpgraded > 0) {
         ns.print(`upgraded hacknet-node-${i} cores ${coresUpgraded} times`);
       }
 
       // Upgrade RAM.
-      let ramUpgraded = 0;
-      while (ns.hacknet.upgradeRam(i, 1)) ramUpgraded++;
+      const ramUpgraded = upgrade(
+        ns,
+        i,
+        ns.hacknet.getRamUpgradeCost,
+        ns.hacknet.upgradeRam
+      );
       if (ramUpgraded > 0) {
         ns.print(`upgraded hacknet-node-${i} RAM ${ramUpgraded} times`);
       }
 
       // Upgrade level.
-      let levelsUpgraded = 0;
-      while (ns.hacknet.upgradeLevel(i, 1)) levelsUpgraded++;
+      const levelsUpgraded = upgrade(
+        ns,
+        i,
+        ns.hacknet.getLevelUpgradeCost,
+        ns.hacknet.upgradeLevel
+      );
       if (levelsUpgraded > 0) {
         ns.print(`upgraded hacknet-node-${i} levels ${levelsUpgraded} times`);
       }
@@ -42,4 +60,38 @@ export async function main(ns) {
       await ns.sleep(1000);
     }
   }
+}
+
+/**
+ * Calculates the cost of upgrading an aspect of a node.
+ *
+ * @typedef UpgradeCostFn
+ * @param {number} nodeIndex
+ * @param {number} upgradeCount
+ * @returns {number} cost of upgrade
+ */
+
+/**
+ * Upgrades an aspect of a node.
+ *
+ * @typedef UpgradeFn
+ * @param {number} nodeIndex
+ * @param {number} upgradeCount
+ * @returns {boolean} whether the upgrade was successful
+ */
+
+/**
+ * @param {import('..').NS} ns
+ * @param {int} nodeIndex
+ * @param {UpgradeCostFn} getUpgradeCostFn
+ * @param {UpgradeFn} upgradeFn
+ * @param {number} moneyToSpend
+ * @returns {number} number of upgrades successful
+ */
+function upgrade(ns, nodeIndex, getUpgradeCostFn, upgradeFn) {
+  const moneyToSpend = getMoneyToSpend(ns);
+  let upgradeCount = 0;
+  while (getUpgradeCostFn(nodeIndex, ++upgradeCount) < moneyToSpend);
+  if (upgradeCount === 0) return 0;
+  return upgradeFn(nodeIndex, upgradeCount) ? upgradeCount : 0;
 }

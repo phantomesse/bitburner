@@ -1,4 +1,4 @@
-import { sort } from '/utils/misc.js';
+import { getMoneyToSpend, sort } from '/utils/misc.js';
 import { formatMoney, formatPercent } from '/utils/format.js';
 
 const COMMISSION_FEE = 100000;
@@ -8,6 +8,7 @@ const DISABLE_LOGGING_FUNCTIONS = [
   'stock.buy',
   'stock.sell',
   'stock.purchase4SMarketDataTixApi',
+  'getServerMoneyAvailable',
 ];
 
 /**
@@ -36,14 +37,14 @@ export async function main(ns) {
 }
 
 /**
- * @param {import('..').NS } ns
+ * @param {import('..').NS} ns
  * @param {string} symbol
  */
 function buyStock(ns, symbol) {
   const ownedShareCount = ns.stock.getPosition(symbol)[0];
   let sharesToBuy = Math.min(
     Math.floor(
-      (ns.getPlayer().money - COMMISSION_FEE) / ns.stock.getAskPrice(symbol)
+      (getMoneyToSpend(ns) - COMMISSION_FEE) / ns.stock.getAskPrice(symbol)
     ),
     ns.stock.getMaxShares(symbol) - ownedShareCount
   );
@@ -90,11 +91,6 @@ function sellStock(ns, symbol) {
 
   const sharePrice = ns.stock.sell(symbol, sharesToSell);
   ns.print(
-    `sold ${sharesToSell} shares of ${symbol} at ${formatMoney(
-      sharePrice
-    )} with profit of ${formatPercent(profit)}`
-  );
-  ns.toast(
     `sold ${sharesToSell} shares of ${symbol} at ${formatMoney(
       sharePrice
     )} with profit of ${formatPercent(profit)}`

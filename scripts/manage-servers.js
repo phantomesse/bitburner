@@ -1,7 +1,11 @@
-import { sort } from '/utils/misc.js';
+import { getMoneyToSpend, sort } from '/utils/misc.js';
 import { PURCHASED_SERVER_PREFIX } from '/utils/servers.js';
 
-const DISABLE_LOGGING_FUNCTIONS = ['getServerMaxRam', 'sleep'];
+const DISABLE_LOGGING_FUNCTIONS = [
+  'getServerMaxRam',
+  'sleep',
+  'getServerMoneyAvailable',
+];
 
 const MIN_POWER = 3; // Min RAM that we want is at least 8GB
 const MAX_POWER = 20; // Max RAM is 2^20
@@ -22,7 +26,7 @@ export async function main(ns) {
       const ram = Math.pow(2, power);
       if (ram < lowestRamAcceptable) continue;
       const cost = ns.getPurchasedServerCost(ram);
-      if (ns.getPlayer().money < cost) continue;
+      if (getMoneyToSpend(ns) < cost) continue;
 
       // Delete lowest RAM server if over server limit.
       if (ns.getPurchasedServers().length === purchasedServerLimit) {
