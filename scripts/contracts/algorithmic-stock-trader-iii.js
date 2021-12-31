@@ -2,9 +2,7 @@
  * Algorithmic Stock Trader III
  *
  * You are given the following array of stock prices (which are numbers) where
- * the i-th element represents the stock price on day i:
- *
- * 118,24,44,45,105,123,12,163,156,2,150,98,47,192,12,113,93,143,105,118,96,16,86,43,18,179,80,81,91,9
+ * the i-th element represents the stock price on day i.
  *
  * Determine the maximum possible profit you can earn using at most two
  * transactions. A transaction is defined as buying and then selling one share

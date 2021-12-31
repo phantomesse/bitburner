@@ -1,6 +1,6 @@
 grow.js	1640809792120.647
 hack.js	1640809658284.274
-manage-contracts.js	1640986604884.975
+manage-contracts.js	1640988600161.8862
 manage-hacking.js	1640910021910.782
 manage-hacknet.js	1640917878845.1367
 manage-servers.js	1640917988985.5764
@@ -10,8 +10,8 @@ sync-dashboard.js	1640910132767.3435
 sync.js	1640899544742.6936
 weaken.js	1640896398554.9033
 contracts/algorithmic-stock-trader-i.js	1640933204232.0596
-contracts/algorithmic-stock-trader-ii.js	1640985813295.651
-contracts/algorithmic-stock-trader-iii.js	1640985735746.6575
+contracts/algorithmic-stock-trader-ii.js	1640988545087.495
+contracts/algorithmic-stock-trader-iii.js	1640986767250.7432
 contracts/array-jumping-game.js	1640928065715.8975
 contracts/find-largest-prime-factor.js	1640928933756.835
 contracts/find-valid-math-solutions.js	1640417752444.1

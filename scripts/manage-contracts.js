@@ -3,6 +3,7 @@ import { arrayJumpingGame } from '/contracts/array-jumping-game.js';
 import { findLargestPrimeFactor } from '/contracts/find-largest-prime-factor.js';
 import { generateIpAddresses } from '/contracts/generate-ip-addresses.js';
 import { algorithmicStockTraderI } from '/contracts/algorithmic-stock-trader-i.js';
+import { algorithmicStockTraderII } from '/contracts/algorithmic-stock-trader-ii.js';
 import { algorithmicStockTraderIII } from '/contracts/algorithmic-stock-trader-iii.js';
 import { subarrayWithMaximumSum } from '/contracts/subarray-with-maximum-sum.js';
 import { sanitizeParenthesesInExpression } from '/contracts/sanitize-parentheses-in-expression.js';
@@ -75,6 +76,9 @@ class Contract {
         break;
       case 'Algorithmic Stock Trader I':
         answer = algorithmicStockTraderI(input);
+        break;
+      case 'Algorithmic Stock Trader II':
+        answer = algorithmicStockTraderII(input);
         break;
       case 'Algorithmic Stock Trader III':
         answer = algorithmicStockTraderIII(input);
