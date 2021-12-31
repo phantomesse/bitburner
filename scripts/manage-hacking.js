@@ -67,8 +67,23 @@ export async function main(ns) {
       // Check if we have any free RAM to do anything.
       if (!hasFreeRam(ns, rootAccessServerNames)) break;
 
-      // Grow the server until MIN_AVAILABLE_MONEY.
+      // Check that we are not over-growing the server.
       const availableMoney = ns.getServerMoneyAvailable(targetServerName);
+      if (availableMoney === ns.getServerMaxMoney(targetServerName)) {
+        const killedServerCount = killScript(
+          ns,
+          rootAccessServerNames,
+          GROW_SCRIPT,
+          targetServerName,
+          1
+        );
+        ns.print(
+          `${targetServerName} reached max money; killed ` +
+            `${killedServerCount} servers that were still trying to grow`
+        );
+      }
+
+      // Grow the server until MIN_AVAILABLE_MONEY.
       if (availableMoney < MIN_AVAILABLE_MONEY) {
         ns.print(
           `\nattempting to grow ${targetServerName} from ${formatMoney(
@@ -76,6 +91,24 @@ export async function main(ns) {
           )} to ${formatMoney(MIN_AVAILABLE_MONEY)}`
         );
         grow(ns, targetServerName, rootAccessServerNames, MIN_AVAILABLE_MONEY);
+      }
+
+      // Check that we are not over-weakening the server.
+      if (
+        ns.getServerSecurityLevel(targetServerName) ===
+        ns.getServerMinSecurityLevel(targetServerName)
+      ) {
+        const killedServerCount = killScript(
+          ns,
+          rootAccessServerNames,
+          WEAKEN_SCRIPT,
+          targetServerName,
+          1
+        );
+        ns.print(
+          `${targetServerName} has reached min security; killed ` +
+            `${killedServerCount} servers that were still trying to weaken`
+        );
       }
 
       // Weaken the server until MIN_HACK_CHANCE.
@@ -87,6 +120,21 @@ export async function main(ns) {
           )} to ${formatPercent(MIN_HACK_CHANCE)} hack chance`
         );
         weaken(ns, targetServerName, rootAccessServerNames);
+      }
+
+      // Check that we are not over-hacking the server.
+      if (availableMoney === 0) {
+        const killedServerCount = killScript(
+          ns,
+          rootAccessServerNames,
+          HACK_SCRIPT,
+          targetServerName,
+          1
+        );
+        ns.print(
+          `${targetServerName} has reached $0; killed ` +
+            `${killedServerCount} servers that were still trying to hack`
+        );
       }
 
       // Hack the server if server has MIN_AVAILABLE_MONEY and MIN_HACK_CHANCE.
@@ -394,4 +442,24 @@ function runScript(ns, serverName, scriptName, threadCount, ...args) {
 
 function getAvailableThreadCount(ns, serverName, scriptName) {
   return Math.floor(getFreeRam(ns, serverName) / ns.getScriptRam(scriptName));
+}
+
+/**
+ * @param {import('..').NS} ns
+ * @param {string[]} serverNames
+ * @param {string} scriptName
+ * @param  {...any} args
+ * @returns {number} number of servers that we killed
+ */
+function killScript(ns, serverNames, scriptName, ...args) {
+  let killedServerCount = 0;
+  for (const serverName of serverNames) {
+    if (
+      ns.isRunning(scriptName, serverName, ...args) &&
+      ns.kill(scriptName, serverName, ...args)
+    ) {
+      killedServerCount++;
+    }
+  }
+  return killedServerCount;
 }

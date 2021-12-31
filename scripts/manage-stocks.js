@@ -1,5 +1,5 @@
 import { sort } from '/utils/misc.js';
-import { formatMoney } from '/utils/format.js';
+import { formatMoney, formatPercent } from '/utils/format.js';
 
 const COMMISSION_FEE = 100000;
 
@@ -92,6 +92,11 @@ function sellStock(ns, symbol) {
   ns.print(
     `sold ${sharesToSell} shares of ${symbol} at ${formatMoney(
       sharePrice
-    )} with profit of ${formatMoney(profit)}`
+    )} with profit of ${formatPercent(profit)}`
+  );
+  ns.toast(
+    `sold ${sharesToSell} shares of ${symbol} at ${formatMoney(
+      sharePrice
+    )} with profit of ${formatPercent(profit)}`
   );
 }
