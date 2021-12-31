@@ -5,6 +5,7 @@ import { generateIpAddresses } from '/contracts/generate-ip-addresses.js';
 import { algorithmicStockTraderI } from '/contracts/algorithmic-stock-trader-i.js';
 import { algorithmicStockTraderIII } from '/contracts/algorithmic-stock-trader-iii.js';
 import { subarrayWithMaximumSum } from '/contracts/subarray-with-maximum-sum.js';
+import { sanitizeParenthesesInExpression } from '/contracts/sanitize-parentheses-in-expression.js';
 import {
   getAllServerNames,
   getPath,
@@ -79,6 +80,9 @@ class Contract {
         break;
       case 'Subarray with Maximum Sum':
         answer = subarrayWithMaximumSum(input);
+        break;
+      case 'Sanitize Parentheses in Expression':
+        answer = sanitizeParenthesesInExpression(input);
         break;
       default:
         return false;
