@@ -94,9 +94,11 @@ export async function main(ns) {
       }
 
       // Check that we are not over-weakening the server.
+      const hackChance = ns.hackAnalyzeChance(targetServerName);
       if (
+        hackChance === 1 ||
         ns.getServerSecurityLevel(targetServerName) ===
-        ns.getServerMinSecurityLevel(targetServerName)
+          ns.getServerMinSecurityLevel(targetServerName)
       ) {
         const killedServerCount = killScript(
           ns,
@@ -112,7 +114,6 @@ export async function main(ns) {
       }
 
       // Weaken the server until MIN_HACK_CHANCE.
-      const hackChance = ns.hackAnalyzeChance(targetServerName);
       if (hackChance < MIN_HACK_CHANCE) {
         ns.print(
           `\nattempting to weaken ${targetServerName} from ${formatPercent(

@@ -32,7 +32,7 @@ export async function main(ns) {
       body: JSON.stringify({ servers: serverInfos, stocks: stockInfo }),
     });
 
-    await ns.sleep(1000);
+    await ns.sleep(10000); // Only update every 10 seconds.
   }
 }
 
