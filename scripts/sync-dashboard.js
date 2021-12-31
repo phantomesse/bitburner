@@ -18,6 +18,8 @@ export async function main(ns) {
   let port = parseInt(ns.args[0]);
   port = isNaN(port) ? DEFAULT_PORT : port;
 
+  let oldBody;
+
   while (true) {
     const serverInfos = ['home', ...getAllServerNames(ns)].map(serverName =>
       getServerInfo(ns, serverName)
@@ -27,12 +29,19 @@ export async function main(ns) {
       .getSymbols()
       .map(symbol => getStockInfo(ns, symbol));
 
-    await fetch(`${LOCALHOST_PREFIX}:${port}/dashboard/sync`, {
-      method: 'post',
-      body: JSON.stringify({ servers: serverInfos, stocks: stockInfo }),
-    });
+    const body = JSON.stringify({ servers: serverInfos, stocks: stockInfo });
+    if (oldBody === undefined || oldBody !== body) {
+      // Only send data over if something has chanced.
+      await fetch(`${LOCALHOST_PREFIX}:${port}/dashboard/sync`, {
+        method: 'post',
+        body: body,
+      });
+      oldBody = body;
+    } else {
+      ns.tprint('nothing has changed');
+    }
 
-    await ns.sleep(10000); // Only update every 10 seconds.
+    await ns.sleep(2000); // Only update every 2 seconds.
   }
 }
 
