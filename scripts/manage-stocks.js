@@ -1,7 +1,9 @@
-import { getMoneyToSpend, sort } from '/utils/misc.js';
+import { getMoneyToSpend, getNetWorth, sort } from '/utils/misc.js';
 import { formatMoney, formatPercent } from '/utils/format.js';
+import { HOME_SERVER_NAME } from '/utils/servers.js';
 
 const COMMISSION_FEE = 100000;
+const PERCENT_OF_NET_WORTH_IN_STOCK = 0.9;
 
 const DISABLE_LOGGING_FUNCTIONS = [
   'sleep',
@@ -22,6 +24,23 @@ export async function main(ns) {
   const symbols = ns.stock.getSymbols();
 
   while (true) {
+    const cash = ns.getServerMoneyAvailable(HOME_SERVER_NAME);
+    const netWorth = getNetWorth(ns);
+    if (cash / netWorth < 1 - PERCENT_OF_NET_WORTH_IN_STOCK) {
+      ns.print(
+        `not buying any stock because we want only ${formatPercent(
+          PERCENT_OF_NET_WORTH_IN_STOCK
+        )} of our net worth in stocks and we currently have ${formatMoney(
+          cash,
+          true
+        )} in cash which is ${formatPercent(
+          cash / netWorth
+        )} of our net worth (${formatMoney(netWorth, true)})`
+      );
+      await ns.sleep(6000); // Sleep for 6 seconds.
+      continue;
+    }
+
     // Sort stock symbols sorted from lowest to highest ask price and buy stock
     // starting with the cheapest stock.
     sort(symbols, ns.stock.getAskPrice);

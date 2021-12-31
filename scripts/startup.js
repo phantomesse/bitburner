@@ -1,6 +1,5 @@
 const SCRIPTS_TO_RUN = [
   'sync.js',
-  'sync-dashboard.js',
   'manage-hacking.js',
   'manage-hacknet.js',
   'manage-servers.js',
