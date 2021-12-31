@@ -2,6 +2,8 @@ import { totalWaysToSum } from '/contracts/total-ways-to-sum.js';
 import { arrayJumpingGame } from '/contracts/array-jumping-game.js';
 import { findLargestPrimeFactor } from '/contracts/find-largest-prime-factor.js';
 import { generateIpAddresses } from '/contracts/generate-ip-addresses.js';
+import { algorithmicStockTraderI } from '/contracts/algorithmic-stock-trader-i.js';
+import { algorithmicStockTraderIII } from '/contracts/algorithmic-stock-trader-iii.js';
 import {
   getAllServerNames,
   getPath,
@@ -68,6 +70,12 @@ class Contract {
       case 'Generate IP Addresses':
         answer = generateIpAddresses(input);
         break;
+      case 'Algorithmic Stock Trader I':
+        answer = algorithmicStockTraderI(input);
+        break;
+      case 'Algorithmic Stock Trader III':
+        answer = algorithmicStockTraderIII(input);
+        break;
       default:
         return false;
     }
@@ -77,7 +85,12 @@ class Contract {
       this.serverName,
       { returnReward: true }
     );
-    if (response === false) return false;
+    if (response === false) {
+      ns.tprint(
+        `could not solve ${this.fileName} (${this._getContractType(ns)})`
+      );
+      return false;
+    }
     ns.tprint(response);
     return true;
   }
