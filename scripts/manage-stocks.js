@@ -37,14 +37,12 @@ export async function main(ns) {
           cash / netWorth
         )} of our net worth (${formatMoney(netWorth, true)})`
       );
-      await ns.sleep(6000); // Sleep for 6 seconds.
-      continue;
+    } else {
+      // Sort stock symbols sorted from lowest to highest ask price and buy stock
+      // starting with the cheapest stock.
+      sort(symbols, ns.stock.getAskPrice);
+      for (const symbol of symbols) buyStock(ns, symbol);
     }
-
-    // Sort stock symbols sorted from lowest to highest ask price and buy stock
-    // starting with the cheapest stock.
-    sort(symbols, ns.stock.getAskPrice);
-    for (const symbol of symbols) buyStock(ns, symbol);
 
     // Sort stock symbols sorted from highest to lowest bid price and sell stock
     // starting at the most expensive stock.
