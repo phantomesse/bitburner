@@ -3,7 +3,7 @@ import { formatMoney, formatPercent } from '/utils/format.js';
 import { HOME_SERVER_NAME } from '/utils/servers.js';
 
 const COMMISSION_FEE = 100000;
-const PERCENT_OF_NET_WORTH_IN_STOCK = 0.9;
+const PERCENT_OF_NET_WORTH_IN_STOCK = 0.95;
 
 const DISABLE_LOGGING_FUNCTIONS = [
   'sleep',
@@ -40,9 +40,13 @@ export async function main(ns) {
     } else {
       // Sort stock symbols sorted from lowest to highest ask price and buy stock
       // starting with the cheapest stock.
+      let moneyToSpend = cash - (1 - PERCENT_OF_NET_WORTH_IN_STOCK) * netWorth;
+      ns.print(`\ncan spend ${formatMoney(moneyToSpend)}`);
       sort(symbols, ns.stock.getAskPrice);
-      for (const symbol of symbols)
-        buyStock(ns, symbol, (1 - PERCENT_OF_NET_WORTH_IN_STOCK) * netWorth);
+      for (const symbol of symbols) {
+        if (moneyToSpend <= COMMISSION_FEE) break;
+        moneyToSpend -= buyStock(ns, symbol, moneyToSpend);
+      }
     }
 
     // Sort stock symbols sorted from highest to lowest bid price and sell stock
@@ -58,6 +62,7 @@ export async function main(ns) {
  * @param {import('..').NS} ns
  * @param {string} symbol
  * @param {number} moneyToSpend
+ * @returns {number} how much we spent
  */
 function buyStock(ns, symbol, moneyToSpend) {
   const ownedShareCount = ns.stock.getPosition(symbol)[0];
@@ -65,11 +70,11 @@ function buyStock(ns, symbol, moneyToSpend) {
     Math.floor((moneyToSpend - COMMISSION_FEE) / ns.stock.getAskPrice(symbol)),
     ns.stock.getMaxShares(symbol) - ownedShareCount
   );
-  if (sharesToBuy <= 0) return;
+  if (sharesToBuy <= 0) return 0;
 
   if (ns.stock.purchase4SMarketDataTixApi()) {
     const forecast = ns.stock.getForecast(symbol);
-    if (forecast < 0.5) return;
+    if (forecast < 0.5) return 0;
     sharesToBuy = Math.ceil(forecast * sharesToBuy);
   }
 
@@ -77,6 +82,8 @@ function buyStock(ns, symbol, moneyToSpend) {
   ns.print(
     `bought ${sharesToBuy} shares of ${symbol} at ${formatMoney(sharePrice)}`
   );
+
+  return sharePrice * sharesToBuy + COMMISSION_FEE;
 }
 
 /**

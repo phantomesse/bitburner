@@ -6,6 +6,7 @@ import { algorithmicStockTraderI } from '/contracts/algorithmic-stock-trader-i.j
 import { algorithmicStockTraderIII } from '/contracts/algorithmic-stock-trader-iii.js';
 import { subarrayWithMaximumSum } from '/contracts/subarray-with-maximum-sum.js';
 import { sanitizeParenthesesInExpression } from '/contracts/sanitize-parentheses-in-expression.js';
+import { uniquePathsInAGridII } from '/contracts/unique-paths-in-a-grid-ii.js';
 import {
   getAllServerNames,
   getPath,
@@ -83,6 +84,9 @@ class Contract {
         break;
       case 'Sanitize Parentheses in Expression':
         answer = sanitizeParenthesesInExpression(input);
+        break;
+      case 'Unique Paths in a Grid II':
+        answer = uniquePathsInAGridII(input);
         break;
       default:
         return false;

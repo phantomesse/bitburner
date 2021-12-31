@@ -21,13 +21,11 @@ export function algorithmicStockTraderIII(input) {
   const firstTrades = _getTrades(input, 0);
 
   let highestProfit = 0;
-  let trades;
   for (const firstTrade of firstTrades) {
     const secondTrades = _getTrades(input, firstTrade.sell.day + 1);
     for (const secondTrade of secondTrades) {
       if (firstTrade.diff + secondTrade.diff > highestProfit) {
         highestProfit = firstTrade.diff + secondTrade.diff;
-        trades = [firstTrade, secondTrade];
       }
     }
   }
