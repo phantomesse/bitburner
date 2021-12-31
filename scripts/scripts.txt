@@ -1,4 +1,4 @@
-find-contracts.js	1640928035344.3674
+find-contracts.js	1640928913454.1697
 grow.js	1640809792120.647
 hack.js	1640809658284.274
 manage-hacking.js	1640910021910.782
@@ -10,6 +10,7 @@ sync-dashboard.js	1640910132767.3435
 sync.js	1640899544742.6936
 weaken.js	1640896398554.9033
 contracts/array-jumping-game.js	1640928065715.8975
+contracts/find-largest-prime-factor.js	1640928933756.835
 contracts/find-valid-math-solutions.js	1640417752444.1
 contracts/generate-ip-addresses.js	1640922782088.635
 contracts/total-ways-to-sum.js	1640927857128.249

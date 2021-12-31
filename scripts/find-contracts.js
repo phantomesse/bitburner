@@ -1,5 +1,6 @@
 import { totalWaysToSum } from '/contracts/total-ways-to-sum.js';
 import { arrayJumpingGame } from '/contracts/array-jumping-game.js';
+import { findLargestPrimeFactor } from '/contracts/find-largest-prime-factor.js';
 import {
   getAllServerNames,
   getPath,
@@ -60,6 +61,9 @@ class Contract {
       case 'Array Jumping Game':
         answer = arrayJumpingGame(input);
         break;
+      case 'Find Largest Prime Factor':
+        answer = findLargestPrimeFactor(input);
+        break;
       default:
         return false;
     }
@@ -70,7 +74,7 @@ class Contract {
       { returnReward: true }
     );
     if (response === false) return false;
-    ns.tprint(response);
+    ns.toast(response);
     return true;
   }
 
