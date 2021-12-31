@@ -8,6 +8,7 @@ import { algorithmicStockTraderIII } from '/contracts/algorithmic-stock-trader-i
 import { subarrayWithMaximumSum } from '/contracts/subarray-with-maximum-sum.js';
 import { sanitizeParenthesesInExpression } from '/contracts/sanitize-parentheses-in-expression.js';
 import { uniquePathsInAGridII } from '/contracts/unique-paths-in-a-grid-ii.js';
+import { findAllValidMathExpressions } from '/contracts/find-valid-math-solutions.js';
 import {
   getAllServerNames,
   getPath,
@@ -40,9 +41,14 @@ export async function main(ns) {
   );
 
   // Print out command to run any unsolved contracts.
-  ns.tprint(
-    '\n' + unsolvedContracts.map(contract => contract.toString(ns)).join('\n\n')
-  );
+  if (unsolvedContracts.length > 0) {
+    ns.tprint(
+      '\n' +
+        unsolvedContracts.map(contract => contract.toString(ns)).join('\n\n')
+    );
+  } else {
+    ns.tprint('no unsolved contracts available at the moment');
+  }
 }
 
 class Contract {
@@ -91,6 +97,9 @@ class Contract {
         break;
       case 'Unique Paths in a Grid II':
         answer = uniquePathsInAGridII(input);
+        break;
+      case 'Find All Valid Math Expressions':
+        answer = findAllValidMathExpressions(input);
         break;
       default:
         return false;
