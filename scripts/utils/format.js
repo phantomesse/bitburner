@@ -60,13 +60,17 @@ export const RIGHT_ALIGNMENT = 'right';
 export function formatTable(columnHeaderToAlignmentMap, ...rowSections) {
   const columnHeaders = Object.keys(rowSections[0][0]);
 
-  // Get width of each column.
+  // Get width and height of each column.
   const columnHeaderToWidthMap = {};
   for (const columnHeader of columnHeaders) {
     let maxWidth = columnHeader.length;
     for (const rows of rowSections) {
-      const width = Math.max(...rows.map(row => row[columnHeader].length));
-      if (width > maxWidth) maxWidth = width;
+      for (const row of rows) {
+        const width = Math.max(
+          ...row[columnHeader].split('\n').map(line => line.length)
+        );
+        if (width > maxWidth) maxWidth = width;
+      }
     }
     columnHeaderToWidthMap[columnHeader] = maxWidth;
   }
@@ -89,15 +93,25 @@ export function formatTable(columnHeaderToAlignmentMap, ...rowSections) {
 }
 
 function _formatTableRow(values, widths, alignments) {
-  return (
-    '┊ ' +
-    values
-      .map((value, index) =>
-        alignments[index] === RIGHT_ALIGNMENT
-          ? value.padStart(widths[index])
-          : value.padEnd(widths[index])
-      )
-      .join(' ┊ ') +
-    ' ┊'
-  );
+  const print = [];
+  const height = Math.max(...values.map(value => value.split('\n').length));
+
+  for (let i = 0; i < values.length; i++) {
+    const valueLines = values[i].split('\n');
+    const width = widths[i];
+    const alignment = alignments[i];
+
+    for (let j = 0; j < height; j++) {
+      const valueLine = valueLines[j] || '';
+      if (!print[j]) print[j] = '';
+      print[j] +=
+        '┊ ' +
+        (alignment === RIGHT_ALIGNMENT
+          ? valueLine.padStart(width)
+          : valueLine.padEnd(width)) +
+        ' ';
+    }
+  }
+
+  return print.map(line => `${line}┊`).join('\n');
 }

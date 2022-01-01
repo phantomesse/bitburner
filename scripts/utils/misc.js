@@ -14,7 +14,12 @@ export const LOCALHOST_PREFIX = 'http://localhost';
  * @param {boolean} [reverse=false]
  */
 export function sort(array, fn, reverse) {
-  array.sort((a, b) => fn(reverse ? b : a) - fn(reverse ? a : b));
+  array.sort((a, b) => {
+    const first = fn(reverse ? b : a);
+    const second = fn(reverse ? a : b);
+    if (typeof first === 'string') return first.localeCompare(second);
+    return first - second;
+  });
 }
 
 /**
