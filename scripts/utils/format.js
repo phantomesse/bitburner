@@ -54,55 +54,50 @@ export const RIGHT_ALIGNMENT = 'right';
  *
  * Note that all objects must have the same keys. All values must be strings.
  *
- * @param {Object[]} rows
- * @param {any} [columnHeaderToAlignmentMap] if not set, all values will be left aligned
+ * @param {Map<string:(LEFT_ALIGNMENT|RIGHT_ALIGNMENT)>} columnHeaderToAlignmentMap
+ * @param {...Object[]} rowSections sections of rows, each of them will be divided by a divider
  */
-export function formatTable(ns, rows, columnHeaderToAlignmentMap) {
-  const columnHeaders = Object.keys(rows[0]);
-
-  // Set alignment.
-  if (columnHeaderToAlignmentMap === undefined) {
-    columnHeaderToAlignmentMap = new Map(
-      columnHeaders.map(columnHeader => [columnHeader, LEFT_ALIGNMENT])
-    );
-  }
+export function formatTable(columnHeaderToAlignmentMap, ...rowSections) {
+  const columnHeaders = Object.keys(rowSections[0][0]);
 
   // Get width of each column.
-  const columnHeaderToLengthMap = {};
+  const columnHeaderToWidthMap = {};
   for (const columnHeader of columnHeaders) {
-    columnHeaderToLengthMap[columnHeader] = Math.max(
-      ...[columnHeader, ...rows.map(row => row[columnHeader])].map(
-        value => value.length
-      )
-    );
+    let maxWidth = columnHeader.length;
+    for (const rows of rowSections) {
+      const width = Math.max(...rows.map(row => row[columnHeader].length));
+      if (width > maxWidth) maxWidth = width;
+    }
+    columnHeaderToWidthMap[columnHeader] = maxWidth;
   }
 
-  const lengths = Object.values(columnHeaderToLengthMap);
+  const widths = Object.values(columnHeaderToWidthMap);
   const alignments = Object.values(columnHeaderToAlignmentMap);
   const divider =
-    '-' + lengths.map(length => ''.padStart(length, '-')).join('-+-') + '-';
-  const print = [
-    '+' + divider + '+',
-    _formatTableRow(columnHeaders, lengths, alignments),
-    '│' + divider + '│',
-    ...rows.map(row =>
-      _formatTableRow(Object.values(row), lengths, alignments)
+    '—' + widths.map(length => ''.padStart(length, '—')).join('—+—') + '—';
+  const sections = [
+    _formatTableRow(columnHeaders, widths, alignments),
+    ...rowSections.map(rows =>
+      rows
+        .map(row => _formatTableRow(Object.values(row), widths, alignments))
+        .join('\n')
     ),
-    '+' + divider + '+',
-  ];
+  ].join('\n┊' + divider + '┊\n');
+
+  const print = ['+' + divider + '+', sections, '+' + divider + '+'];
   return '\n' + print.join('\n');
 }
 
-function _formatTableRow(values, lengths, alignments) {
+function _formatTableRow(values, widths, alignments) {
   return (
-    '│ ' +
+    '┊ ' +
     values
       .map((value, index) =>
         alignments[index] === RIGHT_ALIGNMENT
-          ? value.padStart(lengths[index])
-          : value.padEnd(lengths[index])
+          ? value.padStart(widths[index])
+          : value.padEnd(widths[index])
       )
       .join(' ┊ ') +
-    ' │'
+    ' ┊'
   );
 }

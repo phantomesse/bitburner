@@ -1,4 +1,9 @@
-import { formatTable, LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '/utils/format.js';
+import {
+  formatNumber,
+  formatTable,
+  LEFT_ALIGNMENT,
+  RIGHT_ALIGNMENT,
+} from '/utils/format.js';
 import { sort } from '/utils/misc.js';
 import { getAllServerNames, getFreeRam } from '/utils/servers.js';
 
@@ -17,19 +22,24 @@ export function main(ns) {
   const totalFreeRam = servers
     .map(server => server.freeRam)
     .reduce((a, b) => a + b);
-  ns.tprint(
-    formatTable(
-      ns,
-      servers.map(server => ({
-        'Server Name': server.name,
-        'Free RAM': server.freeRam.toFixed(2) + ' GB',
-      })),
+
+  const table = formatTable(
+    {
+      'Server Name': LEFT_ALIGNMENT,
+      'Free RAM': RIGHT_ALIGNMENT,
+    },
+    servers.map(server => ({
+      'Server Name': server.name,
+      'Free RAM': formatNumber(server.freeRam) + ' GB',
+    })),
+    [
       {
-        'Server Name': LEFT_ALIGNMENT,
-        'Free RAM': RIGHT_ALIGNMENT,
-      }
-    ) + `\n\nTotal free RAM: ${totalFreeRam.toFixed(2)} GB`
+        'Server Name': 'Total free RAM',
+        'Free RAM': formatNumber(totalFreeRam) + ' GB',
+      },
+    ]
   );
+  ns.tprint(table);
 }
 
 class Server {

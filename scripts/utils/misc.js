@@ -1,10 +1,10 @@
 /** Miscellaneous utils that don't fit anywhere else. */
 
+import { getStockWorth } from '/utils/stock.js';
 import { HOME_SERVER_NAME } from '/utils/servers.js';
 
 export const DEFAULT_PORT = 1337;
 export const LOCALHOST_PREFIX = 'http://localhost';
-const COMMISSION_FEE = 100000;
 
 /**
  * Sorts an array given a function to call on each item of the array.
@@ -33,14 +33,11 @@ export function getMoneyToSpend(ns) {
  * @returns {number} net worth including cash on hand and stocks
  */
 export function getNetWorth(ns) {
-  let netWorth = ns.getServerMoneyAvailable(HOME_SERVER_NAME);
-
-  const symbols = ns.stock.getSymbols();
-  for (const symbol of symbols) {
-    const ownedShares = ns.stock.getPosition(symbol)[0];
-    const bidPrice = ns.stock.getBidPrice(symbol);
-    netWorth += ownedShares * bidPrice - COMMISSION_FEE;
-  }
-
-  return netWorth;
+  return (
+    ns.getServerMoneyAvailable(HOME_SERVER_NAME) +
+    ns.stock
+      .getSymbols()
+      .map(symbol => getStockWorth(ns, symbol))
+      .reduce((a, b) => a + b)
+  );
 }
