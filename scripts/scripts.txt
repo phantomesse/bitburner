@@ -1,6 +1,7 @@
 find-backdoors.js	1641074369568.4458
 find-contracts.js	1641073860678
 get-free-ram.js	1641073242694.7827
+get-hacking-info.js	1641080239474.5198
 get-net-worth.js	1641073526217.7383
 get-servers-info.js	1641078399146.1382
 grow.js	1640809792120.647
@@ -26,7 +27,7 @@ contracts/subarray-with-maximum-sum.js	1640966767216.6592
 contracts/total-ways-to-sum.js	1640966042503.7153
 contracts/unique-paths-in-a-grid-i.js	1640966385406.459
 contracts/unique-paths-in-a-grid-ii.js	1640986567055.1956
-utils/format.js	1641077919303.2307
+utils/format.js	1641079753140.3486
 utils/hacking.js	1640904688369.488
 utils/misc.js	1641075846024.772
 utils/servers.js	1641064291883.849
