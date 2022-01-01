@@ -1,5 +1,5 @@
 /**
- * Sell all stock.
+ * Sell all stocks.
  *
  * @param {import('..').NS } ns
  */

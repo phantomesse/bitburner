@@ -5,9 +5,14 @@ import {
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
 } from '/utils/format.js';
-import { getNetWorth, sort } from '/utils/misc.js';
 import { getStockWorth } from '/utils/stock.js';
 import { HOME_SERVER_NAME } from '/utils/servers.js';
+import { sort } from '/utils/misc.js';
+
+const SOURCE_COLUMN_HEADER = 'Source';
+const MONEY_COLUMN_HEADER = 'Money';
+const MONEY_ABBR_COLUMN_HEADER = 'Money (Abbr.)';
+const PERCENT_NET_WORTH_COLUMN_HEADER = '% net worth';
 
 /**
  * Prints out net worth along with breakdown on how much of net worth is in each
@@ -29,31 +34,31 @@ export function main(ns) {
 
   const table = formatTable(
     {
-      Source: LEFT_ALIGNMENT,
-      Money: RIGHT_ALIGNMENT,
-      'Money Abbr.': RIGHT_ALIGNMENT,
-      '% of net worth': RIGHT_ALIGNMENT,
+      [SOURCE_COLUMN_HEADER]: LEFT_ALIGNMENT,
+      [MONEY_COLUMN_HEADER]: RIGHT_ALIGNMENT,
+      [MONEY_ABBR_COLUMN_HEADER]: RIGHT_ALIGNMENT,
+      [PERCENT_NET_WORTH_COLUMN_HEADER]: RIGHT_ALIGNMENT,
     },
     stocks.map(stock => ({
-      Source: stock.symbol,
-      Money: formatMoney(stock.worth),
-      'Money Abbr.': formatMoney(stock.worth, true),
-      '% of net worth': formatPercent(stock.worth / netWorth),
+      [SOURCE_COLUMN_HEADER]: stock.symbol,
+      [MONEY_COLUMN_HEADER]: formatMoney(stock.worth),
+      [MONEY_ABBR_COLUMN_HEADER]: formatMoney(stock.worth, true),
+      [PERCENT_NET_WORTH_COLUMN_HEADER]: formatPercent(stock.worth / netWorth),
     })),
     [
       {
-        Source: 'Cash',
-        Money: formatMoney(cash),
-        'Money Abbr.': formatMoney(cash, true),
-        '% of net worth': formatPercent(cash / netWorth),
+        [SOURCE_COLUMN_HEADER]: 'Cash',
+        [MONEY_COLUMN_HEADER]: formatMoney(cash),
+        [MONEY_ABBR_COLUMN_HEADER]: formatMoney(cash, true),
+        [PERCENT_NET_WORTH_COLUMN_HEADER]: formatPercent(cash / netWorth),
       },
     ],
     [
       {
-        Source: 'Net worth',
-        Money: formatMoney(netWorth),
-        'Money Abbr.': formatMoney(netWorth, true),
-        '% of net worth': '--',
+        [SOURCE_COLUMN_HEADER]: 'Net worth',
+        [MONEY_COLUMN_HEADER]: formatMoney(netWorth),
+        [MONEY_ABBR_COLUMN_HEADER]: formatMoney(netWorth, true),
+        [PERCENT_NET_WORTH_COLUMN_HEADER]: '--',
       },
     ]
   );

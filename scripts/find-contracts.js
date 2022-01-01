@@ -16,7 +16,8 @@ import {
 } from '/utils/servers.js';
 
 /**
- * Finds all the contracts across all servers.
+ * Finds all the contracts across all servers and solves any that we can solve
+ * as we go. Print out all unsolved contracts.
  *
  * @param {import('..').NS} ns
  */

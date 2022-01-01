@@ -7,6 +7,9 @@ import {
 import { sort } from '/utils/misc.js';
 import { getAllServerNames, getFreeRam } from '/utils/servers.js';
 
+const SERVER_NAME_COLUMN_HEADER = 'Server Name';
+const FREE_RAM_COLUMN_HEADER = 'Free RAM';
+
 /**
  * Prints out free RAM from all servers that have any RAM.
  *
@@ -25,17 +28,17 @@ export function main(ns) {
 
   const table = formatTable(
     {
-      'Server Name': LEFT_ALIGNMENT,
-      'Free RAM': RIGHT_ALIGNMENT,
+      [SERVER_NAME_COLUMN_HEADER]: LEFT_ALIGNMENT,
+      [FREE_RAM_COLUMN_HEADER]: RIGHT_ALIGNMENT,
     },
     servers.map(server => ({
-      'Server Name': server.name,
-      'Free RAM': formatNumber(server.freeRam) + ' GB',
+      [SERVER_NAME_COLUMN_HEADER]: server.name,
+      [FREE_RAM_COLUMN_HEADER]: formatNumber(server.freeRam) + ' GB',
     })),
     [
       {
-        'Server Name': 'Total free RAM',
-        'Free RAM': formatNumber(totalFreeRam) + ' GB',
+        [SERVER_NAME_COLUMN_HEADER]: 'Total free RAM',
+        [FREE_RAM_COLUMN_HEADER]: formatNumber(totalFreeRam) + ' GB',
       },
     ]
   );
