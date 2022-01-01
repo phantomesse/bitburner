@@ -14,19 +14,19 @@ const MIN_HACK_CHANCE = 0.6;
 const MIN_AVAILABLE_MONEY = 5000000;
 
 const DISABLE_LOGGING_FUNCTIONS = [
-  'nuke',
   'getHackingLevel',
   'getServerMaxMoney',
   'getServerMaxRam',
-  'getServerMoneyAvailable',
-  'getServerSecurityLevel',
-  'getServerRequiredHackingLevel',
-  'getServerUsedRam',
   'getServerMinSecurityLevel',
-  'scan',
-  'sleep',
-  'scp',
+  'getServerMoneyAvailable',
+  'getServerRequiredHackingLevel',
+  'getServerSecurityLevel',
+  'getServerUsedRam',
   'kill',
+  'nuke',
+  'scan',
+  'scp',
+  'sleep',
 ];
 
 /**

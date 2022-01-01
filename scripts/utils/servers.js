@@ -26,7 +26,7 @@ export function getAllServerNames(ns, root, parent) {
  * Gets the connection path to a server.
  *
  * @example getPath(ns, 'silver-helix')
- * @param {import('../..').NS } ns
+ * @param {import('../..').NS} ns
  * @param {string} server server to get path to
  * @param {string} [root] name of server to start getting server names from
  * @param {string} [parent] name of parent of the root server (where we came
@@ -49,4 +49,14 @@ export function getPath(ns, server, root, parent) {
 
 export async function main(ns) {
   ns.tprint(getPath(ns, 'silver-helix'));
+}
+
+/**
+ * @param {import('../..').NS} ns
+ * @param {string} serverName
+ * @returns {number} GB of free RAM
+ */
+export function getFreeRam(ns, serverName) {
+  if (!ns.hasRootAccess(serverName)) return 0;
+  return ns.getServerMaxRam(serverName) - ns.getServerUsedRam(serverName);
 }
