@@ -69,9 +69,9 @@ class Contract {
     const input = ns.codingcontract.getData(this.fileName, this.serverName);
     let answer;
     switch (contractType) {
-      case 'Total Ways to Sum':
-        answer = totalWaysToSum(input);
-        break;
+      // case 'Total Ways to Sum':
+      //   answer = totalWaysToSum(input);
+      //   break;
       case 'Array Jumping Game':
         answer = arrayJumpingGame(input);
         break;
@@ -84,9 +84,9 @@ class Contract {
       case 'Algorithmic Stock Trader I':
         answer = algorithmicStockTraderI(input);
         break;
-      case 'Algorithmic Stock Trader II':
-        answer = algorithmicStockTraderII(input);
-        break;
+      // case 'Algorithmic Stock Trader II':
+      // answer = algorithmicStockTraderII(input);
+      // break;
       case 'Algorithmic Stock Trader III':
         answer = algorithmicStockTraderIII(input);
         break;

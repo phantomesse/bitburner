@@ -1,13 +1,8 @@
-import {
-  formatMoney,
-  formatPercent,
-  formatTable,
-  LEFT_ALIGNMENT,
-  RIGHT_ALIGNMENT,
-} from '/utils/format.js';
+import { formatMoney, formatPercent } from '/utils/format.js';
 import { getStockWorth } from '/utils/stock.js';
 import { HOME_SERVER_NAME } from '/utils/servers.js';
 import { sort } from '/utils/misc.js';
+import { Alignment, printTable, RowColor } from '/utils/table.js';
 
 const SOURCE_COLUMN_HEADER = 'Source';
 const MONEY_COLUMN_HEADER = 'Money';
@@ -32,12 +27,12 @@ export function main(ns) {
   const netWorth =
     cash + stocks.map(stock => stock.worth).reduce((a, b) => a + b);
 
-  const table = formatTable(
+  printTable(
+    ns,
     {
-      [SOURCE_COLUMN_HEADER]: LEFT_ALIGNMENT,
-      [MONEY_COLUMN_HEADER]: RIGHT_ALIGNMENT,
-      [MONEY_ABBR_COLUMN_HEADER]: RIGHT_ALIGNMENT,
-      [PERCENT_NET_WORTH_COLUMN_HEADER]: RIGHT_ALIGNMENT,
+      [MONEY_COLUMN_HEADER]: Alignment.RIGHT,
+      [MONEY_ABBR_COLUMN_HEADER]: Alignment.RIGHT,
+      [PERCENT_NET_WORTH_COLUMN_HEADER]: Alignment.RIGHT,
     },
     stocks.map(stock => ({
       [SOURCE_COLUMN_HEADER]: stock.symbol,
@@ -51,6 +46,7 @@ export function main(ns) {
         [MONEY_COLUMN_HEADER]: formatMoney(cash),
         [MONEY_ABBR_COLUMN_HEADER]: formatMoney(cash, true),
         [PERCENT_NET_WORTH_COLUMN_HEADER]: formatPercent(cash / netWorth),
+        rowColor: RowColor.WARN,
       },
     ],
     [
@@ -59,14 +55,11 @@ export function main(ns) {
         [MONEY_COLUMN_HEADER]: formatMoney(netWorth),
         [MONEY_ABBR_COLUMN_HEADER]: formatMoney(netWorth, true),
         [PERCENT_NET_WORTH_COLUMN_HEADER]: '--',
+        rowColor: RowColor.ERROR,
       },
     ]
   );
-  ns.tprint(table);
 }
-
-const _formatMoney = money =>
-  `${formatMoney(money)} (${formatMoney(money, true)})`;
 
 class Stock {
   /**

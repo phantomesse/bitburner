@@ -1,11 +1,9 @@
+import { Alignment, printTable, RowColor } from '/utils/table.js';
 import {
   formatMoney,
   formatNumber,
   formatPercent,
-  formatTable,
   formatTime,
-  LEFT_ALIGNMENT,
-  RIGHT_ALIGNMENT,
 } from '/utils/format.js';
 import {
   getHackingHeuristic,
@@ -84,19 +82,18 @@ export function main(ns) {
     }
   }
 
-  const table = formatTable(
+  printTable(
+    ns,
     {
-      [SERVER_NAME_COLUMN_HEADER]: LEFT_ALIGNMENT,
-      [AVAILABLE_MONEY_COLUMN_HEADER]: RIGHT_ALIGNMENT,
-      [SECURITY_LEVEL_COLUMN_HEADER]: RIGHT_ALIGNMENT,
-      [HACK_CHANCE_COLUMN_HEADER]: RIGHT_ALIGNMENT,
-      [BEING_GROWN_COLUMN_HEADER]: RIGHT_ALIGNMENT,
-      [BEING_WEAKENED_COLUMN_HEADER]: RIGHT_ALIGNMENT,
-      [BEING_HACKED_COLUMN_HEADER]: RIGHT_ALIGNMENT,
+      [AVAILABLE_MONEY_COLUMN_HEADER]: Alignment.RIGHT,
+      [SECURITY_LEVEL_COLUMN_HEADER]: Alignment.RIGHT,
+      [HACK_CHANCE_COLUMN_HEADER]: Alignment.RIGHT,
+      [BEING_GROWN_COLUMN_HEADER]: Alignment.RIGHT,
+      [BEING_WEAKENED_COLUMN_HEADER]: Alignment.RIGHT,
+      [BEING_HACKED_COLUMN_HEADER]: Alignment.RIGHT,
     },
     ...hackableServers.map(server => [server.getTableRow()])
   );
-  ns.tprint(table);
 }
 
 class Server {
@@ -140,6 +137,24 @@ class Server {
     )} threads`;
   }
 
+  _getRowColor() {
+    const attackPoints = [
+      this.beingGrownBy.length > 0 ? 1 : 0,
+      this.beingWeakenedBy.length > 0 ? 1 : 0,
+      this.beingHackedBy.length > 0 ? 1 : 0,
+    ].reduce((a, b) => a + b);
+    switch (attackPoints) {
+      case 3:
+        return RowColor.ERROR;
+      case 2:
+        return RowColor.WARN;
+      case 1:
+        return RowColor.NORMAL;
+      case 0:
+        return RowColor.INFO;
+    }
+  }
+
   getTableRow() {
     return {
       [SERVER_NAME_COLUMN_HEADER]:
@@ -161,6 +176,7 @@ class Server {
       [BEING_GROWN_COLUMN_HEADER]: this._formatScripts(this.beingGrownBy),
       [BEING_WEAKENED_COLUMN_HEADER]: this._formatScripts(this.beingWeakenedBy),
       [BEING_HACKED_COLUMN_HEADER]: this._formatScripts(this.beingHackedBy),
+      rowColor: this._getRowColor(),
     };
   }
 }

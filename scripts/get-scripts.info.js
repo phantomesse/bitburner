@@ -1,5 +1,5 @@
+import { Alignment, printTable, RowColor } from '/utils/table.js';
 import { sort } from '/utils/misc.js';
-import { formatTable, LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '/utils/format.js';
 import { HOME_SERVER_NAME } from '/utils/servers.js';
 
 const SCRIPT_NAME_COLUMN_HEADER = 'Script name';
@@ -22,13 +22,16 @@ export function main(ns) {
     [IS_RUNNING_COLUMN_HEADER]: ns.scriptRunning(fileName, HOME_SERVER_NAME)
       ? 'true'
       : '--',
+    rowColor: ns.scriptRunning(fileName, HOME_SERVER_NAME)
+      ? RowColor.NORMAL
+      : RowColor.INFO,
   }));
 
-  const table = formatTable(
+  printTable(
+    ns,
     {
-      [SCRIPT_NAME_COLUMN_HEADER]: LEFT_ALIGNMENT,
-      [RAM_COLUMN_HEADER]: RIGHT_ALIGNMENT,
-      [IS_RUNNING_COLUMN_HEADER]: RIGHT_ALIGNMENT,
+      [RAM_COLUMN_HEADER]: Alignment.RIGHT,
+      [IS_RUNNING_COLUMN_HEADER]: Alignment.RIGHT,
     },
     scripts,
     [
@@ -40,8 +43,8 @@ export function main(ns) {
             .reduce((a, b) => a + b)
             .toFixed(2) + ' GB',
         [IS_RUNNING_COLUMN_HEADER]: '--',
+        rowColor: RowColor.WARN,
       },
     ]
   );
-  ns.tprint(table);
 }

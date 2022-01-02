@@ -1,10 +1,5 @@
 import { sort } from '/utils/misc.js';
-import {
-  formatNumber,
-  formatTable,
-  LEFT_ALIGNMENT,
-  RIGHT_ALIGNMENT,
-} from '/utils/format.js';
+import { formatNumber } from '/utils/format.js';
 import { getAllServerNames } from '/utils/servers.js';
 import {
   isHackable,
@@ -12,6 +7,7 @@ import {
   HACK_SCRIPT,
   WEAKEN_SCRIPT,
 } from '/utils/hacking.js';
+import { Alignment, printTable, RowColor } from '/utils/table.js';
 
 const SERVER_NAME_COLUMN_HEADER = 'Server name';
 const GROWING_COLUMN_HEADER = 'Growing';
@@ -83,19 +79,18 @@ export function main(ns) {
   }
 
   servers = servers.filter(server => server.maxRam > 0);
-  const table = formatTable(
+  printTable(
+    ns,
     {
-      [SERVER_NAME_COLUMN_HEADER]: LEFT_ALIGNMENT,
-      [GROWING_COLUMN_HEADER]: RIGHT_ALIGNMENT,
-      [WEAKENING_COLUMN_HEADER]: RIGHT_ALIGNMENT,
-      [HACKING_COLUMN_HEADER]: RIGHT_ALIGNMENT,
-      [MAX_RAM_COLUMN_HEADER]: RIGHT_ALIGNMENT,
-      [USED_RAM_COLUMN_HEADER]: RIGHT_ALIGNMENT,
-      [FREE_RAM_COLUMN_HEADER]: RIGHT_ALIGNMENT,
+      [GROWING_COLUMN_HEADER]: Alignment.RIGHT,
+      [WEAKENING_COLUMN_HEADER]: Alignment.RIGHT,
+      [HACKING_COLUMN_HEADER]: Alignment.RIGHT,
+      [MAX_RAM_COLUMN_HEADER]: Alignment.RIGHT,
+      [USED_RAM_COLUMN_HEADER]: Alignment.RIGHT,
+      [FREE_RAM_COLUMN_HEADER]: Alignment.RIGHT,
     },
     ...servers.map(server => [server.getTableRow()])
   );
-  ns.tprint(table);
 }
 
 class Server {
@@ -144,6 +139,7 @@ class Server {
       [MAX_RAM_COLUMN_HEADER]: formatNumber(this.maxRam, true) + ' GB',
       [USED_RAM_COLUMN_HEADER]: formatNumber(this.usedRam, true) + ' GB',
       [FREE_RAM_COLUMN_HEADER]: formatNumber(this.freeRam, true) + ' GB',
+      rowColor: this.isPurchased ? RowColor.NORMAL : RowColor.WARN,
     };
   }
 }
