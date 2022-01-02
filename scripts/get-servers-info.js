@@ -28,7 +28,7 @@ const FREE_RAM_COLUMN_HEADER = 'Free ram';
  * @param {import('..').NS} ns
  */
 export function main(ns) {
-  const servers = getAllServerNames(ns)
+  let servers = getAllServerNames(ns)
     .map(serverName => new Server(ns, serverName))
     .filter(server => server.hasRootAccess);
   sort(servers, server => server.name);
@@ -82,6 +82,7 @@ export function main(ns) {
     }
   }
 
+  servers = servers.filter(server => server.maxRam > 0);
   const table = formatTable(
     {
       [SERVER_NAME_COLUMN_HEADER]: LEFT_ALIGNMENT,
@@ -140,9 +141,9 @@ class Server {
       [GROWING_COLUMN_HEADER]: this._formatScripts(this.growing),
       [WEAKENING_COLUMN_HEADER]: this._formatScripts(this.weakening),
       [HACKING_COLUMN_HEADER]: this._formatScripts(this.hacking),
-      [MAX_RAM_COLUMN_HEADER]: formatNumber(this.maxRam, true),
-      [USED_RAM_COLUMN_HEADER]: formatNumber(this.usedRam, true),
-      [FREE_RAM_COLUMN_HEADER]: formatNumber(this.freeRam, true),
+      [MAX_RAM_COLUMN_HEADER]: formatNumber(this.maxRam, true) + ' GB',
+      [USED_RAM_COLUMN_HEADER]: formatNumber(this.usedRam, true) + ' GB',
+      [FREE_RAM_COLUMN_HEADER]: formatNumber(this.freeRam, true) + ' GB',
     };
   }
 }

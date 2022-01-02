@@ -79,13 +79,19 @@ export function formatTable(columnHeaderToAlignmentMap, ...rowSections) {
   const alignments = Object.values(columnHeaderToAlignmentMap);
   const divider =
     '—' + widths.map(length => ''.padStart(length, '—')).join('—+—') + '—';
+  const header = _formatTableRow(
+    columnHeaders,
+    widths,
+    alignments
+  ).toUpperCase();
   const sections = [
-    _formatTableRow(columnHeaders, widths, alignments),
+    header,
     ...rowSections.map(rows =>
       rows
         .map(row => _formatTableRow(Object.values(row), widths, alignments))
         .join('\n')
     ),
+    header,
   ].join('\n┊' + divider + '┊\n');
 
   const print = ['+' + divider + '+', sections, '+' + divider + '+'];

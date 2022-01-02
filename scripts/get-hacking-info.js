@@ -36,7 +36,7 @@ export function main(ns) {
   const hackableServers = allServerNames
     .filter(serverName => isHackable(ns, serverName))
     .map(serverName => new Server(ns, serverName));
-  sort(hackableServers, server => getHackingHeuristic(ns, server.name), true);
+  sort(hackableServers, server => getHackingHeuristic(ns, server.name));
 
   const rootAccessServerNames = allServerNames.filter(serverName =>
     ns.hasRootAccess(serverName)
@@ -129,13 +129,15 @@ class Server {
 
   _formatScripts(scripts) {
     if (scripts.length === 0) return '--';
-    sort(scripts, script => script.threadCount, true);
-    return scripts
-      .map(
-        script =>
-          script.serverName + ` (${formatNumber(script.threadCount, true)})`
-      )
-      .join('\n');
+
+    const totalThreadCount = scripts
+      .map(script => script.threadCount)
+      .reduce((a, b) => a + b);
+    const totalServerCount = scripts.length;
+    return `${totalServerCount} servers\n${formatNumber(
+      totalThreadCount,
+      true
+    )} threads`;
   }
 
   getTableRow() {
