@@ -8,6 +8,7 @@ const ASK_PRICE_COLUMN_HEADER = 'Ask price';
 const BID_PRICE_COLUMN_HEADER = 'Bid price';
 const OWNED_SHARE_COUNT_COLUMN_HEADER = 'Owned shares';
 const MAX_SHARE_COUNT_COLUMN_HEADER = 'Max shares';
+const PERCENT_MAX_SHARE_COLUMN_HEADER = '% of max';
 const SHARES_WORTH_COLUMN_HEADER = 'Worth';
 const SHARES_PROFIT_COLUMN_HEADER = 'Profit';
 
@@ -27,6 +28,7 @@ export function main(ns) {
       [BID_PRICE_COLUMN_HEADER]: Alignment.RIGHT,
       [OWNED_SHARE_COUNT_COLUMN_HEADER]: Alignment.RIGHT,
       [MAX_SHARE_COUNT_COLUMN_HEADER]: Alignment.RIGHT,
+      [PERCENT_MAX_SHARE_COLUMN_HEADER]: Alignment.RIGHT,
       [SHARES_WORTH_COLUMN_HEADER]: Alignment.RIGHT,
       [SHARES_PROFIT_COLUMN_HEADER]: Alignment.RIGHT,
     },
@@ -71,6 +73,9 @@ class Stock {
         true
       ),
       [MAX_SHARE_COUNT_COLUMN_HEADER]: formatNumber(this.maxShareCount, true),
+      [PERCENT_MAX_SHARE_COLUMN_HEADER]: formatPercent(
+        this.ownedShareCount / this.maxShareCount
+      ),
       [SHARES_WORTH_COLUMN_HEADER]:
         this.ownedShareCount === 0 ? '--' : formatMoney(this.sharesWorth, true),
       [SHARES_PROFIT_COLUMN_HEADER]:

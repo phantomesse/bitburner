@@ -1,7 +1,7 @@
 import { DEFAULT_PORT, LOCALHOST_PREFIX } from '/utils/misc.js';
 
 const GITHUB_SCRIPTS_FOLDER =
-  'https://raw.githubusercontent.com/phantomesse/bitburner/master/scripts/';
+  'https://raw.githubusercontent.com/phantomesse/bitburner/master/';
 const SCRIPTS_TXT = 'scripts.txt';
 
 /**
