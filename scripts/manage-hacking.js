@@ -259,12 +259,23 @@ function getFreeRam(ns, serverNames) {
     if (serverName !== HOME_SERVER_NAME) return freeRam;
 
     // If home server, make sure to reserve RAM to run other scripts.
-    const reservedRam = ns
+    const scripts = ns
       .ls(HOME_SERVER_NAME)
-      .filter(fileName => fileName.endsWith('.js'))
-      .filter(fileName => !ns.scriptRunning(fileName, HOME_SERVER_NAME))
-      .map(script => ns.getScriptRam(script))
-      .reduce((a, b) => a + b);
+      .filter(
+        fileName => fileName.endsWith('.js') && !fileName.startsWith('/')
+      );
+    const oneTimeUseScripts = scripts.filter(
+      script => script.startsWith('find-') || script.startsWith('get-')
+    );
+    const oneTimeUseRam = Math.max(
+      ...scripts.map(script => ns.getScriptRam(script))
+    );
+    const reservedRam =
+      scripts
+        .filter(script => !oneTimeUseScripts.includes(script))
+        .filter(fileName => !ns.scriptRunning(fileName, HOME_SERVER_NAME))
+        .map(script => ns.getScriptRam(script))
+        .reduce((a, b) => a + b) + oneTimeUseRam;
     return freeRam - reservedRam;
   }
   return serverNames
