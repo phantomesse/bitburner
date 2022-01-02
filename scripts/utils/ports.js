@@ -1,0 +1,3 @@
+export const MANAGE_SERVERS_TO_MANAGE_HACKING_PORT = 1;
+
+export const NULL_PORT_DATA = 'NULL PORT DATA';

@@ -1,3 +1,4 @@
+import { MANAGE_SERVERS_TO_MANAGE_HACKING_PORT } from '/utils/ports.js';
 import { getMoneyToSpend, sort } from '/utils/misc.js';
 import { PURCHASED_SERVER_PREFIX } from '/utils/servers.js';
 
@@ -38,6 +39,10 @@ export async function main(ns) {
           ns.toast(
             `deleted server ${lowestRamServerName} which had ${lowestRam}GB RAM`
           );
+          await ns.writePort(
+            MANAGE_SERVERS_TO_MANAGE_HACKING_PORT,
+            JSON.stringify({ remove: lowestRamServerName })
+          );
         }
       }
 
@@ -45,6 +50,10 @@ export async function main(ns) {
       const server = ns.purchaseServer(PURCHASED_SERVER_PREFIX, ram);
       if (server !== '') {
         ns.toast(`bought server (${server}) with ${ram}GB RAM`);
+        await ns.writePort(
+          MANAGE_SERVERS_TO_MANAGE_HACKING_PORT,
+          JSON.stringify({ add: server })
+        );
 
         // Update lowest RAM acceptable.
         if (getPurchasedServerNames(ns).length === purchasedServerLimit) {

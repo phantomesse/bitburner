@@ -8,6 +8,10 @@ import {
 import { HOME_SERVER_NAME, getAllServerNames } from '/utils/servers.js';
 import { sort } from '/utils/misc.js';
 import { formatMoney, formatPercent } from '/utils/format.js';
+import {
+  MANAGE_SERVERS_TO_MANAGE_HACKING_PORT,
+  NULL_PORT_DATA,
+} from '/utils/ports.js';
 
 const HACKING_SCRIPTS = [GROW_SCRIPT, WEAKEN_SCRIPT, HACK_SCRIPT];
 const MIN_HACK_CHANCE = 0.6;
@@ -37,9 +41,28 @@ const DISABLE_LOGGING_FUNCTIONS = [
 export async function main(ns) {
   DISABLE_LOGGING_FUNCTIONS.forEach(ns.disableLog);
 
+  let allServerNames = getAllServerNames(ns);
+
   while (true) {
+    // Update all server names based on servers that we've added or deleted from
+    // the manage-servers.js script.
+    const manageServersMessage = ns.readPort(
+      MANAGE_SERVERS_TO_MANAGE_HACKING_PORT
+    );
+    if (manageServersMessage !== NULL_PORT_DATA) {
+      const response = JSON.parse(manageServersMessage);
+      if (response.add && !allServerNames.includes(response.add)) {
+        allServerNames.push(response.add);
+      }
+      if (response.remove && allServerNames.includes(response.remove)) {
+        allServerNames = allServerNames.filter(
+          serverName => serverName !== response.remove
+        );
+      }
+    }
+
     // Get all servers where we have root access including home.
-    const rootAccessServerNames = getAllServerNames(ns).filter(serverName =>
+    const rootAccessServerNames = allServerNames.filter(serverName =>
       gainRootAccess(ns, serverName)
     );
 
