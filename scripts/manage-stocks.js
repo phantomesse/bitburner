@@ -91,6 +91,16 @@ function buyStock(ns, symbol, moneyToSpend) {
  * @param {string} symbol
  */
 function sellStock(ns, symbol) {
+  // Panic sell.
+  if (
+    ns.stock.purchase4SMarketDataTixApi() &&
+    ns.stock.getForecast(symbol) < 0.15
+  ) {
+    const sharesToSell = ns.stock.getPosition(symbol)[0];
+    ns.stock.sell(symbol, sharesToSell);
+    ns.print(`panic sold ${sharesToSell} shares of ${symbol}`);
+  }
+
   const position = ns.stock.getPosition(symbol);
   const ownedShareCount = position[0];
   if (ownedShareCount === 0) return; // Nothing to sell.
