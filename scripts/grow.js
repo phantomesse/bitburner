@@ -12,7 +12,7 @@ export async function main(ns) {
   const numberOfTimes = parseInt(ns.args[1]);
   let index = 0;
   while (isNaN(numberOfTimes) ? true : index++ < numberOfTimes) {
-    await ns.grow(host);
+    await ns.grow(host, { stock: true });
   }
 }
 

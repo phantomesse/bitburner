@@ -12,7 +12,7 @@ export async function main(ns) {
   const numberOfTimes = parseInt(ns.args[1]);
   let index = 0;
   while (isNaN(numberOfTimes) ? true : index++ < numberOfTimes) {
-    await ns.weaken(host);
+    await ns.weaken(host, { stock: true });
   }
 }
 

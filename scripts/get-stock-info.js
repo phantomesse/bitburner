@@ -11,6 +11,7 @@ const MAX_SHARE_COUNT_COLUMN_HEADER = 'Max shares';
 const PERCENT_MAX_SHARE_COLUMN_HEADER = '% of max';
 const SHARES_WORTH_COLUMN_HEADER = 'Worth';
 const SHARES_PROFIT_COLUMN_HEADER = 'Profit';
+const FORECAST_COLUMN_HEADER = 'Forecast';
 
 /**
  * Prints out stock info.
@@ -31,6 +32,7 @@ export function main(ns) {
       [PERCENT_MAX_SHARE_COLUMN_HEADER]: Alignment.RIGHT,
       [SHARES_WORTH_COLUMN_HEADER]: Alignment.RIGHT,
       [SHARES_PROFIT_COLUMN_HEADER]: Alignment.RIGHT,
+      [FORECAST_COLUMN_HEADER]: Alignment.RIGHT,
     },
     stocks.map(stock => stock.getTableRow())
   );
@@ -56,6 +58,17 @@ class Stock {
     this.profit =
       (this.sharesWorth - this.ownedShareCount * this.ownedShareAvgPrice) /
       (this.ownedShareCount * this.ownedShareAvgPrice);
+
+    this.forecast = ns.stock.getForecast(symbol);
+  }
+
+  _getForecast() {
+    if (this.forecast > 0.8) return '+++';
+    if (this.forecast > 0.64) return '++';
+    if (this.forecast >= 0.5) return '+';
+    if (this.forecast > 0.32) return '-';
+    if (this.forecast > 0.16) return '--';
+    return '---';
   }
 
   _getRowColor() {
@@ -82,6 +95,7 @@ class Stock {
         this.ownedShareCount === 0
           ? '--'
           : (this.profit > 0 ? '+' : '') + formatPercent(this.profit),
+      [FORECAST_COLUMN_HEADER]: this._getForecast(),
       rowColor: this._getRowColor(),
     };
   }
