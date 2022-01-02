@@ -14,7 +14,7 @@
  * @param {string} input
  * @returns {number}
  */
-export function algorithmicStockTraderII(ns, input) {
+export function algorithmicStockTraderII(input) {
   let maxProfit = 0;
   for (let buyDay = 0; buyDay < input.length; buyDay++) {
     const possibleTradeTimelines = _getAllPossibleTradeTimelines(input, buyDay);

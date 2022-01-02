@@ -7,6 +7,7 @@ import { algorithmicStockTraderII } from '/contracts/algorithmic-stock-trader-ii
 import { algorithmicStockTraderIII } from '/contracts/algorithmic-stock-trader-iii.js';
 import { subarrayWithMaximumSum } from '/contracts/subarray-with-maximum-sum.js';
 import { sanitizeParenthesesInExpression } from '/contracts/sanitize-parentheses-in-expression.js';
+import { uniquePathsInAGridI } from '/contracts/unique-paths-in-a-grid-i.js';
 import { uniquePathsInAGridII } from '/contracts/unique-paths-in-a-grid-ii.js';
 import { findAllValidMathExpressions } from '/contracts/find-valid-math-solutions.js';
 import {
@@ -95,6 +96,9 @@ class Contract {
         break;
       case 'Sanitize Parentheses in Expression':
         answer = sanitizeParenthesesInExpression(input);
+        break;
+      case 'Unique Paths in a Grid I':
+        answer = uniquePathsInAGridI(input);
         break;
       case 'Unique Paths in a Grid II':
         answer = uniquePathsInAGridII(input);

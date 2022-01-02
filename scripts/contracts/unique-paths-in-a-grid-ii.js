@@ -16,7 +16,7 @@
  * @param {int[][]} input
  */
 export function uniquePathsInAGridII(input) {
-  return new Set(_getUniquePaths(input, 0, 0, '')).size;
+  return new Set(getUniquePaths(input, 0, 0, '')).size;
 }
 
 /**
@@ -25,19 +25,19 @@ export function uniquePathsInAGridII(input) {
  * @param {int} startY
  * @returns {string[]} list of instructions (e.g. "DDRR")
  */
-function _getUniquePaths(grid, startX, startY, instructionsThusFar) {
+export function getUniquePaths(grid, startX, startY, instructionsThusFar) {
   if (startX === grid[0].length - 1 && startY === grid.length - 1) {
     return [instructionsThusFar];
   }
   const allInstructions = [];
   if (_canMoveRight(grid, startX, startY)) {
     allInstructions.push(
-      ..._getUniquePaths(grid, startX + 1, startY, instructionsThusFar + 'R')
+      ...getUniquePaths(grid, startX + 1, startY, instructionsThusFar + 'R')
     );
   }
   if (_canMoveDown(grid, startX, startY)) {
     allInstructions.push(
-      ..._getUniquePaths(grid, startX, startY + 1, instructionsThusFar + 'D')
+      ...getUniquePaths(grid, startX, startY + 1, instructionsThusFar + 'D')
     );
   }
   return allInstructions;

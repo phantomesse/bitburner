@@ -1,3 +1,5 @@
+import { getUniquePaths } from '/contracts/unique-paths-in-a-grid-ii.js';
+
 /**
  * Unique Paths in a Grid I
  *
@@ -11,14 +13,7 @@
  *
  * @param {int[]} input
  */
-export function uniquePathsInAGridI(input) {}
-
-/**
- * @param {int} rowCount
- * @param {int} columnCount
- */
-function _getPaths(rowCount, columnCount) {
-  if (rowCount === 1 && columnCount === 1) return 0;
+export function uniquePathsInAGridI(input) {
+  const matrix = new Array(input[1]).fill(new Array(input[0]).fill(0));
+  return new Set(getUniquePaths(matrix, 0, 0, '')).size;
 }
-
-uniquePathsInAGridI([9, 14]);

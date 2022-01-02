@@ -1,5 +1,5 @@
 find-backdoors.js	1641074369568.4458
-find-contracts.js	1641097730713.6519
+find-contracts.js	1641098439821.1318
 get-free-ram.js	1641091130124.6335
 get-hacking-info.js	1641091617030.8557
 get-net-worth.js	1641091762558.46
@@ -17,7 +17,7 @@ startup.js	1641061658878.6514
 sync.js	1640899544742.6936
 weaken.js	1640896398554.9033
 contracts/algorithmic-stock-trader-i.js	1640933204232.0596
-contracts/algorithmic-stock-trader-ii.js	1641083203953.2512
+contracts/algorithmic-stock-trader-ii.js	1641098059312.4294
 contracts/algorithmic-stock-trader-iii.js	1640986767250.7432
 contracts/array-jumping-game.js	1640928065715.8975
 contracts/find-largest-prime-factor.js	1640928933756.835
@@ -26,8 +26,8 @@ contracts/generate-ip-addresses.js	1640932518632.1165
 contracts/sanitize-parentheses-in-expression.js	1640971903924.313
 contracts/subarray-with-maximum-sum.js	1640966767216.6592
 contracts/total-ways-to-sum.js	1641097722850.563
-contracts/unique-paths-in-a-grid-i.js	1640966385406.459
-contracts/unique-paths-in-a-grid-ii.js	1640986567055.1956
+contracts/unique-paths-in-a-grid-i.js	1641098474936.253
+contracts/unique-paths-in-a-grid-ii.js	1641098383476.9336
 utils/format.js	1641092174551.955
 utils/hacking.js	1640904688369.488
 utils/misc.js	1641075846024.772
