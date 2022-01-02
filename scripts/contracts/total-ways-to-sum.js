@@ -15,31 +15,17 @@
  * @returns {int} number of ways to sum
  */
 export function totalWaysToSum(input) {
-  return _getWaysToSum(input).length;
-}
+  const dynamicProgramming = new Array(input + 1).fill(0);
+  dynamicProgramming[0] = 1;
 
-const cachedWaysToSum = { 1: [] };
-
-/**
- * @param {int} number
- * @param {int[]} addends
- * @returns {int[][]} a list of different ways to sum
- *                    (e.g. [[3, 1], [2, 2], ...])
- */
-function _getWaysToSum(number) {
-  if (number in cachedWaysToSum) return cachedWaysToSum[number];
-  let ways = [];
-  for (let addend = number - 1; addend > 0; addend--) {
-    ways.push([addend, number - addend]);
-    const waysToSum = _getWaysToSum(number - addend).map(way => [
-      addend,
-      ...way,
-    ]);
-    ways.push(...waysToSum);
+  for (let i = 1; i < input; i++) {
+    for (let j = 1; j < input + 1; j++) {
+      if (j >= i) {
+        dynamicProgramming[j] =
+          dynamicProgramming[j] + dynamicProgramming[j - i];
+      }
+    }
   }
-  const waysToSum = [...new Set(ways.map(way => way.sort().join(' ')))].map(
-    way => way.split(' ').map(number => parseInt(number))
-  );
-  cachedWaysToSum[number] = waysToSum;
-  return waysToSum;
+
+  return dynamicProgramming[input];
 }
