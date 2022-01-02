@@ -4,7 +4,7 @@
  * If the number of times is passed into the argument, then only runs for that
  * many times. Otherwise, runs infinitely.
  *
- * @example run weaken-host.ns <hostname> <number of times>
+ * @example run weaken.ns <hostname> <number of times>
  * @param {import('..').NS } ns
  */
 export async function main(ns) {

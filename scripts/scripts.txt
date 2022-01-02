@@ -7,8 +7,8 @@ get-path.js	1641155594741.7407
 get-scripts-info.js	1641095564801.758
 get-servers-info.js	1641092044615.8672
 get-stock-info.js	1641101107980.8408
-grow.js	1641103615791.4636
-hack.js	1641103644008.1133
+grow.js	1641156131388.2834
+hack.js	1641156127189.9514
 manage-hacking.js	1641152987552.8052
 manage-hacknet.js	1640917878845.1367
 manage-servers.js	1641152729305.2925
@@ -16,7 +16,7 @@ manage-stocks.js	1641154173726.8967
 sell-all-stocks.js	1641073786293.1628
 startup.js	1641061658878.6514
 sync.js	1641099035399.1777
-weaken.js	1641103661303.208
+weaken.js	1641156136425.8616
 contracts/algorithmic-stock-trader-i.js	1640933204232.0596
 contracts/algorithmic-stock-trader-ii.js	1641107983191.059
 contracts/algorithmic-stock-trader-iii.js	1640986767250.7432
