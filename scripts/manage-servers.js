@@ -29,7 +29,7 @@ export async function main(ns) {
       if (getMoneyToSpend(ns) < cost) continue;
 
       // Delete lowest RAM server if over server limit.
-      if (ns.getPurchasedServers().length === purchasedServerLimit) {
+      if (getPurchasedServerNames(ns).length === purchasedServerLimit) {
         const lowestRamServerName = getLowestRamPurchasedServer(ns);
         const lowestRam = ns.getServerMaxRam(lowestRamServerName);
         if (ram <= lowestRam) continue;
@@ -47,7 +47,7 @@ export async function main(ns) {
         ns.toast(`bought server (${server}) with ${ram}GB RAM`);
 
         // Update lowest RAM acceptable.
-        if (ns.getPurchasedServers().length === purchasedServerLimit) {
+        if (getPurchasedServerNames(ns).length === purchasedServerLimit) {
           const lowestRamServerName = getLowestRamPurchasedServer(ns);
           const lowestRam = ns.getServerMaxRam(lowestRamServerName);
           if (lowestRam > lowestRamAcceptable) {
@@ -62,9 +62,16 @@ export async function main(ns) {
     await ns.sleep(1000 * 60);
   }
 }
+
+function getPurchasedServerNames(ns) {
+  return ns
+    .scan()
+    .filter(serverName => serverName.startsWith(PURCHASED_SERVER_PREFIX));
+}
+
 /** @param {import('..').NS } ns */
 function getLowestRamPurchasedServer(ns) {
-  const purchasedServerNames = ns.getPurchasedServers();
+  const purchasedServerNames = getPurchasedServerNames(ns);
   sort(purchasedServerNames, ns.getServerMaxRam);
   return purchasedServerNames[0];
 }
