@@ -3,6 +3,7 @@ find-contracts.js	1641109162214.1646
 get-free-ram.js	1641091130124.6335
 get-hacking-info.js	1641091617030.8557
 get-net-worth.js	1641091762558.46
+get-path.js	1641155594741.7407
 get-scripts-info.js	1641095564801.758
 get-servers-info.js	1641092044615.8672
 get-stock-info.js	1641101107980.8408
@@ -34,6 +35,6 @@ utils/format.js	1641092174551.955
 utils/hacking.js	1640904688369.488
 utils/misc.js	1641100294530.5322
 utils/ports.js	1641152575281.5933
-utils/servers.js	1641064291883.849
+utils/servers.js	1641155304277.8787
 utils/stock.js	1641068848850.4822
 utils/table.js	1641090938710.581

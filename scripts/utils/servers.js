@@ -15,11 +15,11 @@ export const PURCHASED_SERVER_PREFIX = 'lauren';
  */
 export function getAllServerNames(ns, root, parent) {
   const children = ns.scan(root).filter(child => child !== parent);
-  let servers = [...children];
+  const servers = [...children];
   for (const child of children) {
-    servers = [...new Set([...servers, ...getAllServerNames(ns, child, root)])];
+    servers.push(...getAllServerNames(ns, child, root));
   }
-  return servers;
+  return [...new Set(servers)];
 }
 
 /**
