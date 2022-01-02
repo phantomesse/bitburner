@@ -85,9 +85,9 @@ class Contract {
       case 'Algorithmic Stock Trader I':
         answer = algorithmicStockTraderI(input);
         break;
-      // case 'Algorithmic Stock Trader II':
-      // answer = algorithmicStockTraderII(input);
-      // break;
+      case 'Algorithmic Stock Trader II':
+        answer = algorithmicStockTraderII(input);
+        break;
       case 'Algorithmic Stock Trader III':
         answer = algorithmicStockTraderIII(input);
         break;
