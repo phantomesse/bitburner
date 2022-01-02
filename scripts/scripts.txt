@@ -14,7 +14,6 @@ manage-servers.js	1640917988985.5764
 manage-stocks.js	1640983121383.804
 sell-all-stocks.js	1641073786293.1628
 startup.js	1641061658878.6514
-sync-dashboard.js	1640910132767.3435
 sync.js	1640899544742.6936
 weaken.js	1640896398554.9033
 contracts/algorithmic-stock-trader-i.js	1640933204232.0596

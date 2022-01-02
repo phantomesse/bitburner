@@ -15,32 +15,8 @@ const DEFAULT_PORT = 1337;
 const SCRIPTS_FOLDER = dirname('.') + '/scripts/';
 const SCRIPTS_TXT = 'scripts.txt';
 
-let dashboardData;
-
 // Create server.
 const server = createServer((request, response) => {
-  if (request.url === '/dashboard/sync') {
-    if (request.method === 'POST') {
-      let data = '';
-      request
-        .on('data', chunk => (data += chunk))
-        .on('end', () => {
-          dashboardData = data;
-          response.statusCode = 200;
-          response.end();
-        });
-      return;
-    }
-
-    if (request.method === 'GET') {
-      response.statusCode = 200;
-      response.end(dashboardData);
-      return;
-    }
-  }
-
-  if (request.url === '/dashboard') request.url = '/dashboard/index.html';
-
   try {
     const data = readFileSync(dirname('.') + request.url, 'utf-8');
     response.statusCode = 200;
