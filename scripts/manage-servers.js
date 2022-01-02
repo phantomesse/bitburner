@@ -67,8 +67,8 @@ export async function main(ns) {
       }
     }
 
-    // Wait 1 minute before buying another server.
-    await ns.sleep(1000 * 60);
+    // Wait 30 seconds before buying another server.
+    await ns.sleep(1000 * 30);
   }
 }
 
