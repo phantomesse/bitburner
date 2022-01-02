@@ -65,6 +65,6 @@ export async function main(ns) {
 /** @param {import('..').NS } ns */
 function getLowestRamPurchasedServer(ns) {
   const purchasedServerNames = ns.getPurchasedServers();
-  sort(purchasedServerNames, ns.getServerMaxRam, true);
+  sort(purchasedServerNames, ns.getServerMaxRam);
   return purchasedServerNames[0];
 }
