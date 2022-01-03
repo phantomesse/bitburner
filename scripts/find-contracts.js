@@ -2,9 +2,12 @@ import { totalWaysToSum } from '/contracts/total-ways-to-sum.js';
 import { arrayJumpingGame } from '/contracts/array-jumping-game.js';
 import { findLargestPrimeFactor } from '/contracts/find-largest-prime-factor.js';
 import { generateIpAddresses } from '/contracts/generate-ip-addresses.js';
-import { algorithmicStockTraderI } from '/contracts/algorithmic-stock-trader-i.js';
-import { algorithmicStockTraderII } from '/contracts/algorithmic-stock-trader-ii.js';
-import { algorithmicStockTraderIII } from '/contracts/algorithmic-stock-trader-iii.js';
+import {
+  algorithmicStockTraderI,
+  algorithmicStockTraderII,
+  algorithmicStockTraderIII,
+  algorithmicStockTraderIV,
+} from '/contracts/algorithmic-stock-trader.js';
 import { subarrayWithMaximumSum } from '/contracts/subarray-with-maximum-sum.js';
 import { sanitizeParenthesesInExpression } from '/contracts/sanitize-parentheses-in-expression.js';
 import { uniquePathsInAGridI } from '/contracts/unique-paths-in-a-grid-i.js';
@@ -92,6 +95,9 @@ class Contract {
         break;
       case 'Algorithmic Stock Trader III':
         answer = algorithmicStockTraderIII(input);
+        break;
+      case 'Algorithmic Stock Trader IV':
+        answer = algorithmicStockTraderIV(input);
         break;
       case 'Subarray with Maximum Sum':
         answer = subarrayWithMaximumSum(input);
