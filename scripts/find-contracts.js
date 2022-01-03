@@ -11,6 +11,7 @@ import { uniquePathsInAGridI } from '/contracts/unique-paths-in-a-grid-i.js';
 import { uniquePathsInAGridII } from '/contracts/unique-paths-in-a-grid-ii.js';
 import { findAllValidMathExpressions } from '/contracts/find-valid-math-solutions.js';
 import { minimumPathSumInATriangle } from '/contracts/minimum-path-sum-in-a-triangle.js';
+import { mergeOverlappingIntervals } from '/contracts/merge-overlapping-intervals.js';
 import {
   getAllServerNames,
   getPath,
@@ -109,6 +110,9 @@ class Contract {
         break;
       case 'Minimum Path Sum in a Triangle':
         answer = minimumPathSumInATriangle(input);
+        break;
+      case 'Merge Overlapping Intervals':
+        answer = mergeOverlappingIntervals(input);
         break;
       default:
         return false;

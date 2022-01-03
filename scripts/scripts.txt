@@ -1,5 +1,5 @@
 find-backdoors.js	1641074369568.4458
-find-contracts.js	1641109162214.1646
+find-contracts.js	1641236584489.7124
 get-free-ram.js	1641091130124.6335
 get-hacking-info.js	1641091617030.8557
 get-net-worth.js	1641091762558.46
@@ -24,7 +24,7 @@ contracts/array-jumping-game.js	1640928065715.8975
 contracts/find-largest-prime-factor.js	1640928933756.835
 contracts/find-valid-math-solutions.js	1640990025882.9314
 contracts/generate-ip-addresses.js	1640932518632.1165
-contracts/merge-overlapping-intervals.js	1641103278614.4778
+contracts/merge-overlapping-intervals.js	1641236542544.1023
 contracts/minimum-path-sum-in-a-triangle.js	1641109135652.2397
 contracts/sanitize-parentheses-in-expression.js	1640971903924.313
 contracts/subarray-with-maximum-sum.js	1640966767216.6592
