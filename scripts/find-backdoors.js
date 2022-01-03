@@ -1,5 +1,7 @@
 import { getAllServerNames, getPath } from '/utils/servers.js';
 
+const DISABLE_LOGGING_FUNCTIONS = ['scan', 'sleep'];
+
 /**
  * Finds any servers that do not have backdoor installed and can have backdoor
  * installed.
@@ -9,7 +11,7 @@ import { getAllServerNames, getPath } from '/utils/servers.js';
  * @param {import('..').NS} ns
  */
 export async function main(ns) {
-  ns.disableLog('sleep');
+  DISABLE_LOGGING_FUNCTIONS.forEach(ns.disableLog);
 
   while (true) {
     const serverNames = getAllServerNames(ns).filter(serverName => {
