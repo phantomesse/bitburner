@@ -15,6 +15,7 @@ import { uniquePathsInAGridII } from '/contracts/unique-paths-in-a-grid-ii.js';
 import { findAllValidMathExpressions } from '/contracts/find-valid-math-solutions.js';
 import { minimumPathSumInATriangle } from '/contracts/minimum-path-sum-in-a-triangle.js';
 import { mergeOverlappingIntervals } from '/contracts/merge-overlapping-intervals.js';
+import { spiralizeMatrix } from '/contracts/spiralize-matrix.js';
 import {
   getAllServerNames,
   getPath,
@@ -119,6 +120,9 @@ class Contract {
         break;
       case 'Merge Overlapping Intervals':
         answer = mergeOverlappingIntervals(input);
+        break;
+      case 'Spiralize Matrix':
+        answer = spiralizeMatrix(input);
         break;
       default:
         return false;
