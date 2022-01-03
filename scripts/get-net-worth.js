@@ -25,21 +25,9 @@ export function main(ns) {
 
   const cash = ns.getServerMoneyAvailable(HOME_SERVER_NAME);
   const netWorth =
-    cash + stocks.map(stock => stock.worth).reduce((a, b) => a + b);
+    cash + stocks.map(stock => stock.worth).reduce((a, b) => a + b, 0);
 
-  printTable(
-    ns,
-    {
-      [MONEY_COLUMN_HEADER]: Alignment.RIGHT,
-      [MONEY_ABBR_COLUMN_HEADER]: Alignment.RIGHT,
-      [PERCENT_NET_WORTH_COLUMN_HEADER]: Alignment.RIGHT,
-    },
-    stocks.map(stock => ({
-      [SOURCE_COLUMN_HEADER]: stock.symbol,
-      [MONEY_COLUMN_HEADER]: formatMoney(stock.worth),
-      [MONEY_ABBR_COLUMN_HEADER]: formatMoney(stock.worth, true),
-      [PERCENT_NET_WORTH_COLUMN_HEADER]: formatPercent(stock.worth / netWorth),
-    })),
+  const sections = [
     [
       {
         [SOURCE_COLUMN_HEADER]: 'Cash',
@@ -55,9 +43,30 @@ export function main(ns) {
         [MONEY_COLUMN_HEADER]: formatMoney(netWorth),
         [MONEY_ABBR_COLUMN_HEADER]: formatMoney(netWorth, true),
         [PERCENT_NET_WORTH_COLUMN_HEADER]: '--',
-        rowColor: RowColor.ERROR,
+        rowColor: RowColor.WARN,
       },
-    ]
+    ],
+  ];
+  if (stocks.length > 0) {
+    sections.unshift(
+      stocks.map(stock => ({
+        [SOURCE_COLUMN_HEADER]: stock.symbol,
+        [MONEY_COLUMN_HEADER]: formatMoney(stock.worth),
+        [MONEY_ABBR_COLUMN_HEADER]: formatMoney(stock.worth, true),
+        [PERCENT_NET_WORTH_COLUMN_HEADER]: formatPercent(
+          stock.worth / netWorth
+        ),
+      }))
+    );
+  }
+  printTable(
+    ns,
+    {
+      [MONEY_COLUMN_HEADER]: Alignment.RIGHT,
+      [MONEY_ABBR_COLUMN_HEADER]: Alignment.RIGHT,
+      [PERCENT_NET_WORTH_COLUMN_HEADER]: Alignment.RIGHT,
+    },
+    ...sections
   );
 }
 
