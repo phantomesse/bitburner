@@ -202,6 +202,17 @@ export async function main(ns) {
         );
         weaken(ns, targetServerName, rootAccessServerNames);
       }
+
+      // Hack server that has >0% hack chance until no money.
+      const hackChance = ns.hackAnalyzeChance(targetServerName);
+      if (availableMoney > 0 && hackChance > 0) {
+        ns.print(
+          `\nattempting to hack ${targetServerName} with ${formatMoney(
+            availableMoney
+          )} and ${formatPercent(hackChance)} hack chance`
+        );
+        hack(ns, targetServerName, rootAccessServerNames);
+      }
     }
 
     await ns.sleep(3000); // Wait for 3 seconds.
@@ -392,7 +403,7 @@ function weaken(ns, targetServerName, rootAccessServerNames) {
   );
   if (estimatedThreadCount === 0) return;
   ns.print(
-    `\nestimated ${estimatedThreadCount} threads to weaken ` +
+    `estimated ${estimatedThreadCount} threads to weaken ` +
       `${targetServerName} from ${currentSecurityLevel} to ${minSecurityLevel}`
   );
 
@@ -422,7 +433,7 @@ function hack(ns, targetServerName, rootAccessServerNames) {
     )
   );
   ns.print(
-    `\nestimated ${estimatedThreadCount} threads to hack ${targetServerName}`
+    `estimated ${estimatedThreadCount} threads to hack ${targetServerName}`
   );
 
   // Use only the estimated thread count to hack the target srver.
