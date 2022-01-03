@@ -3,7 +3,6 @@
 export const algorithmicStockTraderI = input => _getMaxProfit(1, input);
 export const algorithmicStockTraderII = input =>
   _getMaxProfit(input.length, input);
-export const algorithmicStockTraderIII = input => _getMaxProfit(2, input);
 export const algorithmicStockTraderIV = input =>
   _getMaxProfit(input[0], input[1]);
 

@@ -11,9 +11,9 @@ import { totalWaysToSum } from '/contracts/total-ways-to-sum.js';
 import {
   algorithmicStockTraderI,
   algorithmicStockTraderII,
-  algorithmicStockTraderIII,
   algorithmicStockTraderIV,
 } from '/contracts/algorithmic-stock-trader.js';
+import { algorithmicStockTraderIII } from '/contracts/algorithmic-stock-trader-iii.js';
 import {
   uniquePathsInAGridI,
   uniquePathsInAGridII,
@@ -104,7 +104,7 @@ class Contract {
       this.serverName,
       { returnReward: true }
     );
-    if (response === false) {
+    if (response === false || response === '') {
       ns.tprint(`could not solve ${this.fileName} (${contractType})`);
       return false;
     }
