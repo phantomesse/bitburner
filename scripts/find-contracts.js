@@ -10,8 +10,10 @@ import {
 } from '/contracts/algorithmic-stock-trader.js';
 import { subarrayWithMaximumSum } from '/contracts/subarray-with-maximum-sum.js';
 import { sanitizeParenthesesInExpression } from '/contracts/sanitize-parentheses-in-expression.js';
-import { uniquePathsInAGridI } from '/contracts/unique-paths-in-a-grid-i.js';
-import { uniquePathsInAGridII } from '/contracts/unique-paths-in-a-grid-ii.js';
+import {
+  uniquePathsInAGridI,
+  uniquePathsInAGridII,
+} from '/contracts/unique-paths-in-a-grid.js';
 import { findAllValidMathExpressions } from '/contracts/find-valid-math-solutions.js';
 import { minimumPathSumInATriangle } from '/contracts/minimum-path-sum-in-a-triangle.js';
 import { mergeOverlappingIntervals } from '/contracts/merge-overlapping-intervals.js';
