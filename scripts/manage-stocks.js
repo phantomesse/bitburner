@@ -9,7 +9,6 @@ const DISABLE_LOGGING_FUNCTIONS = [
   'sleep',
   'stock.buy',
   'stock.sell',
-  'stock.purchase4SMarketDataTixApi',
   'getServerMoneyAvailable',
 ];
 
@@ -21,7 +20,13 @@ const DISABLE_LOGGING_FUNCTIONS = [
 export async function main(ns) {
   DISABLE_LOGGING_FUNCTIONS.forEach(ns.disableLog);
 
-  const symbols = ns.stock.getSymbols();
+  let symbols;
+  try {
+    symbols = ns.stock.getSymbols();
+  } catch (_) {
+    // No stock exchange API.
+    return;
+  }
 
   while (true) {
     const cash = ns.getServerMoneyAvailable(HOME_SERVER_NAME);
@@ -72,10 +77,12 @@ function buyStock(ns, symbol, moneyToSpend) {
   );
   if (sharesToBuy <= 0) return 0;
 
-  if (ns.stock.purchase4SMarketDataTixApi()) {
+  try {
     const forecast = ns.stock.getForecast(symbol);
     if (forecast < 0.5) return 0;
     sharesToBuy = Math.ceil(forecast * sharesToBuy);
+  } catch (_) {
+    // No stock market data API.
   }
 
   const sharePrice = ns.stock.buy(symbol, sharesToBuy);
@@ -92,13 +99,14 @@ function buyStock(ns, symbol, moneyToSpend) {
  */
 function sellStock(ns, symbol) {
   // Panic sell.
-  if (
-    ns.stock.purchase4SMarketDataTixApi() &&
-    ns.stock.getForecast(symbol) < 0.15
-  ) {
-    const sharesToSell = ns.stock.getPosition(symbol)[0];
-    ns.stock.sell(symbol, sharesToSell);
-    ns.print(`panic sold ${sharesToSell} shares of ${symbol}`);
+  try {
+    if (ns.stock.getForecast(symbol) < 0.15) {
+      const sharesToSell = ns.stock.getPosition(symbol)[0];
+      ns.stock.sell(symbol, sharesToSell);
+      ns.print(`panic sold ${sharesToSell} shares of ${symbol}`);
+    }
+  } catch (_) {
+    // No stock market data API.
   }
 
   const position = ns.stock.getPosition(symbol);
@@ -111,10 +119,12 @@ function sellStock(ns, symbol) {
 
   // Determine how much to sell.
   let sharesToSell = ownedShareCount;
-  if (ns.stock.purchase4SMarketDataTixApi()) {
+  try {
     const forecast = ns.stock.getForecast(symbol);
     if (forecast > 0.5) return; // Stock will go up.
     sharesToSell = Math.ceil((forecast / 0.5) * sharesToSell);
+  } catch (_) {
+    // No stock market data API.
   }
   if (sharesToSell === 0) return; // Nothing to sell.
   const gain = ns.stock.getSaleGain(symbol, sharesToSell, 'Long');
