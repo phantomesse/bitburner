@@ -29,7 +29,6 @@ export async function main(ns) {
     for (const serverName of serverNames) {
       _connectTo(ns, serverName, ns.getCurrentServer());
       await ns.installBackdoor();
-      lastServerName = serverName;
     }
     _connectTo(ns, HOME_SERVER_NAME, ns.getCurrentServer());
   } catch (_) {
