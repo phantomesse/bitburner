@@ -308,7 +308,7 @@ function getFreeRam(ns, serverNames) {
         .filter(fileName => !ns.scriptRunning(fileName, HOME_SERVER_NAME))
         .map(script => ns.getScriptRam(script))
         .reduce((a, b) => a + b) + oneTimeUseRam;
-    return freeRam - reservedRam;
+    return Math.max(freeRam - reservedRam, 0);
   }
   return serverNames
     .map(serverName => getFreeRam(ns, serverName))
