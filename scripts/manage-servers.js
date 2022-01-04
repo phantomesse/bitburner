@@ -23,6 +23,7 @@ export async function main(ns) {
   let lowestRamAcceptable = Math.pow(2, MIN_POWER);
 
   while (true) {
+    // Buy / upgrade servers.
     for (let power = MAX_POWER; power >= MIN_POWER; power--) {
       const ram = Math.pow(2, power);
       if (ram < lowestRamAcceptable) continue;
