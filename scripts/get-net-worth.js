@@ -16,12 +16,15 @@ const PERCENT_NET_WORTH_COLUMN_HEADER = '% net worth';
  * @param {import('..').NS} ns
  */
 export function main(ns) {
-  const stocks = ns.stock
-    .getSymbols()
-    .map(symbol => new Stock(ns, symbol))
-    .filter(stock => stock.worth > 0);
-  sort(stocks, stock => stock.symbol);
-  sort(stocks, stock => stock.worth);
+  let stocks = [];
+  try {
+    const stocks = ns.stock
+      .getSymbols()
+      .map(symbol => new Stock(ns, symbol))
+      .filter(stock => stock.worth > 0);
+    sort(stocks, stock => stock.symbol);
+    sort(stocks, stock => stock.worth);
+  } catch (_) {}
 
   const cash = ns.getServerMoneyAvailable(HOME_SERVER_NAME);
   const netWorth =
