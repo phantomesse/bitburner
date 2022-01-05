@@ -47,10 +47,3 @@ function _getTrades(stockPrices, startingBuyDay) {
   }
   return trades;
 }
-
-const input = [
-  16, 171, 74, 18, 34, 182, 173, 19, 128, 36, 43, 124, 27, 163, 69, 154, 34, 92,
-  72, 152, 142, 90, 200,
-];
-
-console.log(algorithmicStockTraderIII(input));
