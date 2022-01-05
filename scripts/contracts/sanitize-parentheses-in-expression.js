@@ -12,9 +12,11 @@
  * array with only an empty string.
  *
  * IMPORTANT: The string may contain letters, not just parentheses. Examples:
- * "()())()" -> [()()(), (())()]
- * "(a)())()" -> [(a)()(), (a())()]
- * ")( -> [""]
+ * ()())() -> [()()(), (())()]
+ * (a)())() -> [(a)()(), (a())()]
+ * )( -> [""]
+ * ()(a))( -> [ '((a))', '()(a)' ]
+ * )a)(()aa())(((a(a)(
  *
  * @param {string} input
  */
@@ -47,7 +49,11 @@ function _getVariants(str, parenthesesToRemove) {
     if (parenthesesToRemove === 1) {
       variants.push(variant);
     } else {
-      variants.push(..._getVariants(variant, parenthesesToRemove - 1));
+      const furtherVariants = _getVariants(variant, parenthesesToRemove - 1);
+      for (const furtherVariant of furtherVariants) {
+        if (variants.includes(furtherVariant)) continue;
+        variants.push(furtherVariant);
+      }
     }
   }
   return variants;
