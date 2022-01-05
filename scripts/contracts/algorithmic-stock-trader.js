@@ -7,8 +7,7 @@
 // 16,171,74,18,34,182,173,19,128,36,43,124,27,163,69,154,34,92,72,152,142,90,200 -> 347
 
 // IV
-// [6, [101,22,191,49,3,21,93,155,120,49,48,34,193,52,179,89,77,98,34,189,195,71,175,90,40,134,98,46,91,152,2,103,174,126,82,179,172,56,145,113,165,101,162,55,16,164,111]]
-// home; connect iron-gym; connect zer0; connect omega-net; connect crush-fitness; run contract-429500-AlphaEnterprises.cct
+// [6, [101,22,191,49,3,21,93,155,120,49,48,34,193,52,179,89,77,98,34,189,195,71,175,90,40,134,98,46,91,152,2,103,174,126,82,179,172,56,145,113,165,101,162,55,16,164,111]] -> 972
 
 export const algorithmicStockTraderI = input => _getMaxProfit(1, input);
 export const algorithmicStockTraderII = input =>
@@ -31,19 +30,69 @@ function _getMaxProfit(maxTradeCount, stockPrices) {
     );
   }
 
-  let maxProfit = 0;
-  for (let buyDay = 0; buyDay < stockPrices.length; buyDay++) {
-    const profit = _getTradesPermutations(
-      tradesWithPositiveProfits,
-      maxTradeCount,
-      buyDay,
-      0,
-      0
-    );
-    maxProfit = Math.max(profit, maxProfit);
+  const tradePermutations = Array(stockPrices.length); // Index is buy day.
+  for (let buyDay = stockPrices.length - 1; buyDay >= 0; buyDay--) {
+    const availableTrades = tradesWithPositiveProfits[buyDay];
+    tradePermutations[buyDay] = availableTrades.map(trade => [trade]);
+
+    if (buyDay === stockPrices.length - 1) continue;
+
+    const futureTradePermutations = tradePermutations[buyDay + 1];
+    for (const futureTradePermutation of futureTradePermutations) {
+      tradePermutations[buyDay].push(futureTradePermutation);
+      if (futureTradePermutation.length === maxTradeCount) continue;
+
+      for (const availableTrade of availableTrades) {
+        if (availableTrade.sellDay <= futureTradePermutation[0].buyDay) {
+          tradePermutations[buyDay].push([
+            availableTrade,
+            ...futureTradePermutation,
+          ]);
+        }
+      }
+    }
+
+    // Trim permutations so that only one permutation of each length and
+    // buy day (where the chosen permutation is the one with the max profit)
+    /** @type {Object.<int, Permutation[]>} */
+    const buyDayToPermutationsMap = {};
+    for (const permutation of tradePermutations[buyDay]) {
+      const key = permutation[0].buyDay;
+      if (!(key in buyDayToPermutationsMap)) buyDayToPermutationsMap[key] = [];
+      buyDayToPermutationsMap[key].push(permutation);
+    }
+    const permutationsToKeep = [];
+    for (const permutations of Object.values(buyDayToPermutationsMap)) {
+      const lengthToBestPermutationMap = {};
+      const lengthToMaxProfitMap = {};
+      for (const permutation of permutations) {
+        const length = permutation.length;
+        const profit = permutation
+          .map(trade => trade.profit)
+          .reduce((a, b) => a + b, 0);
+        if (
+          !(length in lengthToMaxProfitMap) ||
+          profit > lengthToMaxProfitMap[length]
+        ) {
+          lengthToMaxProfitMap[length] = profit;
+          lengthToBestPermutationMap[length] = permutation;
+        }
+      }
+      permutationsToKeep.push(...Object.values(lengthToBestPermutationMap));
+    }
+    tradePermutations[buyDay] = permutationsToKeep;
   }
-  return maxProfit;
+
+  return Math.max(
+    ...tradePermutations[0].map(trades =>
+      trades.map(trade => trade.profit).reduce((a, b) => a + b, 0)
+    )
+  );
 }
+
+/**
+ * @typedef {Trade[]} Permutation
+ */
 
 /**
  * @typedef {Object} Trade
@@ -68,47 +117,6 @@ function _getTradesWithPositiveProfit(stockPrices, buyDay) {
     }
   }
   return trades;
-}
-
-/**
- * @param {Trade[]} tradesWithPositiveProfits where index is buy day
- * @param {int} buyDay
- * @param {int} maxTradeCount
- * @param {int} tradeCountThusFar
- * @param {int} profitThusFar
- * @return {int} maxProfit
- */
-function _getTradesPermutations(
-  tradesWithPositiveProfits,
-  maxTradeCount,
-  buyDay,
-  tradeCountThusFar,
-  profitThusFar
-) {
-  if (tradeCountThusFar >= maxTradeCount) return [];
-  const availableTrades = tradesWithPositiveProfits[buyDay];
-  if (availableTrades.length === 0) return profitThusFar;
-
-  let maxProfit = 0;
-  for (const trade of availableTrades) {
-    const newProfitThusFar = profitThusFar + trade.profit;
-    maxProfit = Math.max(newProfitThusFar, maxProfit);
-    for (
-      let newBuyDay = trade.sellDay + 1;
-      newBuyDay < tradesWithPositiveProfits.length;
-      newBuyDay++
-    ) {
-      const profit = _getTradesPermutations(
-        tradesWithPositiveProfits,
-        maxTradeCount,
-        newBuyDay,
-        tradeCountThusFar + 1,
-        newProfitThusFar
-      );
-      maxProfit = Math.max(profit, maxProfit);
-    }
-  }
-  return maxProfit;
 }
 
 let input = [
