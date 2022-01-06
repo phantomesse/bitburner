@@ -9,5 +9,6 @@ const testCases = [
     ],
     output: 85,
   },
+  { input: [5, 10, 2, -6, 8, 6, 4, -8, -7, -3, 6, 7, -9, -1], output: 29 },
 ];
 runTests(testCases, subarrayWithMaximumSum);
