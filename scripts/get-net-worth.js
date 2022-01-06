@@ -13,7 +13,7 @@ const PERCENT_NET_WORTH_COLUMN_HEADER = '% net worth';
  * Prints out net worth along with breakdown on how much of net worth is in each
  * stock and in cash.
  *
- * @param {import('..').NS} ns
+ * @param {import('index').NS} ns
  */
 export function main(ns) {
   let stocks = [];
@@ -75,7 +75,7 @@ export function main(ns) {
 
 class Stock {
   /**
-   * @param {import('..').NS} ns
+   * @param {import('index').NS} ns
    * @param {string} symbol
    */
   constructor(ns, symbol) {

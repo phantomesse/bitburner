@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "es6",
-    "paths": {
-      "/*": ["./*"]
-    }
+    "lib": ["ES2021"],
+    "module": "esnext",
+    "target": "es2021",
+    "types": ["jest"],
+    "checkJs": true
   },
+  "exclude": ["node_modules", "scripts"]
 }

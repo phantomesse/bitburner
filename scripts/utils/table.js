@@ -34,7 +34,7 @@ const JOIN = '+';
 /**
  * Utils for printing a table in the terminal.
  *
- * @param {import('..').NS} ns
+ * @param {import('../index').NS} ns
  * @param {Object.<string, Alignment>} columnHeaderToAlignmentMap
  *        if a column header is not specified in this map, then it is assumed
  *        that it will be left-aligned
@@ -105,11 +105,11 @@ export function printTable(ns, columnHeaderToAlignmentMap, ...sections) {
 }
 
 /**
- * @param {import('..').NS} ns
+ * @param {import('../index').NS} ns
  * @param {Object.<string, any>} row
  * @param {string[]} columnHeaders
  * @param {Object.<string, Alignment>} columnHeaderToAlignmentMap
- * @param {Object.<string, int>} columnHeaderToWidthMap
+ * @param {Object.<string, number>} columnHeaderToWidthMap
  * @param {boolean} shouldAddDivider
  */
 function _printRow(
@@ -154,10 +154,10 @@ function _printRow(
 }
 
 /**
- * @param {import('..').NS} ns
+ * @param {import('../index').NS} ns
  * @param {string[]} columnHeaders
  * @param {Object.<string, Alignment>} columnHeaderToAlignmentMap
- * @param {Object.<string, int>} columnHeaderToWidthMap
+ * @param {Object.<string, number>} columnHeaderToWidthMap
  */
 function _printColumnHeaders(
   ns,
@@ -188,7 +188,7 @@ function _printColumnHeaders(
 /**
  * @param {import('..').NS} ns
  * @param {string[]} columnHeaders
- * @param {Object.<string, int>} columnHeaderToWidthMap
+ * @param {Object.<string, number>} columnHeaderToWidthMap
  */
 function _printDivider(ns, columnHeaders, columnHeaderToWidthMap) {
   ns.tprintf(
@@ -204,7 +204,7 @@ function _printDivider(ns, columnHeaders, columnHeaderToWidthMap) {
  * This function does not print anything.
  *
  * @param {string[]} columnHeaders
- * @param {Object.<string, int>} columnHeaderToWidthMap
+ * @param {Object.<string, number>} columnHeaderToWidthMap
  * @returns {string}
  */
 function _getDivider(columnHeaders, columnHeaderToWidthMap) {

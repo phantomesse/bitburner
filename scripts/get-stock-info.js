@@ -16,7 +16,7 @@ const FORECAST_COLUMN_HEADER = 'Forecast';
 /**
  * Prints out stock info.
  *
- * @param {import('..').NS} ns
+ * @param {import('index').NS} ns
  */
 export function main(ns) {
   const stocks = ns.stock.getSymbols().map(symbol => new Stock(ns, symbol));
@@ -42,7 +42,7 @@ export function main(ns) {
 
 class Stock {
   /**
-   * @param {import('..').NS} ns
+   * @param {import('index').NS} ns
    * @param {string} symbol
    */
   constructor(ns, symbol) {

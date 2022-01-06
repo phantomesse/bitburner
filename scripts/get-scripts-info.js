@@ -9,7 +9,7 @@ const IS_RUNNING_COLUMN_HEADER = 'Is running';
 /**
  * Prints out how much RAM each script takes up.
  *
- * @param {import('..').NS} ns
+ * @param {import('index').NS} ns
  */
 export function main(ns) {
   const scriptNames = ns

@@ -1,5 +1,5 @@
-import { algorithmicStockTraderI } from '../scripts/contracts/algorithmic-stock-trader.js';
-import { runTests } from './utils.js';
+import { algorithmicStockTraderI } from '../scripts/contracts/algorithmic-stock-trader';
+import { runTests } from './utils';
 
 const testCases = [
   {

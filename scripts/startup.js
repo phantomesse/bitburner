@@ -9,6 +9,6 @@ const SCRIPTS_TO_RUN = [
 /**
  * Script that starts up all managing scripts.
  *
- * @param {import('..').NS} ns
+ * @param {import('index').NS} ns
  */
 export const main = ns => SCRIPTS_TO_RUN.forEach(script => ns.run(script, 1));

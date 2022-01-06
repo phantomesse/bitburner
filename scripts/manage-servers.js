@@ -15,7 +15,7 @@ const MAX_POWER = 20; // Max RAM is 2^20
  * Continuously try to buy more servers and sells any old servers with less RAM
  * than we could get with a new server.
  *
- * @param {import('..').NS } ns
+ * @param {import('index').NS} ns
  */
 export async function main(ns) {
   DISABLE_LOGGING_FUNCTIONS.forEach(ns.disableLog);
@@ -79,7 +79,7 @@ function getPurchasedServerNames(ns) {
     .filter(serverName => serverName.startsWith(PURCHASED_SERVER_PREFIX));
 }
 
-/** @param {import('..').NS } ns */
+/** @param {import('index').NS} ns */
 function getLowestRamPurchasedServer(ns) {
   const purchasedServerNames = getPurchasedServerNames(ns);
   sort(purchasedServerNames, ns.getServerMaxRam);

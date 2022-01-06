@@ -12,7 +12,7 @@ export const HACK_SCRIPT = 'hack.js';
  * purchased servers list here in order to save on 2.25GB of RAM. This requires
  * that all purchased servers have the same prefix.
  *
- * @param {import('../..').NS } ns
+ * @param {import('../index').NS } ns
  * @param {string} serverName
  * @returns {boolean} true if the server is hackable, false if otherwise
  */
@@ -29,7 +29,7 @@ export function isHackable(ns, serverName) {
 /**
  * A heuristic that determines how hackable a server is.
  *
- * @param {import('../..').NS } ns
+ * @param {import('../index').NS } ns
  * @param {string} serverName
  * @returns {number} higher number means better to hack
  */

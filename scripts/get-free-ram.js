@@ -14,7 +14,7 @@ const MAX_RAM_COLUMN_HEADER = 'Max RAM';
 /**
  * Prints out free RAM from all servers that have any RAM.
  *
- * @param {import('..').NS} ns
+ * @param {import('index').NS} ns
  */
 export function main(ns) {
   const servers = getAllServerNames(ns)
@@ -55,7 +55,7 @@ export function main(ns) {
 
 class Server {
   /**
-   * @param {import('..').NS} ns
+   * @param {import('index').NS} ns
    * @param {string} serverName
    */
   constructor(ns, serverName) {

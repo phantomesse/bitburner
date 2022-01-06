@@ -1,8 +1,8 @@
 /** Utils for formatting numbers. */
 
 /**
- * @param {float} money
- * @param {boolean} isCompact
+ * @param {number} money
+ * @param {boolean} [isCompact]
  * @returns {string}
  */
 export function formatMoney(money, isCompact) {
@@ -15,7 +15,7 @@ export function formatMoney(money, isCompact) {
 
 /**
  * @param {number} number
- * @param {boolean} isCompact
+ * @param {boolean} [isCompact]
  * @returns {string}
  */
 export function formatNumber(number, isCompact) {
@@ -27,7 +27,7 @@ export function formatNumber(number, isCompact) {
 /**
  * Formats a percentage within two decimals.
  *
- * @param {float} percent
+ * @param {number} percent
  * @returns {string}
  */
 export function formatPercent(percent) {
@@ -41,7 +41,7 @@ export function formatPercent(percent) {
  * @returns {string} e.g. "43s", "4m 0s", "3m 32s"
  */
 export function formatTime(timeMs) {
-  const minutes = parseInt(timeMs / 1000 / 60);
-  const seconds = parseInt((timeMs - minutes * 1000 * 60) / 1000);
+  const minutes = Math.floor(timeMs / 1000 / 60);
+  const seconds = Math.floor((timeMs - minutes * 1000 * 60) / 1000);
   return (minutes > 0 ? `${minutes}m ` : '') + `${seconds}s`;
 }

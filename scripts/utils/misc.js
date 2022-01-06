@@ -26,7 +26,7 @@ export function sort(array, fn, reverse) {
  * This function allows us to reserve a certain amount of money so we don't end
  * up spending all our money buying things.
  *
- * @param {import('../..').NS} ns
+ * @param {import('../index').NS} ns
  * @returns {number} money that we want to spend purchasing things
  */
 export function getMoneyToSpend(ns) {
@@ -34,7 +34,7 @@ export function getMoneyToSpend(ns) {
 }
 
 /**
- * @param {import ('../..').NS} ns
+ * @param {import ('../index').NS} ns
  * @returns {number} net worth including cash on hand and stocks
  */
 export function getNetWorth(ns) {

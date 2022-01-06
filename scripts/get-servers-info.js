@@ -21,7 +21,7 @@ const FREE_RAM_COLUMN_HEADER = 'Free ram';
  * Prints out information about all servers that we have root access to and
  * which scripts they're running.
  *
- * @param {import('..').NS} ns
+ * @param {import('index').NS} ns
  */
 export function main(ns) {
   let servers = getAllServerNames(ns)
@@ -95,7 +95,7 @@ export function main(ns) {
 
 class Server {
   /**
-   * @param {import('..').NS} ns
+   * @param {import('index').NS} ns
    * @param {string} serverName
    */
   constructor(ns, serverName) {

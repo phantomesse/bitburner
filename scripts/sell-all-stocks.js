@@ -1,7 +1,7 @@
 /**
  * Sell all stocks.
  *
- * @param {import('..').NS } ns
+ * @param {import('index').NS} ns
  */
 export async function main(ns) {
   const symbols = ns.stock.getSymbols();

@@ -8,10 +8,14 @@ const SCRIPTS_TXT = 'scripts.txt';
  * Copy this file to the bitburner game to sync the rest of the scripts.
  *
  * @example run sync.js <port>
- * @param {import('..').NS } ns
+ * @param {import('index').NS } ns
  */
 export async function main(ns) {
-  let port = parseInt(ns.args[0]);
+  if (typeof ns.args[0] !== 'number') {
+    ns.tprint(`usage: run sync.js <port>`);
+    return;
+  }
+  let port = ns.args[0];
   port = isNaN(port) ? DEFAULT_PORT : port;
 
   // Check if local server is running and set scripts prefix accordingly.
@@ -67,7 +71,7 @@ export async function main(ns) {
 class Script {
   /**
    * @param {string} fileName,
-   * @param {float} lastModifiedTime
+   * @param {number} lastModifiedTime
    */
   constructor(fileName, lastModifiedTime) {
     this.fileName = fileName;
@@ -75,7 +79,7 @@ class Script {
   }
 
   /**
-   * @param {import('..').NS } ns
+   * @param {import('index').NS } ns
    * @param {string} scriptsPrefix
    */
   async download(ns, scriptsPrefix) {

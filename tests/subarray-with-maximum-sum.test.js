@@ -1,5 +1,5 @@
-import { subarrayWithMaximumSum } from '../scripts/contracts/subarray-with-maximum-sum.js';
-import { runTests } from './utils.js';
+import { subarrayWithMaximumSum } from '../scripts/contracts/subarray-with-maximum-sum';
+import { runTests } from './utils';
 
 const testCases = [
   {

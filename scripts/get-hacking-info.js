@@ -26,7 +26,7 @@ const BEING_HACKED_COLUMN_HEADER = 'Hacked by';
 /**
  * Prints out information about all hackable servers.
  *
- * @param {import('..').NS} ns
+ * @param {import('index').NS} ns
  */
 export function main(ns) {
   const allServerNames = getAllServerNames(ns);
@@ -98,7 +98,7 @@ export function main(ns) {
 
 class Server {
   /**
-   * @param {import('..').NS} ns
+   * @param {import('index').NS} ns
    * @param {string} serverName
    */
   constructor(ns, serverName) {

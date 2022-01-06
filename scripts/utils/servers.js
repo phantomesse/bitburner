@@ -7,7 +7,7 @@ export const PURCHASED_SERVER_PREFIX = 'lauren';
  * Retrieves all servers including personal servers and {@link HOME_SERVER_NAME}.
  *
  * @example getAllServers(ns)
- * @param {import('../..').NS } ns
+ * @param {import('../index').NS } ns
  * @param {string} [root] name of server to start getting server names from
  * @param {string} [parent] name of parent of the root server (where we came
  *                          from)
@@ -26,7 +26,7 @@ export function getAllServerNames(ns, root, parent) {
  * Gets the connection path to a server.
  *
  * @example getPath(ns, 'silver-helix')
- * @param {import('../..').NS} ns
+ * @param {import('../index').NS} ns
  * @param {string} server server to get path to
  * @param {string} [root] name of server to start getting server names from
  * @param {string} [parent] name of parent of the root server (where we came
@@ -52,7 +52,7 @@ export async function main(ns) {
 }
 
 /**
- * @param {import('../..').NS} ns
+ * @param {import('../index').NS} ns
  * @param {string} serverName
  * @returns {number} GB of free RAM
  */

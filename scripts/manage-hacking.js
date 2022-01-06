@@ -36,7 +36,7 @@ const DISABLE_LOGGING_FUNCTIONS = [
 /**
  * Manages hacking servers.
  *
- * @param {import('..').NS } ns
+ * @param {import('index').NS } ns
  */
 export async function main(ns) {
   DISABLE_LOGGING_FUNCTIONS.forEach(ns.disableLog);
@@ -223,7 +223,7 @@ export async function main(ns) {
  * Open all the ports that we can open and attempt to gain root access to a
  * given server.
  *
- * @param {import('..').NS } ns
+ * @param {import('index').NS } ns
  * @param {string} serverName
  * @returns {boolean} true if we now have root access and false if otherwise
  */
@@ -259,12 +259,12 @@ function gainRootAccess(ns, serverName) {
  * Copies grow, hack, and weaken scripts to a given server and deletes any other
  * js scripts from that server.
  *
- * @param {import('..').NS} ns
+ * @param {import('index').NS} ns
  * @param {string} serverName
  */
 async function copyScriptsToServer(ns, serverName) {
   // Copy scripts over.
-  await ns.scp(HACKING_SCRIPTS, serverName);
+  await ns.scp(HACKING_SCRIPTS, HOME_SERVER_NAME, serverName);
 
   // Delete any other scripts on the server.
   const otherScripts = ns
@@ -278,7 +278,7 @@ async function copyScriptsToServer(ns, serverName) {
 /**
  * Get amount of free RAM from list of servers or a single server.
  *
- * @param {import('..').NS} ns
+ * @param {import('index').NS} ns
  * @param {(string[]|string)} serverNames
  * @returns {number} GB of free RAM
  */
@@ -318,7 +318,7 @@ function getFreeRam(ns, serverNames) {
 /**
  * Get minimum amount of RAM to execute one of grow, weaken, or hack scripts.
  *
- * @param {import('..').NS} ns
+ * @param {import('index').NS} ns
  * @returns {number} GB of RAM
  */
 function getMinRam(ns) {
@@ -330,7 +330,7 @@ function getMinRam(ns) {
 /**
  * Checks if we have any free RAM to do anything.
  *
- * @param {import('..').NS} ns
+ * @param {import('index').NS} ns
  * @param {string[]} rootAccessServerNames
  * @returns {boolean} true if we have free RAM
  */
@@ -348,7 +348,7 @@ function hasFreeRam(ns, rootAccessServerNames) {
 /**
  * Grow until min money.
  *
- * @param {import('..').NS} ns
+ * @param {import('index').NS} ns
  * @param {number} [minMoneyAvailable] if not set, then will grow until max
  * 																		 money
  */
@@ -386,7 +386,7 @@ function grow(ns, targetServerName, rootAccessServerNames, minMoneyAvailable) {
 /**
  * Weaken until min security level.
  *
- * @param {import('..').NS} ns
+ * @param {import('index').NS} ns
  */
 function weaken(ns, targetServerName, rootAccessServerNames) {
   const currentSecurityLevel = ns.getServerSecurityLevel(targetServerName);
@@ -422,7 +422,7 @@ function weaken(ns, targetServerName, rootAccessServerNames) {
 }
 
 /**
- * @param {import('..').NS} ns
+ * @param {import('index').NS} ns
  */
 function hack(ns, targetServerName, rootAccessServerNames) {
   // Get number of threads needed to hack all the money from the server.
@@ -451,7 +451,7 @@ function hack(ns, targetServerName, rootAccessServerNames) {
 }
 
 /**
- * @param {import('..').NS} ns
+ * @param {import('index').NS} ns
  * @param {string} serverName
  * @param {string} scriptName
  * @param {number} threadCount
@@ -489,7 +489,7 @@ function getAvailableThreadCount(ns, serverName, scriptName) {
 }
 
 /**
- * @param {import('..').NS} ns
+ * @param {import('index').NS} ns
  * @param {string[]} serverNames
  * @param {string} scriptName
  * @param  {...any} args

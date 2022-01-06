@@ -15,7 +15,7 @@ const DISABLE_LOGGING_FUNCTIONS = [
 /**
  * Manages buying and selling stocks.
  *
- * @param {import('..').NS } ns
+ * @param {import('index').NS} ns
  */
 export async function main(ns) {
   DISABLE_LOGGING_FUNCTIONS.forEach(ns.disableLog);
@@ -64,7 +64,7 @@ export async function main(ns) {
 }
 
 /**
- * @param {import('..').NS} ns
+ * @param {import('index').NS} ns
  * @param {string} symbol
  * @param {number} moneyToSpend
  * @returns {number} how much we spent
@@ -94,7 +94,7 @@ function buyStock(ns, symbol, moneyToSpend) {
 }
 
 /**
- * @param {import('..').NS } ns
+ * @param {import('index').NS} ns
  * @param {string} symbol
  */
 function sellStock(ns, symbol) {

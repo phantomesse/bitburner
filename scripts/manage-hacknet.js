@@ -5,7 +5,7 @@ const DISABLE_LOGGING_FUNCTIONS = ['sleep', 'getServerMoneyAvailable'];
 /**
  * Manages buying and upgrading hacknet nodes.
  *
- * @param {import('..').NS} ns
+ * @param {import('index').NS} ns
  */
 export async function main(ns) {
   DISABLE_LOGGING_FUNCTIONS.forEach(ns.disableLog);
@@ -81,11 +81,10 @@ export async function main(ns) {
  */
 
 /**
- * @param {import('..').NS} ns
- * @param {int} nodeIndex
+ * @param {import('index').NS} ns
+ * @param {number} nodeIndex
  * @param {UpgradeCostFn} getUpgradeCostFn
  * @param {UpgradeFn} upgradeFn
- * @param {number} moneyToSpend
  * @returns {number} number of upgrades successful
  */
 function upgrade(ns, nodeIndex, getUpgradeCostFn, upgradeFn) {

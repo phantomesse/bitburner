@@ -1,9 +1,5 @@
 {
-  "compilerOptions": {
-    "module": "commonjs",
-    "target": "es6",
-    "paths": {
-      "/*": ["./*"]
-    }
-  },
+  "extends": "../jsconfig.json",
+  "compilerOptions": { "paths": { "/*": ["./*"] } },
+  "exclude": []
 }

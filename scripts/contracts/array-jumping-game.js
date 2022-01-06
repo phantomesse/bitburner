@@ -11,16 +11,16 @@
  * Your answer should be submitted as 1 or 0, representing true and false
  * respectively
  *
- * @param {int[]} input
- * @returns {int} 1 if can reach the end, 0 if not
+ * @param {number[]} input
+ * @returns {number} 1 if can reach the end, 0 if not
  */
 export function arrayJumpingGame(input) {
   return _getPathToLastIndex(input).length === 0 ? 0 : 1;
 }
 
 /**
- * @param {int[]} maxJumps List of numbers where each number represents max jump.
- * @param {int} [currentIndex=0]
+ * @param {number[]} maxJumps List of numbers where each number represents max jump.
+ * @param {number} [currentIndex=0]
  * @returns {string[]} The path to the last index where each member of the array is
  * 									the jump. Empty if no path.
  */

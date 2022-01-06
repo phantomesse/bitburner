@@ -13,7 +13,7 @@ const DISABLE_LOGGING_FUNCTIONS = ['scan', 'sleep', 'getHackingLevel'];
  *
  * Run this script with `--tail`.
  *
- * @param {import('..').NS} ns
+ * @param {import('index').NS} ns
  */
 export async function main(ns) {
   DISABLE_LOGGING_FUNCTIONS.forEach(ns.disableLog);
@@ -63,7 +63,7 @@ export async function main(ns) {
   }
 }
 
-/** @param {import('..').NS} ns */
+/** @param {import('index').NS} ns */
 function _getBackdoorableServerNames(ns, hackableServerNames) {
   return hackableServerNames.filter(serverName => {
     const server = ns.getServer(serverName);
@@ -75,7 +75,7 @@ function _getBackdoorableServerNames(ns, hackableServerNames) {
   });
 }
 
-/** @param {import('..').NS} ns */
+/** @param {import('index').NS} ns */
 function _connectTo(ns, serverName, lastServerName) {
   const path = getPath(ns, serverName, lastServerName, '');
   for (const server of path) ns.connect(server);

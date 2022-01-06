@@ -7,9 +7,9 @@ export const algorithmicStockTraderIV = input =>
   _getMaxProfit(input[0], input[1]);
 
 /**
- * @param {int} maxTradeCount
- * @param {int[]} stockPrices
- * @returns {int} max profit
+ * @param {number} maxTradeCount
+ * @param {number[]} stockPrices
+ * @returns {number} max profit
  */
 function _getMaxProfit(maxTradeCount, stockPrices) {
   const tradesWithPositiveProfits = Array(stockPrices.length); // Index is buy day
@@ -86,14 +86,14 @@ function _getMaxProfit(maxTradeCount, stockPrices) {
 
 /**
  * @typedef {Object} Trade
- * @property {int} buyDay
- * @property {int} sellDay
- * @property {int} profit
+ * @property {number} buyDay
+ * @property {number} sellDay
+ * @property {number} profit
  */
 
 /**
- * @param {int[]} stockPrices
- * @param {int} buyDay
+ * @param {number[]} stockPrices
+ * @param {number} buyDay
  * @returns {Trade[]} trades with positive profit
  */
 function _getTradesWithPositiveProfit(stockPrices, buyDay) {

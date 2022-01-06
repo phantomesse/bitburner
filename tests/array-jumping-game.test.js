@@ -1,4 +1,4 @@
-import { arrayJumpingGame } from '../scripts/contracts/array-jumping-game.js';
+import { arrayJumpingGame } from '../scripts/contracts/array-jumping-game';
 import { runTests } from './utils';
 
 const testCases = [

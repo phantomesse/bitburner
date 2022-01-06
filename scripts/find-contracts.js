@@ -47,7 +47,7 @@ const CONTRACT_TYPE_TO_SOLVER_FN_MAP = {
  * Finds all the contracts across all servers and solves any that we can solve
  * as we go. Print out all unsolved contracts.
  *
- * @param {import('..').NS} ns
+ * @param {import('index').NS} ns
  */
 export async function main(ns) {
   const serverNames = getAllServerNames(ns).filter(serverName =>
@@ -83,7 +83,7 @@ class Contract {
   /**
    * Attemps to solve a contract.
    *
-   * @param {import('..').NS} ns
+   * @param {import('index').NS} ns
    * @returns {boolean} true if successfully solved
    */
   attemptToSolve(ns) {

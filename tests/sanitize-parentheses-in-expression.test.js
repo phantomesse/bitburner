@@ -1,4 +1,4 @@
-import { sanitizeParenthesesInExpression } from '../scripts/contracts/sanitize-parentheses-in-expression.js';
+import { sanitizeParenthesesInExpression } from '../scripts/contracts/sanitize-parentheses-in-expression';
 import { runTests } from './utils';
 
 const testCases = [
@@ -33,7 +33,10 @@ const testCases = [
 runTests(
   testCases,
   sanitizeParenthesesInExpression,
-  (actualOutput, expectedOutput) => {
+  (
+    /** @type {string[]} */ actualOutput,
+    /** @type {string[]} */ expectedOutput
+  ) => {
     expect(actualOutput).toEqual(expect.arrayContaining(expectedOutput));
   }
 );
