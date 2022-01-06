@@ -5,7 +5,7 @@ import {
   PURCHASED_SERVER_PREFIX,
 } from '/utils/servers.js';
 
-const DISABLE_LOGGING_FUNCTIONS = ['scan', 'sleep'];
+const DISABLE_LOGGING_FUNCTIONS = ['scan', 'sleep', 'getHackingLevel'];
 
 /**
  * Finds any servers that do not have backdoor installed and can have backdoor
@@ -40,6 +40,7 @@ export async function main(ns) {
 
     if (serverNames.length === 0) {
       ns.print('No servers that we can install backdoor available.');
+      ns.tprint('No servers that we can install backdoor available.');
       return;
     }
 

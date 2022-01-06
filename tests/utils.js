@@ -5,3 +5,5 @@ export function runTests(testCases, fnToTest) {
     });
   }
 }
+
+export const skip = () => test.skip('', () => {});

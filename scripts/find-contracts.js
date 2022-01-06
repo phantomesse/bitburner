@@ -69,14 +69,8 @@ export async function main(ns) {
     contract => !contract.attemptToSolve(ns)
   );
 
-  // Print out command to run any unsolved contracts.
-  if (unsolvedContracts.length > 0) {
-    ns.tprint(
-      '\n' +
-        unsolvedContracts.map(contract => contract.toString(ns)).join('\n\n')
-    );
-  } else {
-    ns.tprint('no unsolved contracts available at the moment');
+  if (unsolvedContracts.length === 0) {
+    ns.tprintf('no unsolved contracts available at the moment');
   }
 }
 
@@ -93,8 +87,19 @@ class Contract {
    * @returns {boolean} true if successfully solved
    */
   attemptToSolve(ns) {
-    const contractType = this._getContractType(ns);
-    if (!(contractType in CONTRACT_TYPE_TO_SOLVER_FN_MAP)) return false;
+    const contractType = ns.codingcontract.getContractType(
+      this.fileName,
+      this.serverName
+    );
+    if (!(contractType in CONTRACT_TYPE_TO_SOLVER_FN_MAP)) {
+      ns.tprintf('\n');
+      ns.tprintf(
+        'ERROR\ncould not solve %s\n%s\n',
+        contractType,
+        this.getPath(ns)
+      );
+      return false;
+    }
 
     const input = ns.codingcontract.getData(this.fileName, this.serverName);
     const answer = CONTRACT_TYPE_TO_SOLVER_FN_MAP[contractType](input);
@@ -104,24 +109,37 @@ class Contract {
       this.serverName,
       { returnReward: true }
     );
-    if (response === false || response === '') {
-      ns.tprint(`could not solve ${this.fileName} (${contractType})`);
+    if (response === '') {
+      ns.tprintf('\n');
+      ns.tprintf(
+        'ERROR\ncould not solve %s\n%s\n%s\n',
+        contractType,
+        this.getPath(ns),
+        JSON.stringify({
+          input: input,
+          attemptedAnswer: answer,
+        })
+      );
       return false;
     }
-    ns.tprint(`solved ${this.fileName} (${contractType}): ${response}`);
+
+    ns.tprintf(
+      '\nsolved %s: %s\n%s\n',
+      contractType,
+      response,
+      JSON.stringify({
+        input: input,
+        output: answer,
+      })
+    );
     return true;
   }
 
-  toString(ns) {
-    const command = [
-      HOME_SERVER_NAME,
-      ...getPath(ns, this.serverName).map(path => 'connect ' + path),
-      'run ' + this.fileName,
-    ].join('; ');
-    return [this._getContractType(ns), command].join('\n');
-  }
-
-  _getContractType(ns) {
-    return ns.codingcontract.getContractType(this.fileName, this.serverName);
+  getPath(ns) {
+    return (
+      getPath(ns, this.serverName)
+        .map(path => `connect ${path}`)
+        .join('; ') + `; run ${this.fileName}`
+    );
   }
 }
