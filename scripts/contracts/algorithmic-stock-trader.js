@@ -1,14 +1,4 @@
 // Algorithmic Stock Trader I-IV
-
-// I
-// 96,83,172,187,96,195,159,34,141,159,198,22,39,23,75,86,38,129,110,89,75,111,188 -> 166
-
-// III
-// 16,171,74,18,34,182,173,19,128,36,43,124,27,163,69,154,34,92,72,152,142,90,200 -> 347
-
-// IV
-// [6, [101,22,191,49,3,21,93,155,120,49,48,34,193,52,179,89,77,98,34,189,195,71,175,90,40,134,98,46,91,152,2,103,174,126,82,179,172,56,145,113,165,101,162,55,16,164,111]] -> 972
-
 export const algorithmicStockTraderI = input => _getMaxProfit(1, input);
 export const algorithmicStockTraderII = input =>
   _getMaxProfit(input.length, input);
@@ -118,25 +108,3 @@ function _getTradesWithPositiveProfit(stockPrices, buyDay) {
   }
   return trades;
 }
-
-let input = [
-  96, 83, 172, 187, 96, 195, 159, 34, 141, 159, 198, 22, 39, 23, 75, 86, 38,
-  129, 110, 89, 75, 111, 188,
-];
-console.log(algorithmicStockTraderI(input));
-
-input = [
-  16, 171, 74, 18, 34, 182, 173, 19, 128, 36, 43, 124, 27, 163, 69, 154, 34, 92,
-  72, 152, 142, 90, 200,
-];
-console.log(algorithmicStockTraderIII(input));
-
-input = [
-  6,
-  [
-    101, 22, 191, 49, 3, 21, 93, 155, 120, 49, 48, 34, 193, 52, 179, 89, 77, 98,
-    34, 189, 195, 71, 175, 90, 40, 134, 98, 46, 91, 152, 2, 103, 174, 126, 82,
-    179, 172, 56, 145, 113, 165, 101, 162, 55, 16, 164, 111,
-  ],
-];
-console.log(algorithmicStockTraderIV(input));
