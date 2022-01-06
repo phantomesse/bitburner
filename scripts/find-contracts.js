@@ -70,7 +70,7 @@ export async function main(ns) {
   );
 
   if (unsolvedContracts.length === 0) {
-    ns.tprintf('no unsolved contracts available at the moment');
+    ns.tprintf('\nno unsolved contracts available at the moment');
   }
 }
 
