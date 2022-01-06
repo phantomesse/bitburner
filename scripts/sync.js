@@ -5,18 +5,18 @@ const GITHUB_SCRIPTS_FOLDER =
 const SCRIPTS_TXT = 'scripts.txt';
 
 /**
- * Copy this file to the bitburner game to sync the rest of the scripts.
+ * Copy this file to the bitburner game to sync the rest of the scripts:
+ *
+ * ```
+ * wget https://raw.githubusercontent.com/phantomesse/bitburner/main/scripts/sync.js sync.js
+ * ```
  *
  * @example run sync.js <port>
  * @param {import('index').NS } ns
  */
 export async function main(ns) {
-  if (typeof ns.args[0] !== 'number') {
-    ns.tprint(`usage: run sync.js <port>`);
-    return;
-  }
   let port = ns.args[0];
-  port = isNaN(port) ? DEFAULT_PORT : port;
+  port = typeof port !== 'number' ? DEFAULT_PORT : port;
 
   // Check if local server is running and set scripts prefix accordingly.
   let scriptsPrefix;
