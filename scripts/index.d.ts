@@ -1045,7 +1045,7 @@ export interface TIX {
   getPurchaseCost(sym: string, shares: number, posType: string): number;
 
   /**
-   * Calculate profit of setting stocks.
+   * Calculate profit of selling stocks.
    * @remarks
    * RAM cost: 2 GB
    * Calculates and returns how much you would gain from selling a given number of shares of a stock.
@@ -1333,10 +1333,10 @@ export interface Singularity {
 
   /**
    * SF4.1 - Workout at the gym.
-   * 
+   *
    * @remarks
    * RAM cost: 2 GB
-   * 
+   *
 
    * This function will automatically set you to start working out at a gym to train
    * a particular stat. If you are already in the middle of some “working” action
@@ -1779,7 +1779,7 @@ export interface Singularity {
    *
    * This function returns the number of milliseconds it takes to attempt the
    * specified crime (e.g It takes 60 seconds to attempt the ‘Rob Store’ crime,
-   * so running `commitCrime('rob store')` will return 60000).
+   * so running `commitCrime('rob store')` will return 60,000).
    *
    * Warning: I do not recommend using the time returned from this function to try
    * and schedule your crime attempts. Instead, I would use the isBusy Singularity
@@ -2902,7 +2902,7 @@ export interface Bladeburner {
 }
 
 /**
- * Coding Contact API
+ * Coding Contract API
  * @public
  */
 export interface CodingContract {
@@ -3920,6 +3920,27 @@ interface UserInterface {
    * @returns An object containing the theme's colors
    */
   getTheme(): UserInterfaceTheme;
+
+  /**
+   * Sets the current theme
+   * @remarks
+   * RAM cost: cost: 0 GB
+   * @example
+   * Usage example (NS2)
+   * ```ts
+   * const theme = ns.ui.getTheme();
+   * theme.primary = '#ff5500';
+   * ns.ui.setTheme(theme);
+   * ```
+   */
+  setTheme(newTheme: UserInterfaceTheme): void;
+
+  /**
+   * Resets the player's theme to the default values
+   * @remarks
+   * RAM cost: cost: 0 GB
+   */
+  resetTheme(): void;
 }
 
 /**
@@ -4166,31 +4187,28 @@ export interface NS extends Singularity {
   hackAnalyzeThreads(host: string, hackAmount: number): number;
 
   /**
-   * Get the percent of money stolen with a single thread.
+   * Get the part of money stolen with a single thread.
    * @remarks
    * RAM cost: 1 GB
    *
-   * Returns the percentage of the specified server’s money you will steal with a single hack.
-   * This value is returned in percentage form, not decimal
-   * (Netscript functions typically return in decimal form, but not this one).
-   * This percentage is influenced by the player's hacking skill.
+   * Returns the part of the specified server’s money you will steal with a single thread hack.
    *
    * @example
    * ```ts
    * // NS1:
    * //For example, assume the following returns 0.01:
    * var hackAmount = hackAnalyze("foodnstuff");
-   * //This means that if hack the foodnstuff server, then you will steal 1% of its total money. If you hack using N threads, then you will steal N*0.01 times its total money.
+   * //This means that if hack the foodnstuff server using a single thread, then you will steal 1%, or 0.01 of its total money. If you hack using N threads, then you will steal N*0.01 times its total money.
    * ```
    * @example
    * ```ts
    * // NS2:
    * //For example, assume the following returns 0.01:
    * const hackAmount = ns.hackAnalyze("foodnstuff");
-   * //This means that if hack the foodnstuff server, then you will steal 1% of its total money. If you hack using N threads, then you will steal N*0.01 times its total money.
+   * //This means that if hack the foodnstuff server using a single thread, then you will steal 1%, or 0.01 of its total money. If you hack using N threads, then you will steal N*0.01 times its total money.
    * ```
    * @param host - Hostname of the target server.
-   * @returns The percentage of money you will steal from the target server with a single hack.
+   * @returns The part of money you will steal from the target server with a single thread hack.
    */
   hackAnalyze(host: string): number;
 
@@ -4302,22 +4320,22 @@ export interface NS extends Singularity {
   asleep(millis: number): Promise<void>;
 
   /**
-   * Prints a value or a variable to the script’s logs.
+   * Prints one or move values or variables to the script’s logs.
    * @remarks
    * RAM cost: 0 GB
    *
-   * @param msg - Value to be printed.
+   * @param args - Value(s) to be printed.
    */
-  print(msg: any): void;
+  print(...args: any[]): void;
 
   /**
-   * Prints a value or a variable to the Terminal.
+   * Prints one or more values or variables to the Terminal.
    * @remarks
    * RAM cost: 0 GB
    *
-   * @param msg - Value to be printed.
+   * @param args - Value(s) to be printed.
    */
-  tprint(msg: any): void;
+  tprint(...args: any[]): void;
 
   /**
    * Prints a raw value or a variable to the Terminal.
@@ -4647,7 +4665,11 @@ export interface NS extends Singularity {
    * @param args - Additional arguments to pass into the new script that is being run. Note that if any arguments are being passed into the new script, then the second argument numThreads must be filled in with a value.
    * @returns Returns the PID of a successfully started script, and 0 otherwise.
    */
-  run(script: string, numThreads?: number, ...args: string[]): number;
+  run(
+    script: string,
+    numThreads?: number,
+    ...args: Array<string | number | boolean>
+  ): number;
 
   /**
    * Start another script on any server.
@@ -4772,7 +4794,8 @@ export interface NS extends Singularity {
    * @param args - Arguments to identify which script to kill.
    * @returns True if the script is successfully killed, and false otherwise.
    */
-  kill(script: string | number, host: string, ...args: string[]): boolean;
+  kill(script: number): boolean;
+  kill(script: string, host: string, ...args: string[]): boolean;
 
   /**
    * Terminate all scripts on a server.
@@ -5251,8 +5274,8 @@ export interface NS extends Singularity {
    * @returns info about a running script
    */
   getRunningScript(
-    filename: string | number,
-    hostname: string,
+    filename?: string | number,
+    hostname?: string,
     ...args: (string | number)[]
   ): RunningScript;
 
@@ -5390,7 +5413,7 @@ export interface NS extends Singularity {
    */
   write(
     handle: string,
-    data?: string[] | number,
+    data?: string[] | number | string,
     mode?: 'w' | 'a'
   ): Promise<void>;
 
@@ -5591,8 +5614,6 @@ export interface NS extends Singularity {
    * The required time is increased by the security level of the target server and decreased by the player's hacking level.
    *
    * @param host - Host of target server.
-   * @param hackLvl - Optional hacking level for the calculation. Defaults to player’s current hacking level.
-   * @param intLvl - Optional intelligence level for the calculation. Defaults to player’s current intelligence level. (Intelligence is unlocked after obtaining Source-File 5).
    * @returns Returns the amount of time in milliseconds it takes to execute the hack Netscript function. Returns Infinity if called on a Hacknet Server.
    */
   getHackTime(host: string): number;
@@ -5607,8 +5628,6 @@ export interface NS extends Singularity {
    * The required time is increased by the security level of the target server and decreased by the player's hacking level.
    *
    * @param host - Host of target server.
-   * @param hackLvl - Optional hacking level for the calculation. Defaults to player’s current hacking level.
-   * @param intLvl - Optional intelligence level for the calculation. Defaults to player’s current intelligence level. (Intelligence is unlocked after obtaining Source-File 5).
    * @returns Returns the amount of time in milliseconds it takes to execute the grow Netscript function. Returns Infinity if called on a Hacknet Server.
    */
   getGrowTime(host: string): number;
@@ -5618,14 +5637,12 @@ export interface NS extends Singularity {
    * @remarks
    * RAM cost: 0.05 GB
    *
-   * Returns the amount of time in milliseconds it takes to execute the weaken() Netscript function on the target server.
+   * Returns the amount of time in milliseconds it takes to execute the weaken Netscript function on the target server.
    * The function takes in an optional hackLvl parameter that can be specified to see what the weaken time would be at different hacking levels.
    * The required time is increased by the security level of the target server and decreased by the player's hacking level.
    *
    * @param host - Host of target server.
-   * @param hackLvl - Optional hacking level for the calculation. Defaults to player’s current hacking level.
-   * @param intLvl - Optional intelligence level for the calculation. Defaults to player’s current intelligence level. (Intelligence is unlocked after obtaining Source-File 5).
-   * @returns Returns the amount of time in milliseconds it takes to execute the grow Netscript function. Returns Infinity if called on a Hacknet Server.
+   * @returns Returns the amount of time in milliseconds it takes to execute the weaken Netscript function. Returns Infinity if called on a Hacknet Server.
    */
   getWeakenTime(host: string): number;
 
@@ -5653,11 +5670,8 @@ export interface NS extends Singularity {
    * @param args - Arguments that the script is running with.
    * @returns Amount of income the specified script generates while online.
    */
-  getScriptIncome(
-    script: string,
-    host: string,
-    ...args: string[]
-  ): number | [number, number];
+  getScriptIncome(): [number, number];
+  getScriptIncome(script: string, host: string, ...args: string[]): number;
 
   /**
    * Get the exp gain of a script.
@@ -5676,6 +5690,7 @@ export interface NS extends Singularity {
    * @param args - Arguments that the script is running with.
    * @returns Amount of hacking experience the specified script generates while online.
    */
+  getScriptExpGain(): number;
   getScriptExpGain(script: string, host: string, ...args: string[]): number;
 
   /**
@@ -6286,7 +6301,7 @@ interface CorporationInfo {
   issuedShares: number;
   /** Price of the shares */
   sharePrice: number;
-  /** State of the corporation, like PRODUCTION or EXPORT */
+  /** State of the corporation. Possible states are START, PURCHASE, PRODUCTION, SALE, EXPORT. */
   state: string;
 }
 

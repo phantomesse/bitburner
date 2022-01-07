@@ -61,3 +61,9 @@ export async function main(ns) {
     await ns.sleep(1000);
   }
 }
+
+/**
+ * @param {Object} data
+ * @returns {string[]}
+ */
+export const autocomplete = data => [...data.servers];

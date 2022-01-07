@@ -65,7 +65,7 @@ export async function main(ns) {
 /**
  * Calculates the cost of upgrading an aspect of a node.
  *
- * @typedef UpgradeCostFn
+ * @callback UpgradeCostFn
  * @param {number} nodeIndex
  * @param {number} upgradeCount
  * @returns {number} cost of upgrade
@@ -74,7 +74,7 @@ export async function main(ns) {
 /**
  * Upgrades an aspect of a node.
  *
- * @typedef UpgradeFn
+ * @callback UpgradeFn
  * @param {number} nodeIndex
  * @param {number} upgradeCount
  * @returns {boolean} whether the upgrade was successful
