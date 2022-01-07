@@ -4,6 +4,7 @@ const SCRIPTS_TO_RUN = [
   'manage-hacknet.js',
   'manage-servers.js',
   'manage-stocks.js',
+  'manage-programs.js',
 ];
 
 /**
