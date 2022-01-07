@@ -7,5 +7,6 @@ const testCases = [
     output: 0,
   },
   { input: [0, 5, 1], output: 0 },
+  { input: [8, 6, 5, 0, 1, 1, 0, 8, 0, 8, 10, 4, 1, 5], output: 1 },
 ];
 runTests(testCases, arrayJumpingGame);
