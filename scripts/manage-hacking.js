@@ -33,12 +33,15 @@ const DISABLE_LOGGING_FUNCTIONS = [
   'sleep',
 ];
 
+let homeReservedRam;
+
 /**
  * Manages hacking servers.
  *
  * @param {import('index').NS } ns
  */
 export async function main(ns) {
+  homeReservedRam = ns.args[0];
   DISABLE_LOGGING_FUNCTIONS.forEach(ns.disableLog);
 
   let allServerNames = getAllServerNames(ns);
@@ -290,6 +293,9 @@ function getFreeRam(ns, serverNames) {
       ns.getServerMaxRam(serverName) - ns.getServerUsedRam(serverName);
     if (serverName !== HOME_SERVER_NAME) return freeRam;
 
+    if (homeReservedRam !== undefined)
+      return Math.max(freeRam - homeReservedRam, 0);
+
     // If home server, make sure to reserve RAM to run other scripts.
     const scripts = ns
       .ls(HOME_SERVER_NAME)
@@ -302,7 +308,7 @@ function getFreeRam(ns, serverNames) {
     const oneTimeUseRam = Math.max(
       ...scripts.map(script => ns.getScriptRam(script))
     );
-    const reservedRam =
+    let reservedRam =
       scripts
         .filter(script => !oneTimeUseScripts.includes(script))
         .filter(fileName => !ns.scriptRunning(fileName, HOME_SERVER_NAME))
