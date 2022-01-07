@@ -10,5 +10,9 @@ const testCases = [
     output: 85,
   },
   { input: [5, 10, 2, -6, 8, 6, 4, -8, -7, -3, 6, 7, -9, -1], output: 29 },
+  {
+    input: [-4, 9, -7, 6, 7, -3, 2, -10, -7, -5, 8, -9, -7, -1, -4, 1, -1],
+    output: 15,
+  },
 ];
 runTests(testCases, subarrayWithMaximumSum);

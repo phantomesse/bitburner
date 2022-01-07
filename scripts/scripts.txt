@@ -23,7 +23,7 @@ sync.js	1641507540861.0005
 weaken.js	1641506305265.5605
 contracts/algorithmic-stock-trader.js	1641504395256.3582
 contracts/array-jumping-game.js	1641504407089.0027
-contracts/find-largest-prime-factor.js	1641576260530.602
+contracts/find-largest-prime-factor.js	1641577491490.9446
 contracts/find-valid-math-solutions.js	1641569325643.861
 contracts/generate-ip-addresses.js	1641569843476.9998
 contracts/merge-overlapping-intervals.js	1641236542544.1023
