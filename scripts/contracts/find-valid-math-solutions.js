@@ -7,7 +7,7 @@
  * @param {any[]} input
  * @returns {string[]}
  */
-export function findAllValidMathExpressions(input) {
+export function findValidMathExpressions(input) {
   const digits = input[0]; // String
   const targetNumber = input[1]; // Integer
 

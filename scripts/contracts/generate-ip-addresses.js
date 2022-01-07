@@ -41,16 +41,16 @@ function _getAddresses(str, depth) {
 
 /**
  * A section is the first 1-3 characters of the {@link str} where there cannot
- * be a leading zero nor can there be a zero after the section. The section must
- * also be a number between 1 and 255.
+ * be a leading zero nor can there be a leading zero after the section. The
+ * section must also be a number between 0 and 255.
  *
  * @param {string} str
  */
 function _getBeginningSections(str) {
   if (str.length === 0) return [];
   return [1, 2, 3]
-    .filter(index => str[index] !== '0') // cannot be a zero after the section
-    .map(index => parseInt(str.substring(0, index)))
-    .filter(section => section > 0 && section <= 255)
+    .filter(length => length === 1 || str[0] !== '0') // cannot be a leading zero after the section
+    .map(length => parseInt(str.substring(0, length)))
+    .filter(section => section >= 0 && section <= 255)
     .map(section => section.toString());
 }

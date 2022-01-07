@@ -1,5 +1,5 @@
 import { arrayJumpingGame } from '/contracts/array-jumping-game.js';
-import { findAllValidMathExpressions } from '/contracts/find-valid-math-solutions.js';
+import { findValidMathExpressions } from '/contracts/find-valid-math-solutions.js';
 import { findLargestPrimeFactor } from '/contracts/find-largest-prime-factor.js';
 import { generateIpAddresses } from '/contracts/generate-ip-addresses.js';
 import { mergeOverlappingIntervals } from '/contracts/merge-overlapping-intervals.js';
@@ -30,7 +30,7 @@ const CONTRACT_TYPE_TO_SOLVER_FN_MAP = {
   'Algorithmic Stock Trader III': algorithmicStockTraderIII,
   'Algorithmic Stock Trader IV': algorithmicStockTraderIV,
   'Array Jumping Game': arrayJumpingGame,
-  'Find All Valid Math Expressions': findAllValidMathExpressions,
+  'Find All Valid Math Expressions': findValidMathExpressions,
   'Find Largest Prime Factor': findLargestPrimeFactor,
   'Generate IP Addresses': generateIpAddresses,
   'Merge Overlapping Intervals': mergeOverlappingIntervals,
