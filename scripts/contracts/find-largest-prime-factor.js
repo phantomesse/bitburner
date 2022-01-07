@@ -1,37 +1,38 @@
 /**
  * Find Largest Prime Factor
  *
- * A prime factor is a factor that is a prime number. What is the largest prime factor of 383337599?
+ * A prime factor is a factor that is a prime number. What is the largest prime
+ * factor of the input?
  *
- * @param {int} input
- * @returns {int} largest prime factor
+ * @param {number} input
+ * @returns {number} largest prime factor
  */
 export function findLargestPrimeFactor(input) {
-  for (let i = input; i > 1; i--) {
-    if (input % i !== 0) continue;
-    if (isPrime(i)) return i;
-  }
-  return 1;
-}
+  /** @type {Object.<number, boolean>} */
+  const cachedPrimeNumberMap = {};
 
-const cachedNumberToIsPrimeMap = { 1: true, 2: true, 3: true, 4: false };
+  const primes = [];
+  for (let i = 1; i <= input; i++) {
+    if (input % i !== 0) continue;
+    if (_isPrime(i, cachedPrimeNumberMap)) primes.push(i);
+  }
+  return primes.slice(-1)[0];
+}
 
 /**
  * Checks if a number is prime.
  *
- * @param {int} number
- * @returns {boolean} true if is prime
+ * @param {number} number
+ * @param {Object.<number, boolean>} cachedPrimeNumberMap
  */
-function isPrime(number) {
-  if (number in cachedNumberToIsPrimeMap) {
-    return cachedNumberToIsPrimeMap[number];
-  }
-  for (let i = number - 1; i > 1; i--) {
+function _isPrime(number, cachedPrimeNumberMap) {
+  if (number in cachedPrimeNumberMap) return cachedPrimeNumberMap[number];
+  for (let i = 2; i < number; i++) {
     if (number % i === 0) {
-      cachedNumberToIsPrimeMap[number] = false;
+      cachedPrimeNumberMap[number] = false;
       return false;
     }
   }
-  cachedNumberToIsPrimeMap[number] = true;
+  cachedPrimeNumberMap[number] = true;
   return true;
 }
