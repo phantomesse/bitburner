@@ -102,7 +102,22 @@ class Contract {
     }
 
     const input = ns.codingcontract.getData(this.fileName, this.serverName);
-    const answer = CONTRACT_TYPE_TO_SOLVER_FN_MAP[contractType](input);
+    let answer;
+    try {
+      answer = CONTRACT_TYPE_TO_SOLVER_FN_MAP[contractType](input);
+    } catch (exception) {
+      ns.tprint('\n');
+      ns.tprintf(
+        'ERROR\ncould not solve %s\n%s\n%s\n',
+        contractType,
+        this.getPath(ns),
+        JSON.stringify({
+          input: input,
+          exception: exception,
+        })
+      );
+      return false;
+    }
     const response = ns.codingcontract.attempt(
       answer,
       this.fileName,
