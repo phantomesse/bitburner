@@ -14,10 +14,8 @@ import {
   algorithmicStockTraderIII,
   algorithmicStockTraderIV,
 } from '/contracts/algorithmic-stock-trader.js';
-import {
-  uniquePathsInAGridI,
-  uniquePathsInAGridII,
-} from '/contracts/unique-paths-in-a-grid.js';
+import { uniquePathsInAGridI } from '/contracts/unique-paths-in-a-grid-i.js';
+import { uniquePathsInAGridII } from '/contracts/unique-paths-in-a-grid.js';
 import {
   getAllServerNames,
   getPath,

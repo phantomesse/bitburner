@@ -1,7 +1,3 @@
-export function uniquePathsInAGridI(input) {
-  const grid = new Array(input[1]).fill(new Array(input[0]).fill(0));
-  return _getUniquePathCount(grid);
-}
 export const uniquePathsInAGridII = input => _getUniquePathCount(input);
 
 const _getUniquePathCount = grid =>
