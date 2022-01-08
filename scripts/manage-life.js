@@ -18,7 +18,9 @@ export async function main(ns) {
 
     if (
       ns.isBusy() &&
-      (WORKING_WORK_TYPES.includes(player.workType) || player.crimeType !== '')
+      (WORKING_WORK_TYPES.includes(player.workType) ||
+        player.crimeType !== '' ||
+        player.createProgramName !== '')
     ) {
       // Working at a job or doing a crime, so keep on working.
       await ns.sleep(10000);

@@ -1,9 +1,9 @@
 const PROGRAMS = [
-  'BruteSSH.exe',
-  'FTPCrack.exe',
-  'relaySMTP.exe',
-  'HTTPWorm.exe',
   'SQLInject.exe',
+  'HTTPWorm.exe',
+  'relaySMTP.exe',
+  'FTPCrack.exe',
+  'BruteSSH.exe',
 ];
 
 /**
@@ -15,18 +15,24 @@ export async function main(ns) {
   const player = ns.getPlayer();
 
   // Buy TOR router.
-  while (!player.tor) {
-    const success = ns.purchaseTor();
-    if (success) ns.toast('Bought TOR router');
-    await ns.sleep(1000);
+  if (!player.tor) {
+    while (!ns.purchaseTor()) await ns.sleep(1000);
+    ns.toast('Bought TOR');
   }
 
   // Buy programs.
-  for (const program of PROGRAMS) {
-    while (!ns.fileExists(program)) {
+  let programsToBuy;
+  do {
+    programsToBuy = PROGRAMS.filter(program => !ns.fileExists(program));
+
+    for (const program of programsToBuy) {
+      if (ns.isBusy() && ns.getPlayer().createProgramName === program) {
+        continue;
+      }
       const success = ns.purchaseProgram(program);
       if (success) ns.toast('Bought ' + program);
-      await ns.sleep(1000);
     }
-  }
+
+    await ns.sleep(1000);
+  } while (programsToBuy.length > 0);
 }
