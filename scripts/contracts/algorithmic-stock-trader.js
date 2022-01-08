@@ -71,7 +71,7 @@ function _getMaxProfit(maxTradeCount, stockPrices) {
 
     // Trim permutations so that only one permutation of each length and
     // buy day (where the chosen permutation is the one with the max profit)
-    /** @type {Object.<int, Permutation[]>} */
+    /** @type {Object.<number, Permutation[]>} */
     const buyDayToPermutationsMap = {};
     for (const permutation of tradePermutations[buyDay]) {
       const key = permutation[0].buyDay;

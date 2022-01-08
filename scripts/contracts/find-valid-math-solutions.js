@@ -25,7 +25,7 @@ export function findValidMathExpressions(input) {
 const OPERATORS = ['+', '-', '*'];
 
 /**
- * @param {int[]} numbers
+ * @param {number[]} numbers
  * @returns {string[]}
  */
 function _getExpressions(numbers) {
@@ -46,8 +46,8 @@ function _getExpressions(numbers) {
 
 /**
  * @param {string} digits
- * @returns {int[][]} arrays that represent combinations of valid numbers
- *                    (i.e. digits should not start with '0')
+ * @returns {number[][]} arrays that represent combinations of valid numbers
+ *                       (i.e. digits should not start with '0')
  */
 function _getValidNumberCombinations(digits) {
   const possibleLastNumbers = [];

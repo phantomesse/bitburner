@@ -16,6 +16,7 @@ export function generateIpAddresses(input) {
 
 /**
  * @param {string} str
+ * @param {number} [depth]
  * @returns {string[]}
  */
 function _getAddresses(str, depth) {

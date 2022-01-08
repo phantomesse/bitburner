@@ -30,7 +30,7 @@
  *
  * The minimum path sum is 11 (2 -> 3 -> 5 -> 1).
  *
- * @param {int[][]} input
+ * @param {number[][]} input
  */
 export function minimumPathSumInATriangle(input) {
   let rootNode = new Node(input, 0, 0);

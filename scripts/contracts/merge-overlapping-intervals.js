@@ -7,15 +7,15 @@
  * The intervals must be returned in ASCENDING order. You can assume that in an
  * interval, the first number will always be smaller than the second.
  *
- * @param {int[][]} input
+ * @param {number[][]} input
  */
 export function mergeOverlappingIntervals(input) {
   return _mergeOverlappingIntervals(input);
 }
 
 /**
- * @param {int[][]} intervals
- * @returns {int[][]} merged intervals
+ * @param {number[][]} intervals
+ * @returns {number[][]} merged intervals
  */
 function _mergeOverlappingIntervals(intervals) {
   // Sort by second number and then by first number.
@@ -50,8 +50,8 @@ function _mergeOverlappingIntervals(intervals) {
 }
 
 /**
- * @param {int[]} a interval
- * @param {int[]} b interval
+ * @param {number[]} a interval
+ * @param {number[]} b interval
  * @returns {boolean} true if has overlap
  */
 function _hasOverlap(a, b) {
@@ -62,9 +62,9 @@ function _hasOverlap(a, b) {
 /**
  * Merge overlapping intervals. Intervals **must** be overlapping.
  *
- * @param {int[]} a interval
- * @param {int[]} b interval
- * @returns {int[]} merged interval
+ * @param {number[]} a interval
+ * @param {number[]} b interval
+ * @returns {number[]} merged interval
  */
 function _merge(a, b) {
   return [Math.min(a[0], b[0]), Math.max(a[1], b[1])];

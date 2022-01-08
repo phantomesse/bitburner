@@ -29,7 +29,7 @@ export function sanitizeParenthesesInExpression(input) {
 
 /**
  * @param {string} str
- * @param {int} parenthesesToRemove
+ * @param {number} parenthesesToRemove
  * @returns {string[]}
  */
 function _getVariants(str, parenthesesToRemove) {

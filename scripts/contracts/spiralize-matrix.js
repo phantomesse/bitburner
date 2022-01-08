@@ -4,8 +4,8 @@
  * Given the following array of arrays of numbers representing a 2D matrix,
  * return the elements of the matrix as an array in spiral order
  *
- * @param {int[][]} input
- * @returns {int[]}
+ * @param {number[][]} input
+ * @returns {number[]}
  */
 export function spiralizeMatrix(input) {
   const visitedMatrix = Array.from({ length: input.length }, () =>
@@ -15,7 +15,7 @@ export function spiralizeMatrix(input) {
 }
 
 /**
- * @typedef {int} Direction
+ * @typedef {number} Direction
  */
 
 /**
@@ -30,12 +30,12 @@ const Direction = Object.freeze({
 });
 
 /**
- * @param {int[][]} matrix
+ * @param {number[][]} matrix
  * @param {boolean[][]} visitedMatrix copy of matrix for marking which cells we've visited
- * @param {int} currentX
- * @param {int} currentY
+ * @param {number} currentX
+ * @param {number} currentY
  * @param {Direction} currentDirection
- * @param {int[]} pathThusFar
+ * @param {number[]} pathThusFar
  */
 function _getPath(
   matrix,

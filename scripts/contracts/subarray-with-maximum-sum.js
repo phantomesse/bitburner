@@ -5,8 +5,8 @@
  * at least one number) which has the largest sum and return that sum. 'Sum'
  * refers to the sum of all the numbers in the subarray.
  *
- * @param {int[]} input
- * @returns {int}
+ * @param {number[]} input
+ * @returns {number}
  */
 export function subarrayWithMaximumSum(input) {
   let maxSum = input[0];
