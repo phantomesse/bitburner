@@ -6,5 +6,6 @@ const testCases = [
   { input: [10, 5], output: 715 },
   { input: [14, 10], output: 497420 },
   { input: [10, 2], output: 10 },
+  { input: [2, 14], output: 14 },
 ];
 runTests(testCases, uniquePathsInAGridI);
