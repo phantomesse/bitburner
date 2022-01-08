@@ -8,5 +8,6 @@ const testCases = [
     output: ['0.47.48.126'],
   },
   { input: '114227110211', output: ['114.227.110.211'] },
+  { input: '20152128234', output: ['20.152.128.234', '201.52.128.234'] },
 ];
 runTests(testCases, generateIpAddresses);

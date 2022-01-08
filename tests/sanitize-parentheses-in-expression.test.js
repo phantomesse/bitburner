@@ -29,6 +29,8 @@ const testCases = [
     input: '()(a))(',
     output: ['((a))', '()(a)'],
   },
+  { input: ')(()))(()))()a((', output: ['(()(()))()a', '(())(())()a'] },
+  { input: '(((a((a))', output: ['a((a))', '(a(a))', '((aa))'] },
 ];
 runTests(
   testCases,
