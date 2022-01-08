@@ -11,21 +11,18 @@
  * How many different ways can the input number be written as a sum of at least
  * two positive integers?
  *
- * @param {int} input
- * @returns {int} number of ways to sum
+ * @param {number} input
+ * @returns {number} number of ways to sum
  */
 export function totalWaysToSum(input) {
-  const dynamicProgramming = new Array(input + 1).fill(0);
-  dynamicProgramming[0] = 1;
+  const waysToSum = new Array(input + 1).fill(0);
+  waysToSum[0] = 1;
 
   for (let i = 1; i < input; i++) {
-    for (let j = 1; j < input + 1; j++) {
-      if (j >= i) {
-        dynamicProgramming[j] =
-          dynamicProgramming[j] + dynamicProgramming[j - i];
-      }
+    for (let j = i; j < input + 1; j++) {
+      waysToSum[j] = waysToSum[j] + waysToSum[j - i];
     }
   }
 
-  return dynamicProgramming[input];
+  return waysToSum[input];
 }
