@@ -1,8 +1,35 @@
-// Algorithmic Stock Trader I-IV
+/**
+ * Algorithmic Stock Trader I
+ *
+ * @param {number[]} input stock prices
+ * @returns {number} max profit
+ */
 export const algorithmicStockTraderI = input => _getMaxProfit(1, input);
+
+/**
+ * Algorithmic Stock Trader II
+ *
+ * @param {number[]} input stock prices
+ * @returns {number} max profit
+ */
 export const algorithmicStockTraderII = input =>
   _getMaxProfit(input.length, input);
+
+/**
+ * Algorithmic Stock Trader III
+ *
+ * @param {number[]} input stock prices
+ * @returns {number} max profit
+ */
 export const algorithmicStockTraderIII = input => _getMaxProfit(2, input);
+
+/**
+ * Algorithmic Stock Trader IV
+ *
+ * @param {any[]} input where the first element is the number of trade counts
+ *                      and the second element is the stock prices
+ * @returns {number} max profit
+ */
 export const algorithmicStockTraderIV = input =>
   _getMaxProfit(input[0], input[1]);
 
