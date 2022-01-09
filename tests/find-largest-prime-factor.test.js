@@ -4,5 +4,6 @@ import { runTests } from './utils';
 const testCases = [
   { input: 785484550, output: 234473 },
   { input: 777986532, output: 2423 },
+  { input: 166934276, output: 1399 },
 ];
 runTests(testCases, findLargestPrimeFactor);
