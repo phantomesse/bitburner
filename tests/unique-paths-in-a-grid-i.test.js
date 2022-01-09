@@ -1,4 +1,4 @@
-import { uniquePathsInAGridI } from '../scripts/contracts/unique-paths-in-a-grid-i';
+import { uniquePathsInAGridI } from '../scripts/contracts/unique-paths-in-a-grid';
 import { runTests } from './utils';
 
 const testCases = [
