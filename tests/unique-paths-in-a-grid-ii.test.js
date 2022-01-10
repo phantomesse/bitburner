@@ -22,5 +22,21 @@ const testCases = [
     ],
     output: 202,
   },
+  {
+    input: [
+      [0, 0],
+      [0, 0],
+      [0, 1],
+      [0, 0],
+      [0, 0],
+      [0, 0],
+      [0, 1],
+      [0, 0],
+      [0, 0],
+      [1, 0],
+      [0, 0],
+    ],
+    output: 2,
+  },
 ];
 runTests(testCases, uniquePathsInAGridII);
