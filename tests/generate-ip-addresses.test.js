@@ -22,5 +22,6 @@ const testCases = [
   },
   { input: '5822817460', output: ['58.228.174.60'] },
   { input: '2613314577', output: ['26.133.145.77'] },
+  { input: '42157226192', output: ['42.157.226.192'] },
 ];
 runTests(testCases, generateIpAddresses);

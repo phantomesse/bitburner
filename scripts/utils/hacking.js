@@ -35,9 +35,9 @@ export function isHackable(ns, serverName) {
  */
 export function getHackingHeuristic(ns, serverName) {
   return (
-    ns.hackAnalyzeChance(serverName) *
-    ns.hackAnalyze(serverName) *
-    ns.getHackTime(serverName) *
-    ns.getServerMoneyAvailable(serverName)
+    (ns.hackAnalyzeChance(serverName) *
+      ns.hackAnalyze(serverName) *
+      ns.getServerMoneyAvailable(serverName)) /
+    ns.getHackTime(serverName)
   );
 }

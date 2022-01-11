@@ -136,5 +136,20 @@ const testCases = [
     ],
     output: [[2, 34]],
   },
+  {
+    input: [
+      [1, 7],
+      [5, 10],
+      [6, 8],
+      [6, 14],
+      [11, 17],
+      [13, 16],
+      [13, 19],
+      [17, 27],
+      [19, 26],
+      [20, 21],
+    ],
+    output: [[1, 27]],
+  },
 ];
 runTests(testCases, mergeOverlappingIntervals);
