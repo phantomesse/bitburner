@@ -15,8 +15,13 @@ export async function main(ns) {
     return;
   }
   let index = 0;
-  while (typeof numberOfTimes !== 'number' ? true : index++ < numberOfTimes) {
-    await ns.hack(host, { stock: true });
+  let noEffectTimeCount = 0;
+  while (
+    (typeof numberOfTimes !== 'number' ? true : index++ < numberOfTimes) &&
+    noEffectTimeCount < 5
+  ) {
+    const amountStolen = await ns.hack(host, { stock: true });
+    amountStolen === 0 ? noEffectTimeCount++ : (noEffectTimeCount = 0);
   }
 }
 
