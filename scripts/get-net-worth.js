@@ -18,7 +18,7 @@ const PERCENT_NET_WORTH_COLUMN_HEADER = '% net worth';
 export function main(ns) {
   let stocks = [];
   try {
-    const stocks = ns.stock
+    stocks = ns.stock
       .getSymbols()
       .map(symbol => new Stock(ns, symbol))
       .filter(stock => stock.worth > 0);

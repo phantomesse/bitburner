@@ -5,20 +5,13 @@ import { HOME_SERVER_NAME } from '/utils/servers.js';
 const COMMISSION_FEE = 100000;
 const PERCENT_OF_NET_WORTH_IN_STOCK = 0.99;
 
-const DISABLE_LOGGING_FUNCTIONS = [
-  'sleep',
-  'stock.buy',
-  'stock.sell',
-  'getServerMoneyAvailable',
-];
-
 /**
  * Manages buying and selling stocks.
  *
  * @param {import('index').NS} ns
  */
 export async function main(ns) {
-  DISABLE_LOGGING_FUNCTIONS.forEach(ns.disableLog);
+  ns.disableLog('ALL');
 
   let symbols;
   try {
