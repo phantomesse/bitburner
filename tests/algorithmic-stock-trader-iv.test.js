@@ -67,5 +67,6 @@ const testCases = [
     ],
     output: 325,
   },
+  { input: [9, [134, 181, 115, 129, 165, 65]], output: 97 },
 ];
 runTests(testCases, algorithmicStockTraderIV);

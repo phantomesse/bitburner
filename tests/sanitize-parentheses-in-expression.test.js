@@ -58,6 +58,15 @@ const testCases = [
     ],
   },
   { input: '(()))(', output: ['(())'] },
+  {
+    input: '()(()(a(())a(()))a',
+    output: [
+      '()()(a(())a(()))a',
+      '()(()a(())a(()))a',
+      '()(()(a())a(()))a',
+      '()(()(a(())a()))a',
+    ],
+  },
 ];
 runTests(
   testCases,

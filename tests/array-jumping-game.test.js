@@ -11,5 +11,6 @@ const testCases = [
   { input: [0, 0, 0, 4, 0, 0, 0, 0, 7], output: 0 },
   { input: [5, 2, 6, 0], output: 1 },
   { input: [7, 0, 4, 9, 6, 4, 6, 10, 0, 1, 0, 4, 0, 0, 4], output: 1 },
+  { input: [9, 0, 7, 0, 6, 4, 7, 2], output: 1 },
 ];
 runTests(testCases, arrayJumpingGame);
