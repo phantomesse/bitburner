@@ -29,5 +29,10 @@ const testCases = [
     ],
     output: 21,
   },
+  { input: [10, -10, -9, -6, 8, 1, 7, 3, 2, 8, -6, 10], output: 33 },
+  {
+    input: [8, 6, -9, 0, -4, 0, 6, -3, -9, 5, -1, 8, -3, 6, -4, -6, 6, 4, 7, 2],
+    output: 24,
+  },
 ];
 runTests(testCases, subarrayWithMaximumSum);

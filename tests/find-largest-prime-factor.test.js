@@ -8,5 +8,6 @@ const testCases = [
   { input: 129829481, output: 25847 },
   { input: 862536428, output: 16587239 },
   { input: 1596174, output: 266029 },
+  { input: 395033078, output: 17956049 },
 ];
 runTests(testCases, findLargestPrimeFactor);
