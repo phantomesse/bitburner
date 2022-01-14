@@ -1,5 +1,5 @@
 import { arrayJumpingGame } from '/contracts/array-jumping-game.js';
-import { findValidMathExpressions } from '/contracts/find-valid-math-solutions.js';
+import { findValidMathExpressions } from './contracts/find-valid-math-solutions.js';
 import { findLargestPrimeFactor } from '/contracts/find-largest-prime-factor.js';
 import { generateIpAddresses } from '/contracts/generate-ip-addresses.js';
 import { mergeOverlappingIntervals } from '/contracts/merge-overlapping-intervals.js';

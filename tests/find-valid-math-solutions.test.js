@@ -1661,4 +1661,15 @@ const testCases = [
     output: ['1-5+3+4*8-4', '1-5+3-4+8*4', '1*5+34-8-4'],
   },
 ];
-runTests(testCases, findValidMathExpressions);
+runTests(
+  testCases,
+  findValidMathExpressions,
+  (
+    /** @type {string[]} */ actualOutput,
+    /** @type {string[]} */ expectedOutput
+  ) => {
+    actualOutput.sort();
+    expectedOutput.sort();
+    expect(actualOutput).toEqual(expect.arrayContaining(expectedOutput));
+  }
+);
