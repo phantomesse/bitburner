@@ -34,5 +34,6 @@ const testCases = [
     input: [8, 6, -9, 0, -4, 0, 6, -3, -9, 5, -1, 8, -3, 6, -4, -6, 6, 4, 7, 2],
     output: 24,
   },
+  { input: [8, 9, -4, 8, 1, -8, -9, 4, 8, -7], output: 22 },
 ];
 runTests(testCases, subarrayWithMaximumSum);
