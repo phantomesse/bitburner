@@ -46,6 +46,44 @@ export function findValidMathExpressions(input) {
 
   // Get valid expressions.
   return combinations[0].filter(
-    expression => eval(expression) === targetNumber
+    expression => evaluate(expression) === targetNumber
   );
+}
+
+/**
+ * @param {string} expression
+ * @returns {number}
+ */
+function evaluate(expression) {
+  // Split + and - into an array of addends.
+  const addParts = expression.split('+');
+  const addends = [];
+  for (const addPart of addParts) {
+    if (addPart.includes('-')) {
+      const subtractParts = addPart.split('-');
+      addends.push(subtractParts[0]);
+      for (let i = 1; i < subtractParts.length; i++) {
+        addends.push('-' + subtractParts[i]);
+      }
+    } else {
+      addends.push(addPart);
+    }
+  }
+
+  // Resolve multiplications within each addend and sum.
+  let sum = 0;
+  for (const addend of addends) {
+    if (addend.includes('*')) {
+      const factors = addend.split('*');
+      if (factors.includes('0')) continue;
+      const product = factors
+        .filter(factor => factor !== '1')
+        .map(factor => parseInt(factor))
+        .reduce((a, b) => a * b);
+      sum += product;
+    } else {
+      sum += parseInt(addend);
+    }
+  }
+  return sum;
 }
