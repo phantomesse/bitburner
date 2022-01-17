@@ -5,25 +5,17 @@ import {
   formatTime,
 } from '/utils/format.js';
 
-const DISABLE_LOGGING_FUNCTIONS = [
-  'sleep',
-  'getServerMoneyAvailable',
-  'getServerMaxMoney',
-  'getServerSecurityLevel',
-  'getServerMinSecurityLevel',
-];
-
 /**
  * Monitors a single server in logs.
  *
  * @param {import('index').NS} ns
  */
 export async function main(ns) {
-  DISABLE_LOGGING_FUNCTIONS.forEach(ns.disableLog);
+  ns.disableLog('ALL');
 
   const serverName = ns.args[0];
   if (typeof serverName !== 'string') {
-    ns.tprint('usage: run monitor-server.js <server name>');
+    ns.tprint('usage: run monitor-server.js <server name> --tail');
     return;
   }
 

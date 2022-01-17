@@ -1,6 +1,7 @@
 import { getMoneyToSpend, getNetWorth, sort } from '/utils/misc.js';
 import { formatMoney, formatPercent } from '/utils/format.js';
 import { HOME_SERVER_NAME } from '/utils/servers.js';
+import { getForecast } from './utils/stock';
 
 const COMMISSION_FEE = 100000;
 const PERCENT_OF_NET_WORTH_IN_STOCK = 0.99;
@@ -70,13 +71,9 @@ function buyStock(ns, symbol, moneyToSpend) {
   );
   if (sharesToBuy <= 0) return 0;
 
-  try {
-    const forecast = ns.stock.getForecast(symbol);
-    if (forecast < 0.5) return 0;
-    sharesToBuy = Math.ceil(forecast * sharesToBuy);
-  } catch (_) {
-    // No stock market data API.
-  }
+  const forecast = getForecast(ns, symbol);
+  if (forecast < 0.5) return 0;
+  sharesToBuy = Math.ceil(forecast * sharesToBuy);
 
   const sharePrice = ns.stock.buy(symbol, sharesToBuy);
   ns.print(
@@ -91,20 +88,16 @@ function buyStock(ns, symbol, moneyToSpend) {
  * @param {string} symbol
  */
 function sellStock(ns, symbol) {
-  // Panic sell.
-  try {
-    if (ns.stock.getForecast(symbol) < 0.15) {
-      const sharesToSell = ns.stock.getPosition(symbol)[0];
-      ns.stock.sell(symbol, sharesToSell);
-      ns.print(`panic sold ${sharesToSell} shares of ${symbol}`);
-    }
-  } catch (_) {
-    // No stock market data API.
-  }
-
   const position = ns.stock.getPosition(symbol);
   const ownedShareCount = position[0];
   if (ownedShareCount === 0) return; // Nothing to sell.
+
+  // Panic sell.
+  if (getForecast(ns, symbol) < 0.15) {
+    const sharesToSell = ns.stock.getPosition(symbol)[0];
+    ns.stock.sell(symbol, sharesToSell);
+    ns.print(`panic sold ${sharesToSell} shares of ${symbol}`);
+  }
 
   const ownedAvgSharePrice = position[1];
   const bidPrice = ns.stock.getBidPrice(symbol);
@@ -112,13 +105,10 @@ function sellStock(ns, symbol) {
 
   // Determine how much to sell.
   let sharesToSell = ownedShareCount;
-  try {
-    const forecast = ns.stock.getForecast(symbol);
-    if (forecast > 0.5) return; // Stock will go up.
-    sharesToSell = Math.ceil((forecast / 0.5) * sharesToSell);
-  } catch (_) {
-    // No stock market data API.
-  }
+  const forecast = getForecast(ns, symbol);
+  if (forecast > 0.5) return; // Stock will go up.
+  sharesToSell = Math.ceil((forecast / 0.5) * sharesToSell);
+
   if (sharesToSell === 0) return; // Nothing to sell.
   const gain = ns.stock.getSaleGain(symbol, sharesToSell, 'Long');
   const profit =
