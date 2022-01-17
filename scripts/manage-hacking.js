@@ -9,6 +9,7 @@ import { HOME_SERVER_NAME, getAllServerNames } from '/utils/servers.js';
 import { sort } from '/utils/misc.js';
 import { formatMoney, formatPercent } from '/utils/format.js';
 import {
+  MANAGE_HACKING_TO_MANAGE_STOCKS_PORT,
   MANAGE_SERVERS_TO_MANAGE_HACKING_PORT,
   NULL_PORT_DATA,
 } from '/utils/ports.js';
@@ -16,22 +17,6 @@ import {
 const HACKING_SCRIPTS = [GROW_SCRIPT, WEAKEN_SCRIPT, HACK_SCRIPT];
 const MIN_HACK_CHANCE = 0.6;
 const MIN_AVAILABLE_MONEY = 5000000;
-
-const DISABLE_LOGGING_FUNCTIONS = [
-  'getHackingLevel',
-  'getServerMaxMoney',
-  'getServerMaxRam',
-  'getServerMinSecurityLevel',
-  'getServerMoneyAvailable',
-  'getServerRequiredHackingLevel',
-  'getServerSecurityLevel',
-  'getServerUsedRam',
-  'kill',
-  'nuke',
-  'scan',
-  'scp',
-  'sleep',
-];
 
 let homeReservedRam;
 
@@ -42,7 +27,7 @@ let homeReservedRam;
  */
 export async function main(ns) {
   homeReservedRam = ns.args[0];
-  DISABLE_LOGGING_FUNCTIONS.forEach(ns.disableLog);
+  ns.disableLog('ALL');
 
   let allServerNames = getAllServerNames(ns);
 
@@ -93,9 +78,19 @@ export async function main(ns) {
       // Check if we have any free RAM to do anything.
       if (!hasFreeRam(ns, rootAccessServerNames)) break;
 
-      // Check that we are not over-growing the server.
+      // Tell the manage-stock script to sell if we are close to maxing out the
+      // server's money.
       const availableMoney = ns.getServerMoneyAvailable(targetServerName);
-      if (availableMoney === ns.getServerMaxMoney(targetServerName)) {
+      const maxMoney = ns.getServerMaxMoney(targetServerName);
+      if (availableMoney / maxMoney > 0.99) {
+        await ns.writePort(
+          MANAGE_HACKING_TO_MANAGE_STOCKS_PORT,
+          JSON.stringify({ sell: targetServerName })
+        );
+      }
+
+      // Check that we are not over-growing the server.
+      if (availableMoney === maxMoney) {
         const killedServerCount = killScript(
           ns,
           rootAccessServerNames,
@@ -145,6 +140,15 @@ export async function main(ns) {
           )} to ${formatPercent(MIN_HACK_CHANCE)} hack chance`
         );
         weaken(ns, targetServerName, rootAccessServerNames);
+      }
+
+      // Tell the manage-stock script to buy if we are close to hacking all of
+      // the target server's money.
+      if (availableMoney / maxMoney < 0.01) {
+        await ns.writePort(
+          MANAGE_HACKING_TO_MANAGE_STOCKS_PORT,
+          JSON.stringify({ buy: targetServerName })
+        );
       }
 
       // Check that we are not over-hacking the server.

@@ -2,6 +2,10 @@ import { getMoneyToSpend, getNetWorth, sort } from '/utils/misc.js';
 import { formatMoney, formatPercent } from '/utils/format.js';
 import { HOME_SERVER_NAME } from '/utils/servers.js';
 import { getForecast } from './utils/stock';
+import {
+  MANAGE_HACKING_TO_MANAGE_STOCKS_PORT,
+  NULL_PORT_DATA,
+} from './utils/ports';
 
 const COMMISSION_FEE = 100000;
 const PERCENT_OF_NET_WORTH_IN_STOCK = 0.99;
@@ -23,6 +27,19 @@ export async function main(ns) {
   }
 
   while (true) {
+    const manageHackingMessage = ns.readPort(
+      MANAGE_HACKING_TO_MANAGE_STOCKS_PORT
+    );
+    if (manageHackingMessage !== NULL_PORT_DATA) {
+      const response = JSON.parse(manageHackingMessage);
+      if (response.buy) {
+        ns.toast('should be buying ' + response.buy);
+      }
+      if (response.sell) {
+        ns.toast('should be selling ' + response.sell);
+      }
+    }
+
     const cash = ns.getServerMoneyAvailable(HOME_SERVER_NAME);
     const netWorth = getNetWorth(ns);
     if (cash / netWorth < 1 - PERCENT_OF_NET_WORTH_IN_STOCK) {
