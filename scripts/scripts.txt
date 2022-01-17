@@ -15,13 +15,12 @@ manage-hacknet.js	1642229803636.8108
 manage-life.js	1642229803637.162
 manage-programs.js	1642229803637.434
 manage-servers.js	1642229803637.702
-manage-stocks.js	1642455640100.8406
+manage-stocks.js	1642457660295.623
 monitor-server.js	1642446029849.4854
 monitor-stock.js	1642450235913.0203
 sell-all-stocks.js	1642229803638.7188
 startup.js	1642229803639.036
 sync.js	1642229803639.3152
-test.js	1642456099572.0742
 weaken.js	1642229803641.6506
 contracts/algorithmic-stock-trader.js	1642229803629.474
 contracts/array-jumping-game.js	1642229803629.6726
@@ -38,7 +37,7 @@ contracts/unique-paths-in-a-grid.js	1642229803631.3345
 utils/format.js	1642229803639.7505
 utils/hacking.js	1642229803640.0461
 utils/misc.js	1642229803640.241
-utils/organizations.js	1642457182347.5693
+utils/organizations.js	1642457454006.584
 utils/ports.js	1642454231825.1235
 utils/servers.js	1642229803640.7947
 utils/stock.js	1642450826545.7268

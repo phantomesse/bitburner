@@ -33,3 +33,15 @@ const ORGANIZATIONS = {
   'Microdyne Technologies': { stockSymbol: 'MDYN', serverName: 'microdyne' },
   'Titan Laboratories': { stockSymbol: 'TITN', serverName: 'titan-labs' },
 };
+
+/**
+ * @param {string} serverName
+ * @returns {string|undefined} stock symbol
+ */
+export function getStockSymbol(serverName) {
+  const organizations = Object.values(ORGANIZATIONS);
+  const organization = organizations.find(
+    organization => organization.serverName === serverName
+  );
+  return organization === undefined ? undefined : organization.stockSymbol;
+}

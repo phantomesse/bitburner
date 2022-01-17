@@ -6,6 +6,7 @@ import {
   MANAGE_HACKING_TO_MANAGE_STOCKS_PORT,
   NULL_PORT_DATA,
 } from './utils/ports';
+import { getStockSymbol } from './utils/organizations';
 
 const COMMISSION_FEE = 100000;
 const PERCENT_OF_NET_WORTH_IN_STOCK = 0.99;
@@ -33,10 +34,14 @@ export async function main(ns) {
     if (manageHackingMessage !== NULL_PORT_DATA) {
       const response = JSON.parse(manageHackingMessage);
       if (response.buy) {
-        ns.toast('should be buying ' + response.buy);
+        const symbol = getStockSymbol(response.buy);
+        if (symbol !== undefined) {
+          buyStock(ns, symbol, ns.getServerMoneyAvailable(HOME_SERVER_NAME));
+        }
       }
       if (response.sell) {
-        ns.toast('should be selling ' + response.sell);
+        const symbol = getStockSymbol(response.sell);
+        if (symbol !== undefined) sellStock(ns, symbol);
       }
     }
 
