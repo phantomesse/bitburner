@@ -14,6 +14,9 @@ const symbolToAskPriceHistoryMap = {};
 /** @type {Object.<string, number>} */
 const symbolToMaxAskPriceMap = {};
 
+/** @type {Object.<string, number>} */
+const symbolToMinAskPriceMap = {};
+
 /**
  * Gets how much a stock is worth based on how much of it we own and how much
  * the bid price is.
@@ -60,9 +63,9 @@ function predictForecast(ns, symbol) {
     return 0.5;
   }
   symbolToAskPriceHistoryMap[symbol][currentTimestamp] = currentAskPrice;
-  symbolToMaxAskPriceMap[symbol] = Math.max(
-    ...Object.values(symbolToAskPriceHistoryMap[symbol])
-  );
+  const askPrices = Object.values(symbolToAskPriceHistoryMap[symbol]);
+  symbolToMaxAskPriceMap[symbol] = Math.max(...askPrices);
+  symbolToMinAskPriceMap[symbol] = Math.min(...askPrices);
 
   // Not enough data.
   let timestamps = getAskPriceHistoryTimestamps(symbol);
@@ -98,6 +101,7 @@ function predictForecast(ns, symbol) {
     if (forecast > 0.5) forecast -= noChangeCount / totalCount;
   }
   if (symbolToMaxAskPriceMap[symbol] === currentAskPrice) forecast /= 2;
+  if (symbolToMinAskPriceMap[symbol] === currentAskPrice) forecast *= 2;
   return forecast;
 }
 
