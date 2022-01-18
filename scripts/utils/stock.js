@@ -97,7 +97,7 @@ function predictForecast(ns, symbol) {
     if (forecast < 0.5) forecast += noChangeCount / totalCount;
     if (forecast > 0.5) forecast -= noChangeCount / totalCount;
   }
-  if (symbolToMaxAskPriceMap[symbol] === currentAskPrice) forecast *= 2;
+  if (symbolToMaxAskPriceMap[symbol] === currentAskPrice) forecast /= 2;
   return forecast;
 }
 
