@@ -11,7 +11,9 @@
  * @returns {string[]}
  */
 export function generateIpAddresses(input) {
-  return _getAddresses(input);
+  return _getAddresses(input).filter(
+    address => address.split('.').length === 4
+  );
 }
 
 /**

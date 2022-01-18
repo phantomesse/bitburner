@@ -32,7 +32,7 @@ const CONTRACT_TYPE_TO_SOLVER_FN_MAP = {
   'Array Jumping Game': arrayJumpingGame,
   'Find All Valid Math Expressions': findValidMathExpressions,
   'Find Largest Prime Factor': findLargestPrimeFactor,
-  // 'Generate IP Addresses': generateIpAddresses,
+  'Generate IP Addresses': generateIpAddresses,
   'Merge Overlapping Intervals': mergeOverlappingIntervals,
   'Minimum Path Sum in a Triangle': minimumPathSumInATriangle,
   'Sanitize Parentheses in Expression': sanitizeParenthesesInExpression,
