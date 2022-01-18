@@ -11,6 +11,9 @@ const MAX_PRICE_HISTORY_MILLIS = 10 * 60 * 1000; // Max 10 minutes of history.
 /** @type {Object.<string, PriceHistory>} */
 const symbolToAskPriceHistoryMap = {};
 
+/** @type {Object.<string, number>} */
+const symbolToMaxAskPriceMap = {};
+
 /**
  * Gets how much a stock is worth based on how much of it we own and how much
  * the bid price is.
@@ -57,6 +60,9 @@ function predictForecast(ns, symbol) {
     return 0.5;
   }
   symbolToAskPriceHistoryMap[symbol][currentTimestamp] = currentAskPrice;
+  symbolToMaxAskPriceMap[symbol] = Math.max(
+    ...Object.values(symbolToAskPriceHistoryMap[symbol])
+  );
 
   // Not enough data.
   let timestamps = getAskPriceHistoryTimestamps(symbol);
@@ -91,6 +97,7 @@ function predictForecast(ns, symbol) {
     if (forecast < 0.5) forecast += noChangeCount / totalCount;
     if (forecast > 0.5) forecast -= noChangeCount / totalCount;
   }
+  if (symbolToMaxAskPriceMap[symbol] === currentAskPrice) forecast *= 2;
   return forecast;
 }
 

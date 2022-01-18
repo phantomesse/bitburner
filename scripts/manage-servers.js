@@ -2,12 +2,6 @@ import { MANAGE_SERVERS_TO_MANAGE_HACKING_PORT } from '/utils/ports.js';
 import { getMoneyToSpend, sort } from '/utils/misc.js';
 import { PURCHASED_SERVER_PREFIX } from '/utils/servers.js';
 
-const DISABLE_LOGGING_FUNCTIONS = [
-  'getServerMaxRam',
-  'sleep',
-  'getServerMoneyAvailable',
-];
-
 const MIN_POWER = 3; // Min RAM that we want is at least 8GB
 const MAX_POWER = 20; // Max RAM is 2^20
 
@@ -18,7 +12,7 @@ const MAX_POWER = 20; // Max RAM is 2^20
  * @param {import('index').NS} ns
  */
 export async function main(ns) {
-  DISABLE_LOGGING_FUNCTIONS.forEach(ns.disableLog);
+  ns.disableLog('ALL');
   const purchasedServerLimit = ns.getPurchasedServerLimit();
   let lowestRamAcceptable = Math.pow(2, MIN_POWER);
 

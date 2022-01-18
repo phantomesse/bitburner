@@ -2,9 +2,10 @@ const SCRIPTS_TO_RUN = [
   'sync.js',
   'manage-hacking.js',
   'manage-hacknet.js',
+  'manage-life.js',
+  'manage-programs.js',
   'manage-servers.js',
   'manage-stocks.js',
-  'manage-programs.js',
 ];
 
 /**
