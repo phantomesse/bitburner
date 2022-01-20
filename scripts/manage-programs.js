@@ -4,6 +4,7 @@ const PROGRAMS = [
   'relaySMTP.exe',
   'FTPCrack.exe',
   'BruteSSH.exe',
+  'Formulas.exe',
 ];
 
 /**
