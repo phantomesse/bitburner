@@ -10,11 +10,11 @@ get-servers-info.js	1641507109407.2432
 get-stock-info.js	1641505714150.8755
 grow.js	1642009816249.7214
 hack.js	1642009869847.3403
-manage-hacking.js	1642708272482.239
+manage-hacking.js	1642713498859.552
 manage-hacknet.js	1642708332621.188
 manage-life.js	1642697161615.7932
 manage-programs.js	1642697486181.5813
-manage-servers.js	1642697161617.8196
+manage-servers.js	1642712084259.1924
 manage-stocks.js	1642697161619.6006
 monitor-server.js	1642697161620.9382
 monitor-stock.js	1642697161621.2502
@@ -35,7 +35,7 @@ contracts/subarray-with-maximum-sum.js	1641675841197.6194
 contracts/total-ways-to-sum.js	1641675385873.5703
 contracts/unique-paths-in-a-grid.js	1641748543482.7366
 utils/format.js	1641505785560.3442
-utils/hacking.js	1642711744525.2969
+utils/hacking.js	1642711860456.268
 utils/misc.js	1641505859821.7234
 utils/organizations.js	1642697161624.9453
 utils/ports.js	1642697161626.1782

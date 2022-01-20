@@ -7,7 +7,7 @@ import {
 } from '/utils/hacking.js';
 import { HOME_SERVER_NAME, getAllServerNames } from '/utils/servers.js';
 import { sort } from '/utils/misc.js';
-import { formatMoney, formatPercent } from '/utils/format.js';
+import { formatMoney, formatNumber, formatPercent } from '/utils/format.js';
 import {
   MANAGE_HACKING_TO_MANAGE_STOCKS_PORT,
   MANAGE_SERVERS_TO_MANAGE_HACKING_PORT,
@@ -222,6 +222,46 @@ export async function main(ns) {
       }
     }
 
+    if (
+      ns.fileExists('Formulas.exe') &&
+      hasFreeRam(ns, rootAccessServerNames)
+    ) {
+      // Get server with the most hack exp.
+      const hackableServerNamesSortedByHackExp = [...hackableServerNames];
+      const player = ns.getPlayer();
+      sort(
+        hackableServerNamesSortedByHackExp,
+        serverName =>
+          ns.formulas.hacking.hackExp(ns.getServer(serverName), player),
+        true
+      );
+      const targetServerName = hackableServerNamesSortedByHackExp[0];
+
+      for (const rootAccessServerName of rootAccessServerNames) {
+        const threadCount = getAvailableThreadCount(
+          ns,
+          rootAccessServerName,
+          HACK_SCRIPT
+        );
+        if (threadCount === 0) continue;
+        ns.toast('hello ' + rootAccessServerName + ' ' + threadCount);
+        const pid = ns.exec(
+          HACK_SCRIPT,
+          rootAccessServerName,
+          threadCount,
+          targetServerName,
+          1
+        );
+        if (pid > 0) {
+          ns.print(
+            `hacking ${targetServerName} on ${rootAccessServerName} with ${formatNumber(
+              threadCount
+            )} threads`
+          );
+        }
+      }
+    }
+
     await ns.sleep(3000); // Wait for 3 seconds.
   }
 }
@@ -297,8 +337,9 @@ function getFreeRam(ns, serverNames) {
       ns.getServerMaxRam(serverName) - ns.getServerUsedRam(serverName);
     if (serverName !== HOME_SERVER_NAME) return freeRam;
 
-    if (homeReservedRam !== undefined)
+    if (homeReservedRam !== undefined) {
       return Math.max(freeRam - homeReservedRam, 0);
+    }
 
     // If home server, make sure to reserve RAM to run other scripts.
     const scripts = ns
@@ -350,6 +391,8 @@ function hasFreeRam(ns, rootAccessServerNames) {
  * Grow until min money.
  *
  * @param {import('index').NS} ns
+ * @param {string} targetServerName
+ * @param {string[]} rootAccessServerNames
  * @param {number} [minMoneyAvailable] if not set, then will grow until max
  * 																		 money
  */
@@ -388,6 +431,8 @@ function grow(ns, targetServerName, rootAccessServerNames, minMoneyAvailable) {
  * Weaken until min security level.
  *
  * @param {import('index').NS} ns
+ * @param {string} targetServerName
+ * @param {string[]} rootAccessServerNames
  */
 function weaken(ns, targetServerName, rootAccessServerNames) {
   const currentSecurityLevel = ns.getServerSecurityLevel(targetServerName);
@@ -424,6 +469,8 @@ function weaken(ns, targetServerName, rootAccessServerNames) {
 
 /**
  * @param {import('index').NS} ns
+ * @param {string} targetServerName
+ * @param {string[]} rootAccessServerNames
  */
 function hack(ns, targetServerName, rootAccessServerNames) {
   // Get number of threads needed to hack all the money from the server.

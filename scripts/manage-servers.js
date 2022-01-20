@@ -1,6 +1,7 @@
 import { MANAGE_SERVERS_TO_MANAGE_HACKING_PORT } from '/utils/ports.js';
 import { getMoneyToSpend, sort } from '/utils/misc.js';
 import { PURCHASED_SERVER_PREFIX } from '/utils/servers.js';
+import { formatNumber } from '/utils/format.js';
 
 const MIN_POWER = 3; // Min RAM that we want is at least 8GB
 const MAX_POWER = 20; // Max RAM is 2^20
@@ -44,7 +45,7 @@ export async function main(ns) {
       // Buy server.
       const server = ns.purchaseServer(PURCHASED_SERVER_PREFIX, ram);
       if (server !== '') {
-        ns.toast(`bought server (${server}) with ${ram}GB RAM`);
+        ns.toast(`bought server (${server}) with ${formatNumber(ram)}GB RAM`);
         await ns.writePort(
           MANAGE_SERVERS_TO_MANAGE_HACKING_PORT,
           JSON.stringify({ add: server })
