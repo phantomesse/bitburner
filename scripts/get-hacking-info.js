@@ -22,6 +22,7 @@ const HACK_CHANCE_COLUMN_HEADER = 'Hack chance';
 const BEING_GROWN_COLUMN_HEADER = 'Growing by';
 const BEING_WEAKENED_COLUMN_HEADER = 'Weakening by';
 const BEING_HACKED_COLUMN_HEADER = 'Hacked by';
+const HACK_EXP_HEADER = 'Hack exp';
 
 /**
  * Prints out information about all hackable servers.
@@ -91,6 +92,7 @@ export function main(ns) {
       [BEING_GROWN_COLUMN_HEADER]: Alignment.RIGHT,
       [BEING_WEAKENED_COLUMN_HEADER]: Alignment.RIGHT,
       [BEING_HACKED_COLUMN_HEADER]: Alignment.RIGHT,
+      [HACK_EXP_HEADER]: Alignment.RIGHT,
     },
     ...hackableServers.map(server => [server.getTableRow()])
   );
@@ -118,6 +120,15 @@ class Server {
     this.growTime = ns.getGrowTime(serverName);
     this.weakenTime = ns.getWeakenTime(serverName);
     this.hackTime = ns.getHackTime(serverName);
+
+    try {
+      this.hackExp = ns.formulas.hacking.hackExp(
+        ns.getServer(serverName),
+        ns.getPlayer()
+      );
+    } catch (_) {
+      // No Formulas.exe
+    }
 
     this.beingGrownBy = [];
     this.beingWeakenedBy = [];
@@ -156,7 +167,7 @@ class Server {
   }
 
   getTableRow() {
-    return {
+    const row = {
       [SERVER_NAME_COLUMN_HEADER]:
         this.name +
         `\nHack heuristic: ${formatNumber(this.hackHeuristic, true)}`,
@@ -176,7 +187,9 @@ class Server {
       [BEING_GROWN_COLUMN_HEADER]: this._formatScripts(this.beingGrownBy),
       [BEING_WEAKENED_COLUMN_HEADER]: this._formatScripts(this.beingWeakenedBy),
       [BEING_HACKED_COLUMN_HEADER]: this._formatScripts(this.beingHackedBy),
-      rowColor: this._getRowColor(),
     };
+    if (this.hackExp) row[HACK_EXP_HEADER] = formatNumber(this.hackExp, true);
+    row.rowColor = this._getRowColor();
+    return row;
   }
 }

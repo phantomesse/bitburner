@@ -34,10 +34,16 @@ export function isHackable(ns, serverName) {
  * @returns {number} higher number means better to hack
  */
 export function getHackingHeuristic(ns, serverName) {
-  return (
+  let heuristic =
     (ns.hackAnalyzeChance(serverName) *
       ns.hackAnalyze(serverName) *
       ns.getServerMoneyAvailable(serverName)) /
-    ns.getHackTime(serverName)
-  );
+    ns.getHackTime(serverName);
+  try {
+    heuristic *= ns.formulas.hacking.hackExp(
+      ns.getServer(serverName),
+      ns.getPlayer()
+    );
+  } catch (_) {}
+  return heuristic;
 }
