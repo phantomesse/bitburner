@@ -306,18 +306,9 @@ function getFreeRam(ns, serverNames) {
       .filter(
         fileName => fileName.endsWith('.js') && !fileName.startsWith('/')
       );
-    const oneTimeUseScripts = scripts.filter(
-      script => script.startsWith('find-') || script.startsWith('get-')
-    );
-    const oneTimeUseRam = Math.max(
+    let reservedRam = Math.max(
       ...scripts.map(script => ns.getScriptRam(script))
     );
-    let reservedRam =
-      scripts
-        .filter(script => !oneTimeUseScripts.includes(script))
-        .filter(fileName => !ns.scriptRunning(fileName, HOME_SERVER_NAME))
-        .map(script => ns.getScriptRam(script))
-        .reduce((a, b) => a + b) + oneTimeUseRam;
     return Math.max(freeRam - reservedRam, 0);
   }
   return serverNames
