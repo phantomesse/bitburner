@@ -41,7 +41,14 @@ export function formatPercent(percent) {
  * @returns {string} e.g. "43s", "4m 0s", "3m 32s"
  */
 export function formatTime(timeMs) {
-  const minutes = Math.floor(timeMs / 1000 / 60);
-  const seconds = Math.floor((timeMs - minutes * 1000 * 60) / 1000);
-  return (minutes > 0 ? `${minutes}m ` : '') + `${seconds}s`;
+  const hours = Math.floor(timeMs / 1000 / 60 / 60);
+  const minutes = Math.floor((timeMs - hours * 1000 * 60 * 60) / 1000 / 60);
+  const seconds = Math.floor(
+    (timeMs - hours * 1000 * 60 * 60 - minutes * 1000 * 60) / 1000
+  );
+  return (
+    (hours > 0 ? `${formatNumber(hours)}h ` : '') +
+    (minutes > 0 ? `${minutes}m ` : '') +
+    `${seconds}s`
+  );
 }
