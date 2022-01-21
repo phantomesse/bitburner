@@ -233,8 +233,7 @@ export async function main(ns) {
         hackableServerNamesSortedByHackExp,
         /** @type {string} */ serverName =>
           ns.formulas.hacking.hackExp(ns.getServer(serverName), player) /
-          ns.getHackTime(serverName),
-        true
+          ns.getWeakenTime(serverName)
       );
       const targetServerName = hackableServerNamesSortedByHackExp[0];
 
@@ -242,19 +241,19 @@ export async function main(ns) {
         const threadCount = getAvailableThreadCount(
           ns,
           rootAccessServerName,
-          HACK_SCRIPT
+          WEAKEN_SCRIPT
         );
         if (threadCount === 0) continue;
         const pid = ns.exec(
-          HACK_SCRIPT,
+          WEAKEN_SCRIPT,
           rootAccessServerName,
           threadCount,
           targetServerName,
           1
         );
         if (pid > 0) {
-          ns.toast(
-            `hacking ${targetServerName} on ${rootAccessServerName} with ${formatNumber(
+          ns.print(
+            `weakening ${targetServerName} on ${rootAccessServerName} with ${formatNumber(
               threadCount
             )} threads`
           );
