@@ -79,7 +79,7 @@ function evaluate(expression) {
       const product = factors
         .filter(factor => factor !== '1')
         .map(factor => parseInt(factor))
-        .reduce((a, b) => a * b);
+        .reduce((a, b) => a * b, 1);
       sum += product;
     } else {
       sum += parseInt(addend);
