@@ -5,6 +5,18 @@ const WORKING_WORK_TYPES = [
   'Working for Company',
 ];
 
+const CITY_TO_GYM_MAP = {
+  'Sector-12': 'powerhouse gym',
+  Volhaven: 'millenium fitness gym',
+  Aevum: 'snap fitness gym',
+};
+
+const CITY_TO_UNIVERSITY_MAP = {
+  'Sector-12': 'rothman university',
+  Volhaven: 'zb institute of technology',
+  Aevum: 'summit university',
+};
+
 /**
  * Manages life when we're not busy playing.
  *
@@ -68,28 +80,35 @@ export async function main(ns) {
     }
 
     // Player is no longer busy, so start learning something!
-    switch (lowestSkill) {
-      case player.strength:
-        ns.gymWorkout('powerhouse gym', 'strength');
-        break;
-      case player.defense:
-        ns.gymWorkout('powerhouse gym', 'defense');
-        break;
-      case player.dexterity:
-        ns.gymWorkout('powerhouse gym', 'dexterity');
-        break;
-      case player.agility:
-        ns.gymWorkout('powerhouse gym', 'agility');
-        break;
-      case player.charisma:
-        ns.universityCourse('rothman university', 'Leadership');
-        break;
-      case player.hacking:
-        ns.universityCourse('rothman university', 'Algorithms');
-        break;
-      default:
-        // Should never get here.
-        ns.universityCourse('rothman university', 'Leadership');
+    if (
+      player.city in CITY_TO_GYM_MAP &&
+      player.city in CITY_TO_UNIVERSITY_MAP
+    ) {
+      const gym = CITY_TO_GYM_MAP[player.city];
+      const university = CITY_TO_UNIVERSITY_MAP[player.city];
+      switch (lowestSkill) {
+        case player.strength:
+          ns.gymWorkout(gym, 'strength');
+          break;
+        case player.defense:
+          ns.gymWorkout(gym, 'defense');
+          break;
+        case player.dexterity:
+          ns.gymWorkout(gym, 'dexterity');
+          break;
+        case player.agility:
+          ns.gymWorkout(gym, 'agility');
+          break;
+        case player.charisma:
+          ns.universityCourse(university, 'Leadership');
+          break;
+        case player.hacking:
+          ns.universityCourse(university, 'Algorithms');
+          break;
+        default:
+          // Should never get here.
+          ns.universityCourse(university, 'Leadership');
+      }
     }
     await ns.sleep(10000);
   }
