@@ -1,11 +1,5 @@
 import { sort } from './utils/misc';
 
-const DIVISION_NAMES = [
-  'Agriculture Division',
-  'Software Division',
-  'Food Division',
-];
-
 /**
  * Manages a corporation.
  *
@@ -16,14 +10,30 @@ export async function main(ns) {
 
   while (true) {
     ns.clearLog();
-    for (const divisionName of DIVISION_NAMES) {
-      const division = ns.corporation.getDivision(divisionName);
+
+    // Division-specific actions.
+    const divisions = ns.corporation.getCorporation().divisions;
+    for (const division of divisions) {
       for (const cityName of division.cities) {
+        manageWarehouse(ns, division.name, cityName);
         await manageEmployees(ns, division, cityName);
-        await manageWarehouse(ns, division, cityName);
       }
     }
+
     await ns.sleep(1000 * 10);
+  }
+}
+/**
+ * @param {import('index').NS} ns
+ * @param {string} divisionName
+ * @param {string} cityName
+ */
+function manageWarehouse(ns, divisionName, cityName) {
+  // Upgrade warehouse size if more than 90% of it is being used.
+  const warehouse = ns.corporation.getWarehouse(divisionName, cityName);
+  if (warehouse.sizeUsed > warehouse.size * 0.9) {
+    ns.print(`upgrading warehouse in ${divisionName} - ${cityName}`);
+    ns.corporation.upgradeWarehouse(divisionName, cityName);
   }
 }
 
@@ -34,7 +44,19 @@ export async function main(ns) {
  */
 async function manageEmployees(ns, division, cityName) {
   const divisionName = division.name;
+
+  // Expand office and hire.
   const office = ns.corporation.getOffice(divisionName, cityName);
+  let previousOfficeSize;
+  do {
+    previousOfficeSize = office.size;
+    ns.corporation.upgradeOfficeSize(divisionName, cityName, 1);
+    if (office.size > previousOfficeSize) {
+      ns.print(`expanded office size in ${divisionName} - ${cityName}`);
+    }
+    ns.corporation.hireEmployee(divisionName, cityName);
+  } while (office.size > previousOfficeSize);
+
   const employees = office.employees.map(employeeName =>
     ns.corporation.getEmployee(divisionName, cityName, employeeName)
   );
@@ -109,20 +131,4 @@ async function manageEmployees(ns, division, cityName) {
 
   // Assign the rest to be operators.
   await assignJobs('Operations');
-}
-
-/**
- * @param {import('index').NS} ns
- * @param {import('index').Division} division
- * @param {string} cityName
- */
-async function manageWarehouse(ns, division, cityName) {
-  const warehouse = ns.corporation.getWarehouse(division.name, cityName);
-  ns.print(
-    `${division.name} - ${cityName}: ${warehouse.sizeUsed} / ${warehouse.size}`
-  );
-  if (warehouse.sizeUsed > warehouse.size * 0.9) {
-    ns.print(`upgrading warehouse in ${division.name} - ${cityName}`);
-    ns.corporation.upgradeWarehouse(division.name, cityName);
-  }
 }
