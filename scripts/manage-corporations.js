@@ -63,6 +63,12 @@ export async function main(ns) {
         manageWarehouse(ns, division.name, cityName);
         manageResearch(ns, division.name);
         await manageEmployees(ns, division, cityName);
+
+        // Use Market TA for all products.
+        for (const product of division.products) {
+          ns.corporation.setProductMarketTA1(division.name, product, true);
+          ns.corporation.setProductMarketTA2(division.name, product, true);
+        }
       }
     }
 
