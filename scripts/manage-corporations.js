@@ -95,6 +95,17 @@ function manageResearch(ns, divisionName) {
  * @param {string} cityName
  */
 function manageWarehouse(ns, divisionName, cityName) {
+  if (!ns.corporation.hasWarehouse(divisionName, cityName)) {
+    if (
+      ns.corporation.getPurchaseWarehouseCost() <
+      ns.corporation.getCorporation().funds
+    ) {
+      ns.corporation.purchaseWarehouse(divisionName, cityName);
+    } else {
+      return;
+    }
+  }
+
   // Upgrade warehouse size if more than 90% of it is being used.
   const warehouse = ns.corporation.getWarehouse(divisionName, cityName);
   if (
