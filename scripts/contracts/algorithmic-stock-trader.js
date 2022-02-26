@@ -46,6 +46,11 @@ function _getMaxProfit(maxTradeCount, stockPrices) {
       buyDay
     );
   }
+  if (
+    tradesWithPositiveProfits.find(trades => trades.length > 0) === undefined
+  ) {
+    return 0;
+  }
 
   const tradePermutations = Array(stockPrices.length); // Index is buy day.
   for (let buyDay = stockPrices.length - 1; buyDay >= 0; buyDay--) {
