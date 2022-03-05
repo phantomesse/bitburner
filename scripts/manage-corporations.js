@@ -15,11 +15,19 @@ const UPGRADES = [
   'Project Insight',
 ];
 
+const MULTIPLIER_MATERIAL_NAMES = [
+  'Real Estate',
+  'Hardware',
+  'Robots',
+  'AI Cores',
+];
+
 /**
  * @typedef {Object} Industry
  * @param {string} name
  * @param {Material[]} inputs
  * @param {Material[]} outputs
+ * @param {number} maxProducts
  */
 
 /**
@@ -39,6 +47,7 @@ const UPGRADES = [
       { name: 'Plants', quantity: 1 },
       { name: 'Food', quantity: 1 },
     ],
+    maxProducts: 0,
   },
   {
     name: 'Chemical',
@@ -48,6 +57,7 @@ const UPGRADES = [
       { name: 'Water', quantity: 0.5 },
     ],
     outputs: [{ name: 'Chemicals', quantity: 1 }],
+    maxProducts: 0,
   },
   {
     name: 'Computer',
@@ -56,6 +66,7 @@ const UPGRADES = [
       { name: 'Energy', quantity: 1 },
     ],
     outputs: [],
+    maxProducts: 3,
   },
   {
     name: 'Energy',
@@ -64,11 +75,13 @@ const UPGRADES = [
       { name: 'Metal', quantity: 0.2 },
     ],
     outputs: [{ name: 'Energy', quantity: 1 }],
+    maxProducts: 0,
   },
   {
     name: 'Fishing',
     inputs: [{ name: 'Energy', quantity: 0.5 }],
     outputs: [{ name: 'Food', quantity: 1 }],
+    maxProducts: 0,
   },
   {
     name: 'Food',
@@ -78,6 +91,7 @@ const UPGRADES = [
       { name: 'Energy', quantity: 0.2 },
     ],
     outputs: [{ name: 'Food', quantity: 1 }],
+    maxProducts: 5,
   },
   {
     name: 'Healthcare',
@@ -88,11 +102,13 @@ const UPGRADES = [
       { name: 'Water', quantity: 5 },
     ],
     outputs: [],
+    maxProducts: 3,
   },
   {
     name: 'Mining',
     inputs: [{ name: 'Energy', quantity: 0.8 }],
     outputs: [{ name: 'Metal', quantity: 1 }],
+    maxProducts: 0,
   },
   {
     name: 'Pharmaceutical',
@@ -102,6 +118,7 @@ const UPGRADES = [
       { name: 'Water', quantity: 0.5 },
     ],
     outputs: [{ name: 'Drugs', quantity: 1 }],
+    maxProducts: 3,
   },
   {
     name: 'RealEstate',
@@ -112,6 +129,7 @@ const UPGRADES = [
       { name: 'Hardware', quantity: 4 },
     ],
     outputs: [{ name: 'Real Estate', quantity: 1 }],
+    maxProducts: 3,
   },
   {
     name: 'Robotics',
@@ -120,6 +138,7 @@ const UPGRADES = [
       { name: 'Energy', quantity: 3 },
     ],
     outputs: [{ name: 'Robots', quantity: 1 }],
+    maxProducts: 4,
   },
   {
     name: 'Software',
@@ -128,6 +147,7 @@ const UPGRADES = [
       { name: 'Energy', quantity: 0.5 },
     ],
     outputs: [{ name: 'AI Cores', quantity: 1 }],
+    maxProducts: 5,
   },
   {
     name: 'Tobacco',
@@ -136,6 +156,7 @@ const UPGRADES = [
       { name: 'Water', quantity: 0.2 },
     ],
     outputs: [],
+    maxProducts: 3,
   },
   {
     name: 'Utilities',
@@ -144,6 +165,7 @@ const UPGRADES = [
       { name: 'Metal', quantity: 0.1 },
     ],
     outputs: [{ name: 'Water', quantity: 1 }],
+    maxProducts: 0,
   },
 ];
 
@@ -244,9 +266,10 @@ export async function main(ns) {
     // Division-specific actions.
     const divisions = ns.corporation.getCorporation().divisions;
     for (const division of divisions) {
+      manageResearch(ns, division.name);
+
       for (const cityName of division.cities) {
         manageWarehouse(ns, division.name, cityName);
-        manageResearch(ns, division.name);
 
         while (
           ns.corporation.getHireAdVertCost(division.name) <
@@ -255,97 +278,10 @@ export async function main(ns) {
           ns.corporation.hireAdVert(division.name);
           ns.print('hired advert in ' + division.name);
         }
-
-        if (ns.corporation.hasWarehouse(division.name, cityName)) {
-          const industry = INDUSTRIES.filter(
-            industry => industry.name === division.type
-          )[0];
-
-          for (const material of industry.outputs) {
-            // Export any output materials that are also input materials for other
-            // divisions.
-            const targets = [];
-            const exportIndustries = INDUSTRIES.filter(
-              i =>
-                ['Real Estate', 'Hardware', 'Robots', 'AI Cores'].includes(
-                  material.name
-                ) ||
-                i.inputs.filter(mat => mat.name === material.name).length > 0
-            ).filter(
-              i =>
-                ns.corporation
-                  .getCorporation()
-                  .divisions.filter(d => d.name.includes(i.name)).length > 0
-            );
-            for (const exportIndustry of exportIndustries) {
-              const targetDivisionName = exportIndustry.name + ' Division';
-              for (const targetCityName of ns.corporation.getDivision(
-                targetDivisionName
-              ).cities) {
-                targets.push({
-                  division: targetDivisionName,
-                  city: targetCityName,
-                });
-              }
-            }
-            for (const target of targets) {
-              ns.corporation.exportMaterial(
-                division.name,
-                cityName,
-                target.division,
-                target.city,
-                material.name,
-                `MAX / ${targets.length + 1}`
-              );
-            }
-
-            ns.corporation.sellMaterial(
-              division.name,
-              cityName,
-              material.name,
-              targets.length === 0 ? 'MAX' : 'MAX / ' + (targets.length + 1),
-              'MP'
-            );
-
-            // Use Market TA for all output materials.
-            ns.corporation.setMaterialMarketTA1(
-              division.name,
-              cityName,
-              material.name,
-              true
-            );
-            ns.corporation.setMaterialMarketTA2(
-              division.name,
-              cityName,
-              material.name,
-              true
-            );
-          }
-        }
-
-        // Use Market TA for all products.
-        const funds = ns.corporation.getCorporation().funds;
-        ns.corporation.makeProduct(
-          division.name,
-          cityName,
-          'Product ' +
-            ns.corporation.getDivision(division.name).products.length,
-          funds / 2,
-          funds / 2
-        );
-        for (const product of division.products) {
-          ns.corporation.sellProduct(
-            division.name,
-            cityName,
-            product,
-            'MAX',
-            'MP',
-            true
-          );
-          ns.corporation.setProductMarketTA1(division.name, product, true);
-          ns.corporation.setProductMarketTA2(division.name, product, true);
-        }
       }
+
+      manageMaterials(ns, division.name);
+      manageProducts(ns, division.name);
     }
 
     for (const division of divisions) {
@@ -355,6 +291,100 @@ export async function main(ns) {
     }
 
     await ns.sleep(1000 * 10);
+  }
+}
+
+/**
+ * @param {import('index').NS} ns
+ * @param {string} divisionName
+ */
+function manageMaterials(ns, divisionName) {
+  const division = ns.corporation.getDivision(divisionName);
+  const industry = INDUSTRIES.find(industry => industry.name === division.type);
+  const cityNames = division.cities.filter(cityName =>
+    ns.corporation.hasWarehouse(divisionName, cityName)
+  );
+
+  for (const cityName of cityNames) {
+    // Fill half the warehouse with multiplier materials.
+    const warehouse = ns.corporation.getWarehouse(divisionName, cityName);
+    const multiplierMaterialQuantity =
+      (warehouse.size - warehouse.sizeUsed) /
+      2 /
+      MULTIPLIER_MATERIAL_NAMES.length;
+    for (const materialName of MULTIPLIER_MATERIAL_NAMES) {
+      ns.corporation.buyMaterial(
+        divisionName,
+        cityName,
+        materialName,
+        multiplierMaterialQuantity
+      );
+    }
+
+    // Sell output materials for MP and any non-output multiplier materials for
+    // twice the market price.
+    const outputMaterialNames = industry.outputs.map(
+      (/** @type {Material} */ output) => output.name
+    );
+    const materialsToSell = new Set(
+      MULTIPLIER_MATERIAL_NAMES.concat(outputMaterialNames)
+    );
+    for (const materialName of materialsToSell) {
+      _sellMaterial(
+        ns,
+        divisionName,
+        cityName,
+        materialName,
+        outputMaterialNames.includes(materialName) ? 'MAX' : 'MAX / 2',
+        outputMaterialNames.includes(materialName) ? 'MP' : 'MP * 2'
+      );
+    }
+  }
+}
+
+/**
+ * @param {import('index').NS} ns
+ * @param {string} divisionName
+ */
+function manageProducts(ns, divisionName) {
+  // Create products if we don't have max products already.
+  let division = ns.corporation.getDivision(divisionName);
+  const industry = INDUSTRIES.find(industry => industry.name === division.type);
+  if (division.products.length < industry.maxProducts) {
+    const mostCreativeCityName = division.cities
+      .map(cityName => {
+        return {
+          cityName: cityName,
+          creativity: ns.corporation
+            .getOffice(divisionName, cityName)
+            .employees.map(employeeName =>
+              ns.corporation.getEmployee(divisionName, cityName, employeeName)
+            )
+            .filter(employee => employee.pos === 'Engineer')
+            .map(employee => employee.cre)
+            .reduce((a, b) => a + b),
+        };
+      })
+      .reduce((a, b) => (a.creativity > b.creativity ? a : b), {
+        cityName: '',
+        creativity: 0,
+      }).cityName;
+    if (mostCreativeCityName === '') return;
+    const funds = ns.corporation.getCorporation().funds;
+    ns.corporation.makeProduct(
+      divisionName,
+      mostCreativeCityName,
+      'Product ' + division.products.length,
+      funds / 2,
+      funds / 2
+    );
+  }
+
+  // Set Market TA.
+  division = ns.corporation.getDivision(divisionName);
+  for (const productName of division.products) {
+    ns.corporation.setProductMarketTA1(divisionName, productName, true);
+    ns.corporation.setProductMarketTA2(divisionName, productName, true);
   }
 }
 
@@ -466,7 +496,7 @@ async function manageEmployees(ns, division, cityName) {
   // Assign the worst traited employees to training.
   await assignJobs(
     'Training',
-    divisor * 2,
+    divisor,
     (/** @type {import('index').Employee} */ employee) =>
       employee.cha + employee.exp + employee.cre + employee.eff
   );
@@ -511,4 +541,46 @@ async function manageEmployees(ns, division, cityName) {
 
   // Assign the rest to be operators.
   await assignJobs('Operations');
+}
+
+/**
+ * @param {string} industryName
+ */
+const _getDivisionName = industryName => industryName + ' Division';
+
+/**
+ * @param {import('index').NS} ns
+ * @param {string} divisionName
+ * @param {string} cityName
+ * @param {string} materialName
+ * @param {string} amount
+ * @param {string} price
+ */
+function _sellMaterial(
+  ns,
+  divisionName,
+  cityName,
+  materialName,
+  amount,
+  price
+) {
+  ns.corporation.sellMaterial(
+    divisionName,
+    cityName,
+    materialName,
+    amount,
+    price
+  );
+  ns.corporation.setMaterialMarketTA1(
+    divisionName,
+    cityName,
+    materialName,
+    true
+  );
+  ns.corporation.setMaterialMarketTA2(
+    divisionName,
+    cityName,
+    materialName,
+    true
+  );
 }
