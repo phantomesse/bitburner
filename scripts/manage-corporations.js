@@ -383,6 +383,17 @@ function manageProducts(ns, divisionName) {
   // Set Market TA.
   division = ns.corporation.getDivision(divisionName);
   for (const productName of division.products) {
+    for (const cityName of division.cities) {
+      if (!ns.corporation.hasWarehouse(divisionName, cityName)) continue;
+      ns.corporation.sellProduct(
+        divisionName,
+        cityName,
+        productName,
+        'MAX',
+        'MP',
+        true
+      );
+    }
     ns.corporation.setProductMarketTA1(divisionName, productName, true);
     ns.corporation.setProductMarketTA2(divisionName, productName, true);
   }
@@ -439,9 +450,10 @@ async function manageEmployees(ns, division, cityName) {
   const divisionName = division.name;
 
   // Expand office and hire.
-  const office = ns.corporation.getOffice(divisionName, cityName);
+  let office = ns.corporation.getOffice(divisionName, cityName);
   let previousOfficeSize;
   do {
+    office = ns.corporation.getOffice(divisionName, cityName);
     previousOfficeSize = office.size;
     ns.corporation.upgradeOfficeSize(divisionName, cityName, 1);
     if (office.size > previousOfficeSize) {
@@ -450,6 +462,7 @@ async function manageEmployees(ns, division, cityName) {
     ns.corporation.hireEmployee(divisionName, cityName);
   } while (office.size > previousOfficeSize);
 
+  office = ns.corporation.getOffice(divisionName, cityName);
   const employees = office.employees.map(employeeName =>
     ns.corporation.getEmployee(divisionName, cityName, employeeName)
   );
@@ -461,13 +474,11 @@ async function manageEmployees(ns, division, cityName) {
    * @param {boolean} [sortReverse]
    */
   async function assignJobs(job, divisor, sortFn, sortReverse) {
-    if (!divisor) divisor = 1;
-    if (employees.length < divisor) return;
+    if (divisor && employees.length < divisor) return;
     if (sortFn) sort(employees, sortFn, sortReverse);
-    const employeesToAssign = employees.splice(
-      0,
-      Math.floor(employees.length / divisor)
-    );
+    const employeesToAssign = divisor
+      ? employees.splice(0, Math.floor(employees.length / divisor))
+      : employees;
     for (const employee of employeesToAssign) {
       if (employee.pos === job) continue;
       await ns.corporation.assignJob(
@@ -496,7 +507,7 @@ async function manageEmployees(ns, division, cityName) {
   // Assign the worst traited employees to training.
   await assignJobs(
     'Training',
-    divisor,
+    divisor * 2,
     (/** @type {import('index').Employee} */ employee) =>
       employee.cha + employee.exp + employee.cre + employee.eff
   );
