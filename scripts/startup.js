@@ -5,8 +5,6 @@ const SCRIPTS_TO_RUN = [
   'manage-programs.js',
   'manage-servers.js',
   'manage-stocks.js',
-  'manage-corporations.js',
-  'find-backdoors.js',
 ];
 
 /**
