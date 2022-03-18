@@ -18,6 +18,14 @@ export async function main(ns) {
   let lowestRamAcceptable = Math.pow(2, MIN_POWER);
 
   while (true) {
+    // Upgrade home server.
+    while (ns.getUpgradeHomeCoresCost() < getMoneyToSpend(ns)) {
+      ns.upgradeHomeCores();
+    }
+    while (ns.getUpgradeHomeRamCost() < getMoneyToSpend(ns)) {
+      ns.upgradeHomeRam();
+    }
+
     // Buy / upgrade servers.
     for (let power = MAX_POWER; power >= MIN_POWER; power--) {
       const ram = Math.pow(2, power);
