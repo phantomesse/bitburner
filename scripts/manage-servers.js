@@ -33,7 +33,9 @@ export async function main(ns) {
         ns.killall(lowestRamServerName);
         if (ns.deleteServer(lowestRamServerName)) {
           ns.toast(
-            `deleted server ${lowestRamServerName} which had ${lowestRam}GB RAM`
+            `deleted server ${lowestRamServerName} which had ${formatNumber(
+              lowestRam
+            )}GB RAM`
           );
           await ns.writePort(
             MANAGE_SERVERS_TO_MANAGE_HACKING_PORT,
@@ -57,7 +59,11 @@ export async function main(ns) {
           const lowestRam = ns.getServerMaxRam(lowestRamServerName);
           if (lowestRam > lowestRamAcceptable) {
             lowestRamAcceptable = lowestRam;
-            ns.toast(`now only buying servers >= ${lowestRamAcceptable}GB RAM`);
+            ns.toast(
+              `now only buying servers >= ${formatNumber(
+                lowestRamAcceptable
+              )}GB RAM`
+            );
           }
         }
       }
