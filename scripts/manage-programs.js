@@ -4,7 +4,6 @@ const PROGRAMS = [
   'relaySMTP.exe',
   'FTPCrack.exe',
   'BruteSSH.exe',
-  'Formulas.exe',
 ];
 
 /**
@@ -13,6 +12,7 @@ const PROGRAMS = [
  * @param {import('index').NS} ns
  */
 export async function main(ns) {
+  ns.disableLog('sleep');
   const player = ns.getPlayer();
 
   // Buy TOR router.

@@ -15,7 +15,7 @@ manage-corporations.js	1645738228780.2761
 manage-hacking.js	1642741632190.4734
 manage-hacknet.js	1642708332621.188
 manage-life.js	1644339064343.4102
-manage-programs.js	1642697486181.5813
+manage-programs.js	1647580820760.1233
 manage-servers.js	1647580663497.309
 manage-stocks.js	1642697161619.6006
 monitor-server.js	1642697161620.9382
