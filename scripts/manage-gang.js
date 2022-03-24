@@ -22,10 +22,26 @@ export async function main(ns) {
     const memberNames = ns.gang.getMemberNames();
     for (const memberName of memberNames) {
       // Ascend.
-      ns.gang.ascendMember(memberName);
+      const ascensionResult = ns.gang.getAscensionResult(memberName);
+      if (ascensionResult != null) {
+        const memberInfo = ns.gang.getMemberInformation(memberName);
+        if (
+          ascensionResult.hack > memberInfo.hack_asc_mult * 2 ||
+          ascensionResult.str > memberInfo.str_asc_mult * 2 ||
+          ascensionResult.dex > memberInfo.dex_asc_mult * 2 ||
+          ascensionResult.def > memberInfo.def_asc_mult * 2 ||
+          ascensionResult.agi > memberInfo.agi_asc_mult * 2 ||
+          ascensionResult.cha > memberInfo.cha_asc_mult * 2
+        ) {
+          ns.gang.ascendMember(memberName);
+        }
+      }
 
       // Assign task.
-      if (ns.gang.getGangInformation().wantedLevel > 1) {
+      if (
+        ns.gang.getGangInformation().wantedPenalty < 0.5 &&
+        ns.gang.getGangInformation().wantedLevel > 1
+      ) {
         ns.gang.setMemberTask(memberName, 'Vigilante Justice');
         continue;
       }
@@ -40,8 +56,7 @@ export async function main(ns) {
       // Buy equipment.
       for (const equipmentName of equipmentNames) {
         if (ns.gang.getEquipmentCost(equipmentName) < getMoneyToSpend(ns)) {
-          ns.gang.purchaseEquipment(memberName, equipmentName);
-          break;
+          if (ns.gang.purchaseEquipment(memberName, equipmentName)) break;
         }
       }
     }
