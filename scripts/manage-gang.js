@@ -25,7 +25,7 @@ export async function main(ns) {
       ns.gang.ascendMember(memberName);
 
       // Assign task.
-      if (ns.gang.getGangInformation().wantedPenalty < 0.9) {
+      if (ns.gang.getGangInformation().wantedLevel > 1) {
         ns.gang.setMemberTask(memberName, 'Vigilante Justice');
         continue;
       }
@@ -41,6 +41,7 @@ export async function main(ns) {
       for (const equipmentName of equipmentNames) {
         if (ns.gang.getEquipmentCost(equipmentName) < getMoneyToSpend(ns)) {
           ns.gang.purchaseEquipment(memberName, equipmentName);
+          break;
         }
       }
     }
