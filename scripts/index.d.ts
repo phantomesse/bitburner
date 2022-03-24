@@ -94,6 +94,7 @@ interface Player {
   factions: string[];
   tor: boolean;
   hasCorporation: boolean;
+  inBladeburner: boolean;
 }
 
 /**
@@ -535,6 +536,8 @@ export interface BitNodeMultipliers {
   CompanyWorkExpGain: number;
   /** Influences how much money the player earns when completing working their job. */
   CompanyWorkMoney: number;
+  /** Influences the money gain from dividends of corporations created by the player. */
+  CorporationSoftCap: number;
   /** Influences the valuation of corporations created by the player. */
   CorporationValuation: number;
   /** Influences the base experience gained for each ability when the player commits a crime. */
@@ -1515,6 +1518,20 @@ export interface TIX {
    * @returns True if you successfully purchased it or if you already have access, false otherwise.
    */
   purchase4SMarketDataTixApi(): boolean;
+
+  /**
+   * Purchase WSE Account.
+   * @remarks RAM cost: 2.5 GB
+   * @returns True if you successfully purchased it or if you already have access, false otherwise.
+   */
+  purchaseWseAccount(): boolean;
+
+  /**
+   * Purchase TIX API Access
+   * @remarks RAM cost: 2.5 GB
+   * @returns True if you successfully purchased it or if you already have access, false otherwise.
+   */
+  purchaseTixApi(): boolean;
 }
 
 /**
@@ -2288,6 +2305,67 @@ export interface Singularity {
    * @returns True if the focus was changed.
    */
   setFocus(focus: boolean): boolean;
+
+  /**
+   * Get a list of programs offered on the dark web.
+   * @remarks
+   * RAM cost: 1 GB * 16/4/1
+   *
+   *
+   * This function allows the player to get a list of programs available for purchase
+   * on the dark web. Players MUST have purchased Tor to get the list of programs
+   * available. If Tor has not been purchased yet, this function will return an
+   * empty list.
+   *
+   * @example
+   * ```ts
+   * // NS1
+   * getDarkwebProgramsAvailable();
+   * // returns ['BruteSSH.exe', 'FTPCrack.exe'...etc]
+   * ```
+   * @example
+   * ```ts
+   * // NS2
+   * ns.getDarkwebProgramsAvailable();
+   * // returns ['BruteSSH.exe', 'FTPCrack.exe'...etc]
+   * ```
+   * @returns - a list of programs available for purchase on the dark web, or [] if Tor has not
+   * been purchased
+   */
+  getDarkwebPrograms(): string[];
+
+  /**
+   * Check the price of an exploit on the dark web
+   * @remarks
+   * RAM cost: 0.5 GB * 16/4/1
+   *
+   *
+   * This function allows you to check the price of a darkweb exploit/program.
+   * You MUST have a TOR router in order to use this function. The price returned
+   * by this function is the same price you would see with buy -l from the terminal.
+   * Returns the cost of the program if it has not been purchased yet, 0 if it
+   * has already been purchased, or -1 if Tor has not been purchased (and thus
+   * the program/exploit is not available for purchase).
+   *
+   * If the program does not exist, an error is thrown.
+   *
+   *
+   * @example
+   * ```ts
+   * // NS1
+   * getDarkwebProgramCost("brutessh.exe");
+   * ```
+   * @example
+   * ```ts
+   * // NS2
+   * ns.getDarkwebProgramCost("brutessh.exe");
+   * ```
+   * @param programName - Name of program to check the price of
+   * @returns Price of the specified darkweb program
+   * (if not yet purchased), 0 if it has already been purchased, or -1 if Tor has not been
+   * purchased. Throws an error if the specified program/exploit does not exist
+   */
+  getDarkwebProgramCost(programName: string): number;
 }
 
 /**
@@ -2798,7 +2876,7 @@ export interface Bladeburner {
    *
    * Note that this is meant to be used for Contracts and Operations.
    * This function will return ‘Infinity’ for actions such as Training and Field Analysis.
-   * This function will return 1 for BlackOps not yet completed regardless of wether
+   * This function will return 1 for BlackOps not yet completed regardless of whether
    * the player has the required rank to attempt the mission or not.
    *
    * @param type - Type of action.
@@ -2838,7 +2916,7 @@ export interface Bladeburner {
   getActionCurrentLevel(type: string, name: string): number;
 
   /**
-   * Get wether an action is set to autolevel.
+   * Get whether an action is set to autolevel.
    * @remarks
    * RAM cost: 4 GB
    *
@@ -5762,7 +5840,7 @@ export interface NS extends Singularity {
    * @param data - Data to write.
    * @returns True if the data is successfully written to the port, and false otherwise.
    */
-  tryWritePort(port: number, data: string[] | number): Promise<boolean>;
+  tryWritePort(port: number, data: string | number): Promise<boolean>;
 
   /**
    * Read content of a file.
@@ -6093,19 +6171,28 @@ export interface NS extends Singularity {
   tFormat(milliseconds: number, milliPrecision?: boolean): string;
 
   /**
-   * Prompt the player with a Yes/No modal.
+   * Prompt the player with an input modal.
    * @remarks
    * RAM cost: 0 GB
    *
-   * Prompts the player with a dialog box with two options: “Yes” and “No”.
-   * This function will return true if the player click “Yes” and false if
-   * the player clicks “No”. The script’s execution is halted until the player
-   * selects one of the options.
+   * Prompts the player with a dialog box. If `options.type` is undefined or "boolean",
+   * the player is shown "Yes" and "No" prompts, which return true and false respectively.
+   * Passing a type of "text" will give the player a text field and a value of "select"
+   * will show a drop-down field. Choosing type "select" will require an array or object
+   * to be passed via the `options.choices` property.
+   * The script’s execution is halted until the player selects one of the options.
    *
    * @param txt - Text to appear in the prompt dialog box.
-   * @returns True if the player click “Yes” and false if the player clicks “No”.
+   * @param options - Options to modify the prompt the player is shown.
+   * @returns True if the player click “Yes”; false if the player clicks “No”; or the value entered by the player.
    */
-  prompt(txt: string): Promise<boolean>;
+  prompt(
+    txt: string,
+    options?: {
+      type?: 'boolean' | 'text' | 'select' | undefined;
+      choices?: string[];
+    }
+  ): Promise<boolean | string>;
 
   /**
    * Open up a message box.
@@ -6537,6 +6624,19 @@ export interface WarehouseAPI {
     amt: number
   ): void;
   /**
+   * Set material to bulk buy
+   * @param divisionName - Name of the division
+   * @param cityName - Name of the city
+   * @param materialName - Name of the material
+   * @param amt - Amount of material to buy
+   */
+  bulkPurchase(
+    divisionName: string,
+    cityName: string,
+    materialName: string,
+    amt: number
+  ): void;
+  /**
    * Get warehouse data
    * @param divisionName - Name of the division
    * @param cityName - Name of the city
@@ -6798,6 +6898,28 @@ export interface Corporation extends WarehouseAPI, OfficeAPI {
    * @param percent - Percent of profit to issue as dividends.
    */
   issueDividends(percent: number): void;
+  /**
+   * Buyback Shares
+   * @param amount - Amount of shares to buy back.
+   *
+   */
+  buyBackShares(amount: number): void;
+  /**
+   * Sell Shares
+   * @param amount -  Amount of shares to sell.
+   *
+   */
+  sellShares(amount: number): void;
+  /**
+   * Get bonus time.
+   *
+   * “Bonus time” is accumulated when the game is offline or if the game is inactive in the browser.
+   *
+   * “Bonus time” makes the game progress faster.
+   *
+   * @returns Bonus time for the Corporation mechanic in milliseconds.
+   */
+  getBonusTime(): number;
 }
 
 /**
@@ -7057,4 +7179,15 @@ interface GameInfo {
   version: string;
   commit: string;
   platform: string;
+}
+
+/**
+ * Used for autocompletion
+ * @public
+ */
+interface AutocompleteData {
+  servers: string[];
+  scripts: string[];
+  txts: string[];
+  flags(schema: [string, string | number | boolean | string[]][]): any;
 }
