@@ -26,18 +26,28 @@ export async function main(ns) {
       if (ascensionResult != null) {
         const memberInfo = ns.gang.getMemberInformation(memberName);
         if (
-          ascensionResult.hack > memberInfo.hack_asc_mult * 2 ||
-          ascensionResult.str > memberInfo.str_asc_mult * 2 ||
-          ascensionResult.dex > memberInfo.dex_asc_mult * 2 ||
-          ascensionResult.def > memberInfo.def_asc_mult * 2 ||
-          ascensionResult.agi > memberInfo.agi_asc_mult * 2 ||
-          ascensionResult.cha > memberInfo.cha_asc_mult * 2
+          ascensionResult.hack > memberInfo.hack_asc_mult * 1.5 ||
+          ascensionResult.str > memberInfo.str_asc_mult * 1.5 ||
+          ascensionResult.dex > memberInfo.dex_asc_mult * 1.5 ||
+          ascensionResult.def > memberInfo.def_asc_mult * 1.5 ||
+          ascensionResult.agi > memberInfo.agi_asc_mult * 1.5 ||
+          ascensionResult.cha > memberInfo.cha_asc_mult * 1.5
         ) {
           ns.gang.ascendMember(memberName);
         }
       }
 
       // Assign task.
+      const clashChance = ns.gang.getGangInformation().territoryClashChance;
+      if (clashChance > 0) {
+        if (
+          memberNames.indexOf(memberName) <=
+          Math.ceil(memberNames.length * Math.min(clashChance, 0.5))
+        ) {
+          ns.gang.setMemberTask(memberName, 'Territory Warfare');
+          continue;
+        }
+      }
       if (
         ns.gang.getGangInformation().wantedPenalty < 0.5 &&
         ns.gang.getGangInformation().wantedLevel > 1
