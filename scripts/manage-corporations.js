@@ -394,8 +394,10 @@ function manageProducts(ns, divisionName) {
         true
       );
     }
-    ns.corporation.setProductMarketTA1(divisionName, productName, true);
-    ns.corporation.setProductMarketTA2(divisionName, productName, true);
+    try {
+      ns.corporation.setProductMarketTA1(divisionName, productName, true);
+      ns.corporation.setProductMarketTA2(divisionName, productName, true);
+    } catch (e) {}
   }
 }
 
@@ -575,23 +577,25 @@ function _sellMaterial(
   amount,
   price
 ) {
-  ns.corporation.sellMaterial(
-    divisionName,
-    cityName,
-    materialName,
-    amount,
-    price
-  );
-  ns.corporation.setMaterialMarketTA1(
-    divisionName,
-    cityName,
-    materialName,
-    true
-  );
-  ns.corporation.setMaterialMarketTA2(
-    divisionName,
-    cityName,
-    materialName,
-    true
-  );
+  try {
+    ns.corporation.sellMaterial(
+      divisionName,
+      cityName,
+      materialName,
+      amount,
+      price
+    );
+    ns.corporation.setMaterialMarketTA1(
+      divisionName,
+      cityName,
+      materialName,
+      true
+    );
+    ns.corporation.setMaterialMarketTA2(
+      divisionName,
+      cityName,
+      materialName,
+      true
+    );
+  } catch (e) {}
 }
