@@ -18,11 +18,8 @@ import {
   uniquePathsInAGridI,
   uniquePathsInAGridII,
 } from '/contracts/unique-paths-in-a-grid.js';
-import {
-  getAllServerNames,
-  getPath,
-  HOME_SERVER_NAME,
-} from '/utils/servers.js';
+import { getAllServerNames, getPath } from '/utils/servers.js';
+import { shortestPathInAGrid } from './contracts/shortest-path-in-a-grid.js';
 
 const CONTRACT_TYPE_TO_SOLVER_FN_MAP = {
   'Algorithmic Stock Trader I': algorithmicStockTraderI,
@@ -41,6 +38,7 @@ const CONTRACT_TYPE_TO_SOLVER_FN_MAP = {
   'Total Ways to Sum': totalWaysToSum,
   'Unique Paths in a Grid I': uniquePathsInAGridI,
   'Unique Paths in a Grid II': uniquePathsInAGridII,
+  'Shortest Path in a Grid': shortestPathInAGrid,
 };
 
 /**
