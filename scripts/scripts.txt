@@ -31,6 +31,7 @@ contracts/array-jumping-game.js	1641504407089.0027
 contracts/find-largest-prime-factor.js	1641577491490.9446
 contracts/find-valid-math-solutions.js	1643783208842.6538
 contracts/generate-ip-addresses.js	1642697161610.5393
+contracts/hamming-codes.js	1650411828186.0793
 contracts/merge-overlapping-intervals.js	1641675796720.4338
 contracts/minimum-path-sum-in-a-triangle.js	1641675805865.0723
 contracts/sanitize-parentheses-in-expression.js	1641675813044.7334
