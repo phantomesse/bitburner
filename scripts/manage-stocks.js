@@ -97,12 +97,15 @@ function buyStock(ns, symbol, moneyToSpend) {
   if (forecast < 0.5) return 0;
   sharesToBuy = Math.ceil(forecast * sharesToBuy);
 
-  const sharePrice = ns.stock.buy(symbol, sharesToBuy);
-  ns.print(
-    `bought ${sharesToBuy} shares of ${symbol} at ${formatMoney(sharePrice)}`
-  );
-
-  return sharePrice * sharesToBuy + COMMISSION_FEE;
+  try {
+    const sharePrice = ns.stock.buy(symbol, sharesToBuy);
+    ns.print(
+      `bought ${sharesToBuy} shares of ${symbol} at ${formatMoney(sharePrice)}`
+    );
+    return sharePrice * sharesToBuy + COMMISSION_FEE;
+  } catch (e) {
+    return 0;
+  }
 }
 
 /**
