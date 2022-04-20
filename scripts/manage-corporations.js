@@ -147,7 +147,7 @@ const MULTIPLIER_MATERIAL_NAMES = [
       { name: 'Energy', quantity: 0.5 },
     ],
     outputs: [{ name: 'AI Cores', quantity: 1 }],
-    maxProducts: 5,
+    maxProducts: 3,
   },
   {
     name: 'Tobacco',
@@ -555,11 +555,6 @@ async function manageEmployees(ns, division, cityName) {
   // Assign the rest to be operators.
   await assignJobs('Operations');
 }
-
-/**
- * @param {string} industryName
- */
-const _getDivisionName = industryName => industryName + ' Division';
 
 /**
  * @param {import('index').NS} ns
