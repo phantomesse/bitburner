@@ -6,8 +6,4 @@
   "bitburner.showFileWatcherEnabledNotification": true,
 
   "javascript.preferences.importModuleSpecifier": "non-relative",
-  "files.exclude": {
-      "jsconfig.json": true,
-      "NetscriptDefinitions.d.ts": true,
-  },
 }
