@@ -3,6 +3,7 @@
 /**
  * @typedef Server
  * @property {string} hostname
+ * @property {[boolean]} isPurchased
  * @property {[number]} maxRam maximum RAM the server has
  * @property {[number]} maxMoney
  * @property {[number]} minSecurity

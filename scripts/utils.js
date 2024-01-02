@@ -1,4 +1,5 @@
 export const HOME_HOSTNAME = 'home';
+export const DARKWEB_HOSTNAME = 'darkweb';
 
 /** One second in milliseconds. */
 export const ONE_SECOND = 1000;

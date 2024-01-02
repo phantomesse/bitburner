@@ -1,6 +1,8 @@
 import { getServers } from 'database/servers';
 import { HOME_HOSTNAME, ONE_SECOND } from 'utils';
 
+const MIN_MONEY_AMOUNT = 1000000;
+
 /**
  * Manages hacking in all servers, reserving enough RAM in Home server to run
  * all other scripts.
@@ -8,17 +10,19 @@ import { HOME_HOSTNAME, ONE_SECOND } from 'utils';
  * @param {NS} ns
  */
 export async function main(ns) {
-  // Get amount of RAM to resolve based on the combination of all scripts in the
-  // Home server.
-  const ramToReserveInHome = ns
-    .ls(HOME_HOSTNAME, '.js')
-    .map(filename => ns.getScriptRam(filename))
-    .reduce((a, b) => a + b);
-
   // Get all servers from database.
   const allServers = getServers(ns);
 
   while (true) {
+    // Get amount of RAM to resolve based on the combination of all scripts in
+    // the Home server.
+    const ramToReserveInHome = ns
+      .ls(HOME_HOSTNAME, '.js')
+      .filter(filename => !ns.isRunning(filename, HOME_HOSTNAME))
+      .map(filename => ns.getScriptRam(filename))
+      .reduce((a, b) => Math.max(a, b));
+
+    // Get servers to hack, grow, and weaken.
     const serversToHack = getServersToHack(ns, allServers);
     const serversToGrow = getServersToGrow(ns, allServers);
     const serversToWeaken = getServersToWeaken(ns, allServers);
@@ -123,7 +127,8 @@ function getServersToHack(ns, allServers) {
         ns.hasRootAccess(server.hostname) &&
         server.hackingLevel <= ns.getHackingLevel() &&
         server.maxMoney > 0 &&
-        ns.getServerMoneyAvailable(server.hostname) > server.maxMoney / 2 &&
+        ns.getServerMoneyAvailable(server.hostname) >
+          Math.min(server.maxMoney / 2, MIN_MONEY_AMOUNT) &&
         ns.getServerSecurityLevel(server.hostname) < server.baseSecurity
     )
     .map(server => {

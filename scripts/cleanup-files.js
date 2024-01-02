@@ -9,10 +9,10 @@ import { HOME_HOSTNAME, getAllHostnames } from 'utils';
 export async function main(ns) {
   const allHostnames = getAllHostnames(ns);
   for (const hostname of allHostnames) {
+    if (hostname === HOME_HOSTNAME) continue;
+
     // Kill all scripts.
     ns.killall(hostname);
-
-    if (hostname === HOME_HOSTNAME) continue;
 
     // Remove files.
     const filenames = ns.ls(hostname, '.js');

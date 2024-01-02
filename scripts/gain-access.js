@@ -15,9 +15,11 @@ export async function main(ns) {
       const hostname = server.hostname;
 
       // Attempt to run programs to open ports and nuke to gain root access.
-      runProgram(() => ns.relaysmtp(hostname));
-      runProgram(() => ns.ftpcrack(hostname));
       runProgram(() => ns.brutessh(hostname));
+      runProgram(() => ns.ftpcrack(hostname));
+      runProgram(() => ns.httpworm(hostname));
+      runProgram(() => ns.relaysmtp(hostname));
+      runProgram(() => ns.sqlinject(hostname));
       runProgram(() => ns.nuke(hostname));
 
       if (ns.hasRootAccess(hostname)) {

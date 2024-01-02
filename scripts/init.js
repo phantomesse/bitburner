@@ -1,5 +1,5 @@
 import { updateServers } from 'database/servers';
-import { getAllHostnames } from 'utils';
+import { ONE_SECOND, getAllHostnames } from 'utils';
 
 /**
  * Run this script at the beginning of every session.
@@ -7,20 +7,28 @@ import { getAllHostnames } from 'utils';
  * @param {NS} ns
  */
 export async function main(ns) {
+  ns.disableLog('ALL');
+  ns.enableLog('run');
+
   // Optionally clean up files in all servers if there is enough RAM to do so.
-  ns.run('cleanup-files.js');
+  const cleanupFilesPid = ns.run('cleanup-files.js');
+  while (ns.isRunning(cleanupFilesPid)) await ns.sleep(ONE_SECOND);
 
   // Reset database files.
   const allHostnames = getAllHostnames(ns);
+  const purchasedHostnames = ns.getPurchasedServers();
   updateServers(
     ns,
-    ...allHostnames.map(hostname => getServerData(ns, hostname))
+    ...allHostnames.map(hostname =>
+      getServerData(ns, hostname, purchasedHostnames)
+    )
   );
 
   // Start scripts.
-  ns.tprint(ns.run('gain-access.js'));
-  ns.tprint(ns.run('manage-hacking.js'));
+  ns.run('gain-access.js');
+  ns.run('manage-hacking.js');
   ns.run('manage-hacknet.js');
+  ns.run('manage-servers.js');
 }
 
 /**
@@ -28,11 +36,13 @@ export async function main(ns) {
  *
  * @param {NS} ns
  * @param {string} hostname
+ * @param {string[]} purchasedHostnames
  * @returns {import('database/servers').Server} server
  */
-export function getServerData(ns, hostname) {
+export function getServerData(ns, hostname, purchasedHostnames) {
   return {
     hostname: hostname,
+    isPurchased: purchasedHostnames.includes(hostname),
     maxRam: ns.getServerMaxRam(hostname),
     maxMoney: ns.getServerMaxMoney(hostname),
     minSecurity: ns.getServerMinSecurityLevel(hostname),
