@@ -38,9 +38,18 @@ export async function main(ns) {
       }
 
       // Attempt to upgrade an existing server.
-      // for (const hostname of purchasedHostnames) {
-
-      // }
+      for (const hostname of purchasedHostnames) {
+        if (ram <= ns.getServerMaxRam(hostname)) continue;
+        const upgradeSuccssful = ns.upgradePurchasedServer(hostname, ram);
+        if (upgradeSuccssful) {
+          updateServers(ns, {
+            hostname: hostname,
+            maxRam: ram,
+          });
+          ns.scriptKill('manage-hacking.js', HOME_HOSTNAME);
+          ns.run('manage-hacking.js');
+        }
+      }
     }
 
     await ns.sleep(ONE_MINUTE);

@@ -4,12 +4,10 @@
  * @param {NS} ns
  */
 export async function main(ns) {
-  while (true) {
-    try {
-      await ns.grow(ns.args[0]);
-    } catch (_) {
-      return;
-    }
+  try {
+    await ns.grow(ns.args[0]);
+  } catch (_) {
+    return;
   }
 }
 
