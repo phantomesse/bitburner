@@ -1,12 +1,12 @@
 /**
- * Hacks a given server.
+ * Grows a given server.
  *
  * @param {NS} ns
  */
 export async function main(ns) {
   while (true) {
     try {
-      await ns.hack(ns.args[0]);
+      await ns.grow(ns.args[0]);
     } catch (_) {
       return;
     }
