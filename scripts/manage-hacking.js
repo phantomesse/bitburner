@@ -1,5 +1,9 @@
 import { getServers } from 'database/servers';
-import { HOME_HOSTNAME, ONE_SECOND } from 'utils/constants';
+import {
+  HOME_HOSTNAME,
+  ONE_SECOND,
+  UPDATE_SERVERS_PORT,
+} from 'utils/constants';
 import { formatTime, formatMoney } from 'utils/format';
 import { printTable } from 'utils/table';
 
@@ -12,26 +16,34 @@ const WEAKEN_JS = 'weaken.js';
  * Manages hacking in all servers, reserving enough RAM in Home server to run
  * all other scripts.
  *
+ * Override the RAM to reserve by passing as an argument.
+ *
  * @param {NS} ns
  */
 export async function main(ns) {
   ns.disableLog('ALL');
+  ns.atExit(() => ns.closeTail());
 
   // Get all servers from database.
-  const allServers = getServers(ns);
+  let allServers = getServers(ns);
 
   while (true) {
+    if (ns.readPort(UPDATE_SERVERS_PORT) === 1) allServers = getServers(ns);
+
     // Get amount of RAM to resolve based on the combination of all scripts in
     // the Home server.
-    const ramToReserveInHome = ns
-      .ls(HOME_HOSTNAME, '.js')
-      .filter(
-        filename =>
-          !ns.isRunning(filename, HOME_HOSTNAME) ||
-          [HACK_JS, GROW_JS, WEAKEN_JS, 'utils.js'].includes(filename)
-      )
-      .map(filename => ns.getScriptRam(filename))
-      .reduce((a, b) => a + b);
+    const ramToReserveInHome =
+      ns.args[0] ??
+      ns
+        .ls(HOME_HOSTNAME, '.js')
+        .filter(
+          filename =>
+            !ns.isRunning(filename, HOME_HOSTNAME) &&
+            ![HACK_JS, GROW_JS, WEAKEN_JS, 'utils.js'].includes(filename) &&
+            filename.indexOf('/') < 0
+        )
+        .map(filename => ns.getScriptRam(filename))
+        .reduce((a, b) => a + b);
 
     // Get servers to hack, grow, and weaken.
     const serversToHack = getServersToHack(
@@ -158,7 +170,7 @@ function getServersToHack(ns, allServers) {
         server.maxMoney > 0 &&
         ns.getServerMoneyAvailable(server.hostname) >
           Math.min(server.maxMoney / 2, MIN_MONEY_AMOUNT) &&
-        ns.hackAnalyzeChance(server.hostname) > 0.7
+        ns.hackAnalyzeChance(server.hostname) > 0.6
     )
     .map(server => {
       server.threadsNeeded = Math.floor(
@@ -189,7 +201,7 @@ function getServersToGrow(ns, allServers) {
         ns.hasRootAccess(server.hostname) &&
         server.hackingLevel <= ns.getHackingLevel() &&
         server.maxMoney > 0 &&
-        ns.getServerMoneyAvailable(server.hostname) < server.maxMoney
+        ns.getServerMoneyAvailable(server.hostname) < server.maxMoney / 2
     )
     .map(server => {
       server.threadsNeeded = Math.floor(
@@ -222,7 +234,8 @@ function getServersToWeaken(ns, allServers) {
         ns.hasRootAccess(server.hostname) &&
         server.hackingLevel <= ns.getHackingLevel() &&
         server.maxMoney > 0 &&
-        ns.getServerSecurityLevel(server.hostname) > server.minSecurity
+        ns.getServerSecurityLevel(server.hostname) > server.minSecurity &&
+        ns.hackAnalyzeChance(server.hostname) <= 0.6
     )
     .map(server => {
       const securityToDecrease =
@@ -281,7 +294,7 @@ function logServers(ns, serversToHack, serversToGrow, serversToWeaken) {
           },
           {
             column: { name: 'Threads Needed', style: { textAlign: 'right' } },
-            content: server.threadsNeeded,
+            content: ns.formatNumber(server.threadsNeeded, 0),
           },
         ],
       };
@@ -321,7 +334,7 @@ function logServers(ns, serversToHack, serversToGrow, serversToWeaken) {
           },
           {
             column: { name: 'Threads Needed', style: { textAlign: 'right' } },
-            content: server.threadsNeeded,
+            content: ns.formatNumber(server.threadsNeeded, 0),
           },
         ],
       };
@@ -368,7 +381,7 @@ function logServers(ns, serversToHack, serversToGrow, serversToWeaken) {
           },
           {
             column: { name: 'Threads Needed', style: { textAlign: 'right' } },
-            content: server.threadsNeeded,
+            content: ns.formatNumber(server.threadsNeeded, 0),
           },
         ],
       };

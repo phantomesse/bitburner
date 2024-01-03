@@ -5,7 +5,7 @@
  */
 export async function main(ns) {
   try {
-    await ns.weaken(ns.args[0]);
+    await ns.weaken(ns.args[0], { stock: true });
   } catch (_) {
     return;
   }

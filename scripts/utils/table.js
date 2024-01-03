@@ -13,6 +13,7 @@
  * @typedef Cell
  * @property {Column} column
  * @property {import('../../NetscriptDefinitions').ReactNode} content
+ * @property {[Object.<string, string|number>]} style
  */
 
 /**
@@ -32,7 +33,7 @@
  * @param {Table} table
  */
 export const printTable = (ns, table) =>
-  ns.printRaw(getTableForPrinting(ns, table));
+  ns.printRaw(getTableForPrinting(ns, table, true));
 
 /**
  * Prints a table to the terminal.
@@ -48,9 +49,11 @@ export const tprintTable = (ns, table) =>
  *
  * @param {NS} ns
  * @param {Table} table
+ * @param {[boolean]} fillWidth
+ *        whether the table should take up the full width of the window
  * @returns {import('../../NetscriptDefinitions').ReactElement}
  */
-function getTableForPrinting(ns, table) {
+function getTableForPrinting(ns, table, fillWidth) {
   // Get border color.
   let primaryColor = ns.ui.getTheme().primary.substring(1);
   if (primaryColor.length === 3) {
@@ -70,6 +73,7 @@ function getTableForPrinting(ns, table) {
       ...cellStyling,
       ...cell.column.style,
       fontWeight: 'bold',
+      width: 'auto',
     })
   );
   const cellElements = table.rows
@@ -78,6 +82,8 @@ function getTableForPrinting(ns, table) {
         createReactElement(cell.content, {
           ...cellStyling,
           ...cell.column.style,
+          ...cell.style,
+          width: 'auto',
         })
       )
     )
@@ -85,8 +91,13 @@ function getTableForPrinting(ns, table) {
   return createReactElement([...headerCellElements, ...cellElements], {
     border: border,
     display: 'grid',
-    gridTemplateColumns: headerCellElements.map(_ => 'max-content').join(' '),
-    width: 'max-content',
+    gridTemplateColumns: table.rows[0].cells
+      .map(cell => {
+        if (cell.column.style.width) return cell.column.style.width;
+        return fillWidth ? '1fr' : 'max-content';
+      })
+      .join(' '),
+    width: fillWidth ? '100%' : 'max-content',
   });
 }
 

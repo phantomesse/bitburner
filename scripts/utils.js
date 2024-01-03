@@ -27,6 +27,31 @@ export function getAllHostnames(ns, rootHostname, previousHostname) {
 
 /**
  * @param {NS} ns
+ * @param {string} targetHostname to connect to
+ * @param {[string[]]} pathThusFar
+ * @returns {string[]} array of hostnames starting from the one closest to home
+ */
+export function getPath(ns, targetHostname, pathThusFar) {
+  pathThusFar = pathThusFar ?? [];
+  if (targetHostname === HOME_HOSTNAME) return pathThusFar;
+
+  const adjacentHostnames = ns
+    .scan(targetHostname)
+    .filter(adjacentHostname => adjacentHostname !== pathThusFar[0]);
+  if (adjacentHostnames.length === 0) return [];
+
+  for (const adjacentHostname of adjacentHostnames) {
+    const path = getPath(ns, adjacentHostname, [
+      targetHostname,
+      ...pathThusFar,
+    ]);
+    if (path.length > 0) return path;
+  }
+  return []; // Should not reach here.
+}
+
+/**
+ * @param {NS} ns
  * @param {number} amount
  * @returns {string} e.g. "$123.45"
  */

@@ -25,10 +25,10 @@ export async function main(ns) {
   );
 
   // Start scripts.
-  ns.run('gain-access.js');
-  ns.run('manage-hacking.js');
-  ns.run('manage-hacknet.js');
-  ns.run('manage-servers.js');
+  ns.run('gain-access.js', { preventDuplicates: true });
+  ns.run('manage-hacking.js', { preventDuplicates: true });
+  ns.run('manage-hacknet.js', { preventDuplicates: true });
+  ns.run('manage-servers.js', { preventDuplicates: true });
 }
 
 /**

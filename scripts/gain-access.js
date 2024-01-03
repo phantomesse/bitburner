@@ -19,8 +19,7 @@ export async function main(ns) {
       runProgram(() => ns.nuke(hostname));
     }
     hostnames = hostnames.filter(hostname => !ns.hasRootAccess(hostname));
-
-    await ns.sleep(ONE_MINUTE);
+    if (hostnames.length > 0) await ns.sleep(ONE_MINUTE);
   } while (hostnames.length > 0);
 }
 

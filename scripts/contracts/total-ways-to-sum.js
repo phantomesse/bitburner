@@ -25,5 +25,6 @@ function solve(input) {
   return waysToSum[input];
 }
 
-console.log(solve(4)); // 4
-console.log(solve(46)); // 105557
+// console.log(solve(4)); // 4
+// console.log(solve(46)); // 105557
+console.log(solve(86)); // 34262961

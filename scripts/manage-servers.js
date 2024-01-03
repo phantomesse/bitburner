@@ -1,5 +1,6 @@
 import { getServers, updateServers } from 'database/servers';
 import { HOME_HOSTNAME, ONE_MINUTE } from 'utils';
+import { UPDATE_SERVERS_PORT } from 'utils/constants';
 
 const MAX_RAM_POWER = 20;
 
@@ -9,6 +10,8 @@ const MAX_RAM_POWER = 20;
  * @param {NS} ns
  */
 export async function main(ns) {
+  ns.disableLog('getServerMaxRam');
+
   const purchasedHostnames = getServers(ns)
     .filter(server => server.isPurchased)
     .map(server => server.hostname);
@@ -32,8 +35,7 @@ export async function main(ns) {
             baseSecurity: 0,
             hackingLevel: 0,
           });
-          ns.scriptKill('manage-hacking.js', HOME_HOSTNAME);
-          ns.run('manage-hacking.js');
+          ns.writePort(UPDATE_SERVERS_PORT, 1);
         }
       }
 
@@ -46,8 +48,7 @@ export async function main(ns) {
             hostname: hostname,
             maxRam: ram,
           });
-          ns.scriptKill('manage-hacking.js', HOME_HOSTNAME);
-          ns.run('manage-hacking.js');
+          ns.writePort(UPDATE_SERVERS_PORT, 1);
         }
       }
     }
