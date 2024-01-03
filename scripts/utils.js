@@ -1,10 +1,4 @@
-export const HOME_HOSTNAME = 'home';
-
-/** One second in milliseconds. */
-export const ONE_SECOND = 1000;
-
-/** One minute in milliseconds. */
-export const ONE_MINUTE = ONE_SECOND * 60;
+import { HOME_HOSTNAME } from 'utils/constants';
 
 /**
  * Gets all hostnames available.
@@ -51,27 +45,10 @@ export function getPath(ns, targetHostname, pathThusFar) {
 }
 
 /**
- * @param {NS} ns
- * @param {number} amount
- * @returns {string} e.g. "$123.45"
- */
-export function formatMoney(ns, amount) {
-  return '$' + ns.formatNumber(amount, 2);
-}
-
-/**
  * @param {import("../NetscriptDefinitions").ReactNode} content
- * @param {[Style]} style
+ * @param {[Object.<string, string|number>]} style
  * @returns {import("../NetscriptDefinitions").ReactElement}
  */
 export function createReactElement(content, style) {
   return React.createElement('div', { style: style ?? {} }, content);
 }
-
-/**
- * @typedef Style
- * @property {[string]} background
- * @property {[string]} color
- * @property {['flex'|'grid']} display
- * @property {['left'|'center'|'right']} textAlign
- */

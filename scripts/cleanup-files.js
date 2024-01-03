@@ -1,4 +1,5 @@
-import { HOME_HOSTNAME, getAllHostnames } from 'utils';
+import { getAllHostnames } from 'utils';
+import { HOME_HOSTNAME } from 'utils/constants';
 
 /**
  * Stops all scripts and removes JS files from every server except the home

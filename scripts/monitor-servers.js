@@ -1,7 +1,8 @@
 import { getServers } from 'database/servers';
-import { ONE_SECOND, createReactElement } from 'utils';
+import { createReactElement } from 'utils';
 import { formatTime } from 'utils/format';
 import { printTable } from 'utils/table';
+import { ONE_SECOND } from 'utils/constants';
 
 /**
  * Monitors all servers that can run scripts in the --tail.

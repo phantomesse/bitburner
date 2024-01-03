@@ -1,6 +1,9 @@
 import { getServers, updateServers } from 'database/servers';
-import { HOME_HOSTNAME, ONE_MINUTE } from 'utils';
-import { UPDATE_SERVERS_PORT } from 'utils/constants';
+import {
+  HOME_HOSTNAME,
+  ONE_MINUTE,
+  UPDATE_SERVERS_PORT,
+} from 'utils/constants';
 
 const MAX_RAM_POWER = 20;
 

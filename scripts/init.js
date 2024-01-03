@@ -1,5 +1,6 @@
 import { updateServers } from 'database/servers';
-import { ONE_SECOND, getAllHostnames } from 'utils';
+import { getAllHostnames } from 'utils';
+import { ONE_SECOND } from 'utils/constants';
 
 /**
  * Run this script at the beginning of every session.

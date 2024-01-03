@@ -1,5 +1,5 @@
 import { getServers } from 'database/servers';
-import { ONE_MINUTE } from 'utils';
+import { ONE_MINUTE } from 'utils/constants';
 
 /**
  * Attempts to gain root access to servers.

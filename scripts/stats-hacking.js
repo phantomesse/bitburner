@@ -1,4 +1,5 @@
-import { formatMoney, getAllHostnames, createReactElement } from 'utils';
+import { getAllHostnames, createReactElement } from 'utils';
+import { formatMoney } from 'utils/format';
 
 /** @type {Style} */ const CELL_STYLING = {
   padding: '2px 8px',

@@ -1,4 +1,4 @@
-import { ONE_SECOND, HOME_HOSTNAME } from 'utils';
+import { ONE_SECOND, HOME_HOSTNAME } from 'utils/constants';
 
 /**
  * Manages purchasing and upgrading Hacknet nodes.
