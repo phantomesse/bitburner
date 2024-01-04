@@ -6,14 +6,14 @@
 /**
  * @typedef Column
  * @property {string} name
- * @property {Object.<string, string|number>} style
+ * @property {[import('utils/dom').Style]} style
  */
 
 /**
  * @typedef Cell
  * @property {Column} column
  * @property {import('../../NetscriptDefinitions').ReactNode} content
- * @property {[Object.<string, string|number>]} style
+ * @property {[import('utils/dom').Style]} style
  */
 
 /**
@@ -105,7 +105,7 @@ function getTableForPrinting(ns, table, fillWidth) {
  * Creates a <div> react element.
  *
  * @param {import('../../NetscriptDefinitions').ReactNode|import('../../NetscriptDefinitions').ReactNode[]} content
- * @param {[Object.<string, string|number>]} style
+ * @param {[import('utils/dom').Style]} style
  * @returns {import('../../NetscriptDefinitions').ReactElement}
  */
 function createReactElement(content, style) {

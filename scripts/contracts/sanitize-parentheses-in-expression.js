@@ -16,13 +16,14 @@
  * "(a)())()" -> ["(a)()()", "(a())()"]
  * ")(" -> [""]
  *
- * @param {string} input
+ * @param {string} expression
+ * @returns {string[]} valid expressions
  */
-export default function sanitizeParenthesesInExpression(input) {
+export default function sanitizeParenthesesInExpression(expression) {
   // Input expression is already valid.
-  if (isValidExpression(input)) return [input];
+  if (isValidExpression(expression)) return [expression];
 
-  const validExpressions = [...new Set(getValidExpressions(input))];
+  const validExpressions = [...new Set(getValidExpressions(expression))];
   return validExpressions.length > 0 ? validExpressions : [''];
 }
 

@@ -1,14 +1,10 @@
+import findLargestPrimeFactor from 'contracts/find-largest-prime-factor';
 import sanitizeParenthesesInExpression from 'contracts/sanitize-parentheses-in-expression';
 import totalWaysToSum from 'contracts/total-ways-to-sum';
 import uniquePathsInAGridI from 'contracts/unique-paths-in-a-grid-i.old';
 import { getServers } from 'database/servers';
 import { getPath } from 'utils';
-
-const CONTRACT_TYPE_TO_SOLVE_FUNCTION_MAP = {
-  'Total Ways to Sum': totalWaysToSum,
-  'Sanitize Parentheses in Expression': sanitizeParenthesesInExpression,
-  'Unique Paths in a Grid I': uniquePathsInAGridI,
-};
+import { CONTRACT_TYPE_TO_SOLVER_MAP } from 'utils/constants';
 
 /**
  * Manages contracts.
@@ -24,9 +20,12 @@ export async function main(ns) {
         contract,
         server.hostname
       );
-      if (contractType in CONTRACT_TYPE_TO_SOLVE_FUNCTION_MAP) {
+      if (
+        contractType in CONTRACT_TYPE_TO_SOLVER_MAP &&
+        CONTRACT_TYPE_TO_SOLVER_MAP[contractType] !== null
+      ) {
         const wasSuccessful = ns.codingcontract.attempt(
-          CONTRACT_TYPE_TO_SOLVE_FUNCTION_MAP[contractType](
+          CONTRACT_TYPE_TO_SOLVER_MAP[contractType](
             ns.codingcontract.getData(contract, server.hostname)
           ),
           contract,
