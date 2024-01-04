@@ -12,7 +12,7 @@
  *
  * @param {number} input
  */
-function solve(input) {
+export function totalWaysToSum(input) {
   const waysToSum = new Array(input + 1).fill(0);
   waysToSum[0] = 1;
 
@@ -25,6 +25,6 @@ function solve(input) {
   return waysToSum[input];
 }
 
-// console.log(solve(4)); // 4
-// console.log(solve(46)); // 105557
-console.log(solve(86)); // 34262961
+// console.log(totalWaysToSum(4)); // 4
+// console.log(totalWaysToSum(46)); // 105557
+console.log(totalWaysToSum(86)); // 34262961
