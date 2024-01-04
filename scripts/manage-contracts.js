@@ -1,11 +1,13 @@
-import { sanitizeParenthesesInExpression } from 'contracts/sanitize-parentheses-in-expression';
-import { totalWaysToSum } from 'contracts/total-ways-to-sum';
+import sanitizeParenthesesInExpression from 'contracts/sanitize-parentheses-in-expression';
+import totalWaysToSum from 'contracts/total-ways-to-sum';
+import uniquePathsInAGridI from 'contracts/unique-paths-in-a-grid-i.old';
 import { getServers } from 'database/servers';
 import { getPath } from 'utils';
 
 const CONTRACT_TYPE_TO_SOLVE_FUNCTION_MAP = {
   'Total Ways to Sum': totalWaysToSum,
   'Sanitize Parentheses in Expression': sanitizeParenthesesInExpression,
+  'Unique Paths in a Grid I': uniquePathsInAGridI,
 };
 
 /**
@@ -32,7 +34,7 @@ export async function main(ns) {
         );
         if (wasSuccessful) {
           ns.tprint(
-            `Solved ${contract} on ${server.hostname} (${contractType})`
+            `SUCCESS Solved ${contract} on ${server.hostname} (${contractType})`
           );
           continue;
         } else {
