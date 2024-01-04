@@ -6,6 +6,8 @@ const PADDING = '16px';
 /**
  * Generates test contracts.
  *
+ * Takes in a contract type as an argument.
+ *
  * @param {NS} ns
  */
 export async function main(ns) {

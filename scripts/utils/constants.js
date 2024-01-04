@@ -1,11 +1,17 @@
 import algorithmicStockTraderI from 'contracts/algorithmic-stock-trader-i';
 import algorithmicStockTraderIII from 'contracts/algorithmic-stock-trader-iii';
+import arrayJumpingGame from 'contracts/array-jumping-game';
+import compressionIILZDecompression from 'contracts/compression-ii-lz-decompression';
 import findLargestPrimeFactor from 'contracts/find-largest-prime-factor';
 import sanitizeParenthesesInExpression from 'contracts/sanitize-parentheses-in-expression';
+import shortestPathInAGrid from 'contracts/shortest-path-in-a-grid';
 import totalWaysToSum from 'contracts/total-ways-to-sum';
 import uniquePathsInAGridI from 'contracts/unique-paths-in-a-grid-i';
 
 export const HOME_HOSTNAME = 'home';
+
+/** Maximum number of servers that we can buy. */
+export const MAX_PURCHASED_SERVER_COUNT = 25;
 
 /** One second in milliseconds. */
 export const ONE_SECOND = 1000;
@@ -22,9 +28,9 @@ export const CONTRACT_TYPE_TO_SOLVER_MAP = {
   'Algorithmic Stock Trader III': algorithmicStockTraderIII,
   'Algorithmic Stock Trader IV': null,
   'Array Jumping Game II': null,
-  'Array Jumping Game': null,
+  'Array Jumping Game': arrayJumpingGame,
   'Compression I: RLE Compression': null,
-  'Compression II: LZ Decompression': null,
+  'Compression II: LZ Decompression': compressionIILZDecompression,
   'Compression III: LZ Compression': null,
   'Encryption I: Caesar Cipher': null,
   'Encryption II: Vigenère Cipher': null,
@@ -37,7 +43,7 @@ export const CONTRACT_TYPE_TO_SOLVER_MAP = {
   'Minimum Path Sum in a Triangle': null,
   'Proper 2-Coloring of a Graph': null,
   'Sanitize Parentheses in Expression': sanitizeParenthesesInExpression,
-  'Shortest Path in a Grid': null,
+  'Shortest Path in a Grid': shortestPathInAGrid,
   'Spiralize Matrix': null,
   'Subarray with Maximum Sum': null,
   'Total Ways to Sum II': null,
