@@ -36,6 +36,7 @@ export async function main(ns) {
             purchasedHostnames.push(hostname);
             updateServers(ns, {
               hostname: hostname,
+              organization: '',
               isPurchased: true,
               maxRam: ram,
               maxMoney: 0,

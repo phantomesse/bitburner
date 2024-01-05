@@ -84,23 +84,42 @@ function getRunningScripts(ns, hostname) {
 
     if (['hack.js', 'grow.js', 'weaken.js'].includes(process.filename)) {
       const script = ns.getRunningScript(process.pid, hostname);
+      // const totalTimeMessage = script.logs[0]
+      //   .replace(
+      //     `${process.filename.replace('.js', '')}: Executing on '${
+      //       process.args[0]
+      //     }' in `,
+      //     ''
+      //   )
+      //   .split(' (')[0];
+      // const minutes =
+      //   totalTimeMessage.indexOf('minute') > 0
+      //     ? parseInt(totalTimeMessage.split(' minute')[0])
+      //     : 0;
+      // const seconds = parseFloat(totalTimeMessage.split(' ').splice(-2, 1));
+      // const secondsLeft = Math.ceil(
+      //   minutes * 60 + seconds - script.onlineRunningTime
+      // );
+      // message += ` - ${formatTime(ns, secondsLeft * 1000)} left`;
+
       const totalTimeMessage = script.logs[0]
-        .replace(
-          `${process.filename.replace('.js', '')}: Executing on '${
-            process.args[0]
-          }' in `,
-          ''
-        )
-        .split(' (')[0];
-      const minutes =
-        totalTimeMessage.indexOf('minute') > 0
-          ? parseInt(totalTimeMessage.split(' minute')[0])
-          : 0;
-      const seconds = parseFloat(totalTimeMessage.split(' ').splice(-2, 1));
-      const secondsLeft = Math.ceil(
-        minutes * 60 + seconds - script.onlineRunningTime
-      );
-      message += ` - ${formatTime(ns, secondsLeft * 1000)} left`;
+        .match(/ in .* \(/)[0]
+        .replace(' in ', '')
+        .replace(' (', '');
+      const totalSeconds = totalTimeMessage
+        .match(/[0-9.]+ [a-z]+/g)
+        .map(timePart => {
+          const number = parseFloat(timePart.split(' ')[0]);
+          if (timePart.includes('hour')) return number * 60 * 60;
+          if (timePart.includes('minute')) return number * 60;
+          if (timePart.includes('second')) return number;
+          return number;
+        })
+        .reduce((a, b) => a + b);
+      message += ` - ${formatTime(
+        ns,
+        (totalSeconds - script.onlineRunningTime) * 1000
+      )} left`;
       style.color = {
         'hack.js': ns.ui.getTheme().error,
         'grow.js': ns.ui.getTheme().success,

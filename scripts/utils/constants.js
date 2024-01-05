@@ -1,5 +1,9 @@
-import algorithmicStockTraderI from 'contracts/algorithmic-stock-trader-i';
-import algorithmicStockTraderIII from 'contracts/algorithmic-stock-trader-iii';
+import {
+  algorithmicStockTraderI,
+  algorithmicStockTraderII,
+  algorithmicStockTraderIII,
+  algorithmicStockTraderIV,
+} from 'contracts/algorithmic-stock-trader';
 import arrayJumpingGame from 'contracts/array-jumping-game';
 import compressionIILZDecompression from 'contracts/compression-ii-lz-decompression';
 import findLargestPrimeFactor from 'contracts/find-largest-prime-factor';
@@ -24,9 +28,9 @@ export const UPDATE_SERVERS_PORT = 13;
 
 export const CONTRACT_TYPE_TO_SOLVER_MAP = {
   'Algorithmic Stock Trader I': algorithmicStockTraderI,
-  'Algorithmic Stock Trader II': null,
+  'Algorithmic Stock Trader II': algorithmicStockTraderII,
   'Algorithmic Stock Trader III': algorithmicStockTraderIII,
-  'Algorithmic Stock Trader IV': null,
+  'Algorithmic Stock Trader IV': algorithmicStockTraderIV,
   'Array Jumping Game II': null,
   'Array Jumping Game': arrayJumpingGame,
   'Compression I: RLE Compression': null,

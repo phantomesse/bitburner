@@ -255,7 +255,6 @@ function getServersToGrow(ns, allServers) {
     .filter(
       server =>
         ns.hasRootAccess(server.hostname) &&
-        server.hackingLevel <= ns.getHackingLevel() &&
         server.maxMoney > 0 &&
         ns.getServerMoneyAvailable(server.hostname) < server.maxMoney / 2
     )
@@ -288,7 +287,6 @@ function getServersToWeaken(ns, allServers) {
     .filter(
       server =>
         ns.hasRootAccess(server.hostname) &&
-        server.hackingLevel <= ns.getHackingLevel() &&
         server.maxMoney > 0 &&
         ns.getServerSecurityLevel(server.hostname) > server.minSecurity &&
         ns.hackAnalyzeChance(server.hostname) <= 0.5

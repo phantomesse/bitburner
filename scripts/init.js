@@ -1,4 +1,5 @@
 import { updateServers } from 'database/servers';
+import { writeStocks } from 'database/stocks';
 import { getAllHostnames } from 'utils';
 import { ONE_SECOND } from 'utils/constants';
 
@@ -8,8 +9,7 @@ import { ONE_SECOND } from 'utils/constants';
  * @param {NS} ns
  */
 export async function main(ns) {
-  ns.disableLog('ALL');
-  ns.enableLog('run');
+  // ns.disableLog('ALL');
 
   // Optionally clean up files in all servers if there is enough RAM to do so.
   const cleanupFilesPid = ns.run('cleanup-files.js');
@@ -17,13 +17,14 @@ export async function main(ns) {
 
   // Reset database files.
   const allHostnames = getAllHostnames(ns);
-  const purchasedHostnames = ns.getPurchasedServers();
   updateServers(
     ns,
-    ...allHostnames.map(hostname =>
-      getServerData(ns, hostname, purchasedHostnames)
-    )
+    ...allHostnames.map(hostname => getServerData(ns, hostname))
   );
+  if (ns.stock.hasWSEAccount() && ns.stock.hasTIXAPIAccess()) {
+    writeStocks(ns);
+    ns.run('manage-stocks.js', { preventDuplicates: true });
+  }
 
   // Start scripts.
   ns.run('gain-access.js', { preventDuplicates: true });
@@ -37,15 +38,16 @@ export async function main(ns) {
  *
  * @param {NS} ns
  * @param {string} hostname
- * @param {string[]} purchasedHostnames
  * @returns {import('database/servers').Server} server
  */
-export function getServerData(ns, hostname, purchasedHostnames) {
+export function getServerData(ns, hostname, x) {
+  const serverData = ns.getServer(hostname);
   return {
     hostname: hostname,
-    isPurchased: purchasedHostnames.includes(hostname),
-    maxRam: ns.getServerMaxRam(hostname),
-    maxMoney: ns.getServerMaxMoney(hostname),
+    organization: serverData.organizationName,
+    isPurchased: serverData.purchasedByPlayer,
+    maxRam: serverData.maxRam,
+    maxMoney: serverData.moneyMax,
     minSecurity: ns.getServerMinSecurityLevel(hostname),
     baseSecurity: ns.getServerBaseSecurityLevel(hostname),
     hackingLevel: ns.getServerRequiredHackingLevel(hostname),

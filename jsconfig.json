@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
-      "baseUrl": ".",
-      "paths": {"*": ["scripts/*"]},
-      
+    "baseUrl": ".",
+    "paths": { "*": ["scripts/*"] }
   }
 }

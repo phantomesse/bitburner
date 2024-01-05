@@ -41,6 +41,7 @@ export async function main(ns) {
     const endTimestamp = new Date().getUTCMilliseconds();
     const wasSuccessful =
       ns.codingcontract.attempt(output, contractFileName).length > 0;
+    await ns.sleep(1);
 
     /** @type {import('utils/table').Row} */ const row = {
       cells: [
