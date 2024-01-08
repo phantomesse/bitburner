@@ -1,4 +1,4 @@
-import { createReactElement } from 'utils';
+import { createReactElement } from 'utils/dom';
 import { CONTRACT_TYPE_TO_SOLVER_MAP, HOME_HOSTNAME } from 'utils/constants';
 
 const PADDING = '16px';

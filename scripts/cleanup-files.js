@@ -1,4 +1,4 @@
-import { getAllHostnames } from 'utils';
+import { getAllHostnames } from 'utils/servers';
 import { HOME_HOSTNAME } from 'utils/constants';
 
 /**

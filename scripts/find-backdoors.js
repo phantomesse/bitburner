@@ -1,5 +1,5 @@
 import { getServers } from 'database/servers';
-import { getPath } from 'utils';
+import { executeTerminalCommand } from 'utils/dom';
 
 /**
  * Prints out a command to run backdoor on all unowned servers with root access.
@@ -7,25 +7,22 @@ import { getPath } from 'utils';
  * @param {NS} ns
  */
 export async function main(ns) {
+  const currentHackingLevel = ns.getHackingLevel();
   const servers = getServers(ns).filter(server => {
-    const serverInfo = ns.getServer(server.hostname);
+    const serverData = ns.getServer(server.hostname);
     return (
-      !serverInfo.purchasedByPlayer &&
-      !serverInfo.backdoorInstalled &&
-      serverInfo.requiredHackingSkill <= ns.getHackingLevel() &&
-      ns.hasRootAccess(server.hostname)
+      ns.hasRootAccess(server.hostname) &&
+      serverData.requiredHackingSkill <= currentHackingLevel &&
+      !serverData.purchasedByPlayer &&
+      !serverData.backdoorInstalled
     );
   });
-
   for (const server of servers) {
-    const path = getPath(ns, server.hostname);
-
-    const commands = [];
-    commands.push(
+    const commands = [
+      server.path.map(hostname => `connect ${hostname}`).join('; '),
+      'backdoor',
       'home',
-      ...path.map(hostname => `connect ${hostname}`),
-      'backdoor'
-    );
-    ns.tprintf(commands.map(command => command + ';').join(' ') + '\n');
+    ];
+    await executeTerminalCommand(ns, ...commands);
   }
 }

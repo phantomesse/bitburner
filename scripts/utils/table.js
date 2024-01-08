@@ -19,11 +19,13 @@
 /**
  * @typedef Row
  * @property {Cell[]} cells
+ * @property {[import('utils/dom').Style]} style
  */
 
 /**
  * @typedef Table
  * @property {Row[]} rows
+ * @property {[import('utils/dom').Style]} style
  */
 
 /**
@@ -54,6 +56,8 @@ export const tprintTable = (ns, table) =>
  * @returns {import('../../NetscriptDefinitions').ReactElement}
  */
 function getTableForPrinting(ns, table, fillWidth) {
+  if (table.rows.length === 0) return createReactElement('Nothing to print!');
+
   // Get border color.
   let primaryColor = ns.ui.getTheme().primary.substring(1);
   if (primaryColor.length === 3) {
@@ -77,18 +81,22 @@ function getTableForPrinting(ns, table, fillWidth) {
     })
   );
   const cellElements = table.rows
-    .map(row =>
-      row.cells.map(cell =>
+    .map(row => {
+      const rowStyle = row.style ?? {};
+      return row.cells.map(cell =>
         createReactElement(cell.content, {
           ...cellStyling,
           ...cell.column.style,
+          ...rowStyle,
           ...cell.style,
           width: 'auto',
         })
-      )
-    )
+      );
+    })
     .flat();
+  const tableStyle = table.style ?? {};
   return createReactElement([...headerCellElements, ...cellElements], {
+    ...tableStyle,
     border: border,
     display: 'grid',
     gridTemplateColumns: table.rows[0].cells

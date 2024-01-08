@@ -1,4 +1,5 @@
 import { getServers } from 'database/servers';
+import { createColorForString } from 'utils/colors';
 import {
   HOME_HOSTNAME,
   ONE_SECOND,
@@ -251,7 +252,7 @@ function getServersToHack(ns, allServers) {
  *          servers that can be grown
  */
 function getServersToGrow(ns, allServers) {
-  const servers = allServers
+  let servers = allServers
     .filter(
       server =>
         ns.hasRootAccess(server.hostname) &&
@@ -270,6 +271,12 @@ function getServersToGrow(ns, allServers) {
       return server;
     })
     .filter(server => server.threadsNeeded > 0);
+  const serversLimitedByHackingLevel = servers.filter(
+    server => server.hackingLevel <= ns.getHackingLevel()
+  );
+  if (serversLimitedByHackingLevel.length > 0) {
+    servers = serversLimitedByHackingLevel;
+  }
   servers.sort((server1, server2) => {
     ns.getGrowTime(server1.hostname) - ns.getGrowTime(server2.hostname);
   });
@@ -283,7 +290,7 @@ function getServersToGrow(ns, allServers) {
  *          servers that can be weakened
  */
 function getServersToWeaken(ns, allServers) {
-  const servers = allServers
+  let servers = allServers
     .filter(
       server =>
         ns.hasRootAccess(server.hostname) &&
@@ -302,6 +309,13 @@ function getServersToWeaken(ns, allServers) {
       return server;
     })
     .filter(server => server.threadsNeeded > 0);
+  const serversLimitedByHackingLevel = servers.filter(
+    server => server.hackingLevel <= ns.getHackingLevel()
+  );
+  if (serversLimitedByHackingLevel.length > 0) {
+    servers = serversLimitedByHackingLevel;
+  }
+
   servers.sort((server1, server2) => {
     ns.getWeakenTime(server1.hostname) - ns.getWeakenTime(server2.hostname);
   });
@@ -323,7 +337,7 @@ function logServers(ns, serversToHack, serversToGrow, serversToWeaken) {
   if (serversToHack.length > 0) {
     ns.print('Servers to hack');
 
-    const table = { rows: [] };
+    const table = { rows: [], style: { color: ns.ui.getTheme().error } };
     for (const server of serversToHack) {
       const row = {
         cells: [
@@ -351,6 +365,7 @@ function logServers(ns, serversToHack, serversToGrow, serversToWeaken) {
             content: ns.formatNumber(server.threadsNeeded, 0),
           },
         ],
+        style: { color: createColorForString(ns, server.hostname) },
       };
       table.rows.push(row);
     }
@@ -363,7 +378,7 @@ function logServers(ns, serversToHack, serversToGrow, serversToWeaken) {
   if (serversToWeaken.length > 0) {
     ns.print('Servers to weaken');
 
-    const table = { rows: [] };
+    const table = { rows: [], style: { color: ns.ui.getTheme().warning } };
     for (const server of serversToWeaken) {
       const row = {
         cells: [
@@ -398,6 +413,7 @@ function logServers(ns, serversToHack, serversToGrow, serversToWeaken) {
             content: ns.formatNumber(server.threadsNeeded, 0),
           },
         ],
+        style: { color: createColorForString(ns, server.hostname) },
       };
       table.rows.push(row);
     }
@@ -410,7 +426,7 @@ function logServers(ns, serversToHack, serversToGrow, serversToWeaken) {
   if (serversToGrow.length > 0) {
     ns.print('Servers to grow');
 
-    const table = { rows: [] };
+    const table = { rows: [], style: { color: ns.ui.getTheme().success } };
     for (const server of serversToGrow) {
       const row = {
         cells: [
@@ -438,6 +454,7 @@ function logServers(ns, serversToHack, serversToGrow, serversToWeaken) {
             content: ns.formatNumber(server.threadsNeeded, 0),
           },
         ],
+        style: { color: createColorForString(ns, server.hostname) },
       };
       table.rows.push(row);
     }

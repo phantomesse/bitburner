@@ -2,6 +2,7 @@ import { getServers } from 'database/servers';
 import { printTable } from 'utils/table';
 import { formatMoney, formatTime } from 'utils/format';
 import { ONE_SECOND } from 'utils/constants';
+import { createColorForString } from 'utils/colors';
 
 /**
  * Monitors all servers that can be hacked in the --tail.
@@ -39,6 +40,7 @@ export async function main(ns) {
           {
             column: { name: 'Hostname', style: { width: 'max-content' } },
             content: server.hostname,
+            style: { color: createColorForString(ns, server.hostname) },
           },
           {
             column: {
@@ -70,6 +72,13 @@ export async function main(ns) {
               style: { textAlign: 'right', color: growColor },
             },
             content: formatMoney(ns, server.maxMoney),
+          },
+          {
+            column: {
+              name: 'Grow Time',
+              style: { textAlign: 'right', color: growColor },
+            },
+            content: ns.getGrowTime(server.hostname),
           },
           {
             column: {

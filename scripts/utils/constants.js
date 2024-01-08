@@ -6,9 +6,13 @@ import {
 } from 'contracts/algorithmic-stock-trader';
 import arrayJumpingGame from 'contracts/array-jumping-game';
 import compressionIILZDecompression from 'contracts/compression-ii-lz-decompression';
+import encryptionICaesarCipher from 'contracts/encryption-i-caesar-cipher';
+import encryptionIIVigenereCipher from 'contracts/encryption-ii-vigenere-cipher';
 import findLargestPrimeFactor from 'contracts/find-largest-prime-factor';
+import mergeOverlappingIntervals from 'contracts/merge-overlapping-intervals';
 import sanitizeParenthesesInExpression from 'contracts/sanitize-parentheses-in-expression';
 import shortestPathInAGrid from 'contracts/shortest-path-in-a-grid';
+import spiralizeMatrix from 'contracts/spiralize-matrix';
 import totalWaysToSum from 'contracts/total-ways-to-sum';
 import uniquePathsInAGridI from 'contracts/unique-paths-in-a-grid-i';
 
@@ -36,19 +40,19 @@ export const CONTRACT_TYPE_TO_SOLVER_MAP = {
   'Compression I: RLE Compression': null,
   'Compression II: LZ Decompression': compressionIILZDecompression,
   'Compression III: LZ Compression': null,
-  'Encryption I: Caesar Cipher': null,
-  'Encryption II: Vigenère Cipher': null,
+  'Encryption I: Caesar Cipher': encryptionICaesarCipher,
+  'Encryption II: Vigenère Cipher': encryptionIIVigenereCipher,
   'Find All Valid Math Expressions': null,
   'Find Largest Prime Factor': findLargestPrimeFactor,
   'Generate IP Addresses': null,
   'HammingCodes: Encoded Binary to Integer': null,
   'HammingCodes: Integer to Encoded Binary': null,
-  'Merge Overlapping Intervals': null,
+  'Merge Overlapping Intervals': mergeOverlappingIntervals,
   'Minimum Path Sum in a Triangle': null,
   'Proper 2-Coloring of a Graph': null,
   'Sanitize Parentheses in Expression': sanitizeParenthesesInExpression,
   'Shortest Path in a Grid': shortestPathInAGrid,
-  'Spiralize Matrix': null,
+  'Spiralize Matrix': spiralizeMatrix,
   'Subarray with Maximum Sum': null,
   'Total Ways to Sum II': null,
   'Total Ways to Sum': totalWaysToSum,

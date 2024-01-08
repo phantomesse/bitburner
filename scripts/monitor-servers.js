@@ -1,8 +1,9 @@
 import { getServers } from 'database/servers';
-import { createReactElement } from 'utils';
+import { createReactElement } from 'utils/dom';
 import { formatTime } from 'utils/format';
 import { printTable } from 'utils/table';
 import { ONE_SECOND } from 'utils/constants';
+import { createColorForString } from 'utils/colors';
 
 /**
  * Monitors all servers that can run scripts in the --tail.
@@ -17,7 +18,16 @@ export async function main(ns) {
   ns.atExit(() => ns.closeTail());
 
   while (true) {
-    const servers = getServers(ns).filter(
+    const allServers = getServers(ns);
+    const hostnameToColor = {};
+    for (const server of allServers) {
+      hostnameToColor[server.hostname] = createColorForString(
+        ns,
+        server.hostname
+      );
+    }
+
+    const servers = allServers.filter(
       server => ns.hasRootAccess(server.hostname) && server.maxRam > 0
     );
     servers.sort(
@@ -34,7 +44,9 @@ export async function main(ns) {
         cells: [
           {
             column: { name: 'Hostname', style: { width: 'max-content' } },
-            content: server.hostname,
+            content: createReactElement(server.hostname, {
+              color: hostnameToColor[server.hostname],
+            }),
           },
           {
             column: {
@@ -53,7 +65,7 @@ export async function main(ns) {
           },
           {
             column: { name: 'Running Scripts', style: {} },
-            content: getRunningScripts(ns, server.hostname),
+            content: getRunningScripts(ns, server.hostname, hostnameToColor),
           },
         ],
       };
@@ -72,36 +84,32 @@ export async function main(ns) {
  *
  * @param {NS} ns
  * @param {string} hostname
+ * @param {Object.<string, string>} hostnameToColor
  * @returns {import('../NetscriptDefinitions').ReactElement}
  */
-function getRunningScripts(ns, hostname) {
+function getRunningScripts(ns, hostname, hostnameToColor) {
   const elements = ns.ps(hostname).map(process => {
     const style = {};
-    let message =
-      process.filename +
-      (process.args.length > 0 ? ' ' + process.args.join(' ') : '') +
-      ` (${process.threads.toLocaleString()})`;
+    const message = [createReactElement(process.filename, {}, 'span')];
+
+    for (const args of process.args) {
+      message.push(
+        createReactElement(
+          ` ${args}`,
+          {
+            color: args in hostnameToColor ? hostnameToColor[args] : 'inherit',
+          },
+          'span'
+        )
+      );
+    }
+
+    message.push(
+      createReactElement(` (${process.threads.toLocaleString()})`, {}, 'span')
+    );
 
     if (['hack.js', 'grow.js', 'weaken.js'].includes(process.filename)) {
       const script = ns.getRunningScript(process.pid, hostname);
-      // const totalTimeMessage = script.logs[0]
-      //   .replace(
-      //     `${process.filename.replace('.js', '')}: Executing on '${
-      //       process.args[0]
-      //     }' in `,
-      //     ''
-      //   )
-      //   .split(' (')[0];
-      // const minutes =
-      //   totalTimeMessage.indexOf('minute') > 0
-      //     ? parseInt(totalTimeMessage.split(' minute')[0])
-      //     : 0;
-      // const seconds = parseFloat(totalTimeMessage.split(' ').splice(-2, 1));
-      // const secondsLeft = Math.ceil(
-      //   minutes * 60 + seconds - script.onlineRunningTime
-      // );
-      // message += ` - ${formatTime(ns, secondsLeft * 1000)} left`;
-
       const totalTimeMessage = script.logs[0]
         .match(/ in .* \(/)[0]
         .replace(' in ', '')
@@ -116,10 +124,16 @@ function getRunningScripts(ns, hostname) {
           return number;
         })
         .reduce((a, b) => a + b);
-      message += ` - ${formatTime(
-        ns,
-        (totalSeconds - script.onlineRunningTime) * 1000
-      )} left`;
+      message.push(
+        createReactElement(
+          ` - ${formatTime(
+            ns,
+            (totalSeconds - script.onlineRunningTime) * 1000
+          )} left`,
+          {},
+          'span'
+        )
+      );
       style.color = {
         'hack.js': ns.ui.getTheme().error,
         'grow.js': ns.ui.getTheme().success,

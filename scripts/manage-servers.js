@@ -37,6 +37,7 @@ export async function main(ns) {
             updateServers(ns, {
               hostname: hostname,
               organization: '',
+              path: [hostname],
               isPurchased: true,
               maxRam: ram,
               maxMoney: 0,

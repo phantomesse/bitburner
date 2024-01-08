@@ -4,6 +4,9 @@
  * @typedef Server
  * @property {string} hostname
  * @property {string} organization
+ * @property {string[]} path
+ *           path from home to the hostname not including home but including the
+ *           hostname (e.g. ['foodnstuff', 'CSEC'] for 'CSEC' server)
  * @property {[boolean]} isPurchased
  * @property {[number]} maxRam maximum RAM the server has
  * @property {[number]} maxMoney

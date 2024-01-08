@@ -63,7 +63,7 @@ function buyLongs(ns, stock) {
   const sharesToBuy = Math.min(
     stock.maxShares - getPosition(ns, stock.symbol).longs,
     Math.floor(
-      (ns.getServerMoneyAvailable(HOME_HOSTNAME) -
+      (ns.getServerMoneyAvailable(HOME_HOSTNAME) / 2 -
         ns.stock.getConstants().StockMarketCommission) /
         ns.stock.getAskPrice(stock.symbol)
     )
