@@ -3,6 +3,7 @@ import {
   HOME_HOSTNAME,
   MAX_PURCHASED_SERVER_COUNT,
   ONE_MINUTE,
+  ONE_SECOND,
   UPDATE_SERVERS_PORT,
 } from 'utils/constants';
 import { formatMoney } from 'utils/format';
@@ -78,6 +79,6 @@ export async function main(ns) {
       }
     }
 
-    await ns.sleep(ONE_MINUTE);
+    await ns.sleep(ONE_SECOND);
   }
 }

@@ -1,7 +1,6 @@
 import { getServers } from 'database/servers';
 import { CONTRACT_TYPE_TO_SOLVER_MAP, HOME_HOSTNAME } from 'utils/constants';
 import { createReactElement } from 'utils/dom';
-import { getAllPaths } from 'utils/servers';
 import { tprintTable } from 'utils/table';
 
 /**
