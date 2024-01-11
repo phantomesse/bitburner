@@ -9,6 +9,7 @@ import compressionIILZDecompression from 'contracts/compression-ii-lz-decompress
 import encryptionICaesarCipher from 'contracts/encryption-i-caesar-cipher';
 import encryptionIIVigenereCipher from 'contracts/encryption-ii-vigenere-cipher';
 import findLargestPrimeFactor from 'contracts/find-largest-prime-factor';
+import generateIPAddresses from 'contracts/generate-ip-addresses';
 import mergeOverlappingIntervals from 'contracts/merge-overlapping-intervals';
 import sanitizeParenthesesInExpression from 'contracts/sanitize-parentheses-in-expression';
 import shortestPathInAGrid from 'contracts/shortest-path-in-a-grid';
@@ -44,7 +45,7 @@ export const CONTRACT_TYPE_TO_SOLVER_MAP = {
   'Encryption II: Vigenère Cipher': encryptionIIVigenereCipher,
   'Find All Valid Math Expressions': null,
   'Find Largest Prime Factor': findLargestPrimeFactor,
-  'Generate IP Addresses': null,
+  'Generate IP Addresses': generateIPAddresses,
   'HammingCodes: Encoded Binary to Integer': null,
   'HammingCodes: Integer to Encoded Binary': null,
   'Merge Overlapping Intervals': mergeOverlappingIntervals,
@@ -59,54 +60,3 @@ export const CONTRACT_TYPE_TO_SOLVER_MAP = {
   'Unique Paths in a Grid I': uniquePathsInAGridI,
   'Unique Paths in a Grid II': null,
 };
-
-export const POTENTIAL_GANG_MEMBER_NAMES = [
-  'Abyss',
-  'Beast',
-  'Bullet',
-  'Catalyst',
-  'Cipher',
-  'Cobra',
-  'Echo',
-  'Eclipse',
-  'Enigma',
-  'Frost',
-  'Ghost',
-  'Havoc',
-  'Haze',
-  'Inferno',
-  'Obsidian',
-  'Omega',
-  'Phantom',
-  'Phoenix',
-  'Razor',
-  'Renegade',
-  'Riptide',
-  'Scorpion',
-  'Shadow',
-  'Spike',
-  'Storm',
-  'Tempest',
-  'Thunder',
-  'Venom',
-  'Viper',
-  'Vortex',
-];
-
-export const GANG_TASKS = [
-  'Unassigned',
-  'Mug People',
-  'Deal Drugs',
-  'Strongarm Civilians',
-  'Run a Con',
-  'Armed Robbery',
-  'Traffick Illegal Arms',
-  'Threaten & Blackmail',
-  'Human Trafficking',
-  'Terrorism',
-  'Vigilante Justice',
-  'Train Combat',
-  'Train Hacking',
-  'Train Charisma',
-  'Territory Warfare',
-];

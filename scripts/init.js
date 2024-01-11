@@ -2,6 +2,7 @@ import { updateServers } from 'database/servers';
 import { writeStocks } from 'database/stocks';
 import { getAllPaths } from 'utils/servers';
 import { HOME_HOSTNAME, ONE_SECOND } from 'utils/constants';
+import { writeGangTasks } from 'database/gang-tasks';
 
 /**
  * Run this script at the beginning of every session.
@@ -31,6 +32,10 @@ export async function main(ns) {
     writeStocks(ns);
     ns.run('manage-stocks.js', { preventDuplicates: true });
   }
+  try {
+    writeGangTasks(ns);
+    if (ns.gang.inGang()) ns.run('manage-gang.js', { preventDuplicates: true });
+  } catch (_) {}
 
   // Start scripts.
   ns.run('gain-access.js', { preventDuplicates: true });

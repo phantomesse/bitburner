@@ -15,7 +15,6 @@ export async function main(ns) {
     const position = ns.stock.getPosition(symbol);
 
     // Sell longs.
-    const longs = position[0];
     ns.stock.sellStock(symbol, position[0]);
 
     // Sell shorts.
