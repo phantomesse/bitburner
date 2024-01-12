@@ -12,6 +12,7 @@
  * [6, 2]
  *
  * @param {number[]} input
+ * @returns {number} number of unique paths
  */
 export default function uniquePathsInAGridI(input) {
   const [rows, columns] = input;

@@ -1,8 +1,6 @@
 import {
   algorithmicStockTraderI,
   algorithmicStockTraderII,
-  algorithmicStockTraderIII,
-  algorithmicStockTraderIV,
 } from 'contracts/algorithmic-stock-trader';
 import arrayJumpingGame from 'contracts/array-jumping-game';
 import compressionIRLECompression from 'contracts/compression-i-rle-compression';
@@ -13,8 +11,8 @@ import findLargestPrimeFactor from 'contracts/find-largest-prime-factor';
 import generateIPAddresses from 'contracts/generate-ip-addresses';
 import mergeOverlappingIntervals from 'contracts/merge-overlapping-intervals';
 import sanitizeParenthesesInExpression from 'contracts/sanitize-parentheses-in-expression';
-import shortestPathInAGrid from 'contracts/shortest-path-in-a-grid';
 import spiralizeMatrix from 'contracts/spiralize-matrix';
+import subarrayWithMaximumSum from 'contracts/subarray-with-maximum-sum';
 import totalWaysToSum from 'contracts/total-ways-to-sum';
 import uniquePathsInAGridI from 'contracts/unique-paths-in-a-grid-i';
 
@@ -55,7 +53,7 @@ export const CONTRACT_TYPE_TO_SOLVER_MAP = {
   'Sanitize Parentheses in Expression': sanitizeParenthesesInExpression,
   // 'Shortest Path in a Grid': shortestPathInAGrid,
   'Spiralize Matrix': spiralizeMatrix,
-  'Subarray with Maximum Sum': null,
+  'Subarray with Maximum Sum': subarrayWithMaximumSum,
   'Total Ways to Sum II': null,
   'Total Ways to Sum': totalWaysToSum,
   'Unique Paths in a Grid I': uniquePathsInAGridI,

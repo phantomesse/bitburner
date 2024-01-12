@@ -21,6 +21,9 @@ export async function main(ns) {
   }
 
   // Remove database files.
-  const filenames = ns.ls(HOME_HOSTNAME, '.txt');
+  const filenames = [
+    ...ns.ls(HOME_HOSTNAME, '.txt'),
+    ...ns.ls(HOME_HOSTNAME, '.cct'),
+  ];
   for (const filename of filenames) ns.rm(filename);
 }

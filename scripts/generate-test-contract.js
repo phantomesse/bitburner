@@ -66,9 +66,14 @@ function printContract(ns, contractFileName) {
 
   // Print description.
   ns.tprintRaw(
-    createReactElement(ns.codingcontract.getDescription(contractFileName), {
-      padding: PADDING,
-    })
+    createReactElement(
+      ns.codingcontract
+        .getDescription(contractFileName)
+        .replaceAll('&nbsp;', ' '),
+      {
+        padding: PADDING,
+      }
+    )
   );
 
   // Print command to attempt.

@@ -6,6 +6,7 @@ import {
   UPDATE_SERVERS_PORT,
 } from 'utils/constants';
 import { formatTime, formatMoney } from 'utils/format';
+import { getRamToReserve } from 'utils/scripts';
 import { printTable } from 'utils/table';
 
 const MIN_MONEY_AMOUNT = 1000000;
@@ -33,18 +34,7 @@ export async function main(ns) {
 
     // Get amount of RAM to resolve based on the combination of all scripts in
     // the Home server.
-    const ramToReserveInHome =
-      ns.args[0] ??
-      ns
-        .ls(HOME_HOSTNAME, '.js')
-        .filter(
-          filename =>
-            !ns.isRunning(filename, HOME_HOSTNAME) &&
-            ![HACK_JS, GROW_JS, WEAKEN_JS, 'utils.js'].includes(filename) &&
-            filename.indexOf('/') < 0
-        )
-        .map(filename => ns.getScriptRam(filename))
-        .reduce((a, b) => a + b);
+    const ramToReserveInHome = getRamToReserve(ns);
 
     // Get servers to hack, weaken, and grow.
     let serversToHack = getServersToHack(

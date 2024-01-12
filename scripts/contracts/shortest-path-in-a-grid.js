@@ -38,89 +38,165 @@
  *
  * Answer: ''
  *
- * @param {number[][]} grid
+ * @param {number[][]} input
  * @returns {string} path
  */
-export default function shortestPathInAGrid(grid) {
-  const paths = getPaths(0, 0, grid, []);
-  paths.sort((path1, path2) => path1.length - path2.length);
-  return paths[0]?.join('') ?? '';
+export default function shortestPathInAGrid(input) {
+  // Starting from bottom corner of grid, get all paths possible to bottom corner.
+  const grid = new Grid(input);
+  return getPaths(grid.endPosition, grid, '', [], new Map());
 }
 
 /**
- * @typedef {('U'|'L'|'D'|'R')[]} Path
+ * @typedef {('U'|'L'|'D'|'R')} Direction
  */
+
+const directionToOffsetMap = {
+  D: { x: 0, y: -1 },
+  R: { x: -1, y: 0 },
+  U: { x: 0, y: 1 },
+  L: { x: 1, y: 0 },
+};
 
 /**
- * @param {number} x
- * @param {number} y
- * @param {number[][]} grid
- * @param {Path} pathThusFar
- * @returns {Path[]} all possible paths from x,y to the bottom-right corner
+ *
+ * @param {Position} position
+ * @param {Grid} grid
+ * @param {string} pathThusFar
+ * @param {Position[]} visitedPositions
+ * @param {Map<Position, string[]>} positionToPathsCacheMap
+ * @returns {string[]}
  */
-function getPaths(x, y, grid, pathThusFar) {
-  if (!isValidPosition(x, y, grid)) return [];
-  if (y === grid.length - 1 && x === grid[y].length - 1) return [pathThusFar];
+function getPaths(
+  position,
+  grid,
+  pathThusFar,
+  visitedPositions,
+  positionToPathsCacheMap
+) {
+  console.log(`position: ${position}, ${pathThusFar}`);
 
-  // Create a copy of the grid and mark the current position as an obstacle.
-  const newGrid = [];
-  for (let row of grid) {
-    newGrid.push([...row]);
+  const cacheKey = [...positionToPathsCacheMap.keys()].find(key =>
+    key.equals(position)
+  );
+  if (cacheKey) {
+    console.log('getting from cache', cacheKey);
+    return positionToPathsCacheMap.get(cacheKey);
   }
-  newGrid[y][x] = 1;
 
-  const paths = [
-    { x: x, y: y - 1, direction: 'U' },
-    { x: x - 1, y: y, direction: 'L' },
-    { x: x, y: y + 1, direction: 'D' },
-    { x: x + 1, y: y, direction: 'R' },
-  ]
-    .map(newPosition =>
-      getPaths(newPosition.x, newPosition.y, newGrid, [
-        ...pathThusFar,
-        newPosition.direction,
-      ])
-    )
-    .filter(paths => paths.length > 0)
-    .flat();
+  if (position.equals(new Position(0, 0))) {
+    console.log(`reached the end ${pathThusFar}`);
+    return [pathThusFar];
+  }
 
+  let paths = [];
+  for (const direction in directionToOffsetMap) {
+    const offset = directionToOffsetMap[direction];
+    const nextPosition = new Position(
+      position.x + offset.x,
+      position.y + offset.y
+    );
+    if (
+      !grid.isValidPosition(nextPosition) ||
+      visitedPositions.find(visitedPosition =>
+        visitedPosition.equals(nextPosition)
+      )
+    ) {
+      continue;
+    }
+
+    paths.push(
+      ...getPaths(
+        nextPosition,
+        grid,
+        pathThusFar + direction,
+        [...visitedPositions, position],
+        positionToPathsCacheMap
+      )
+    );
+  }
+
+  positionToPathsCacheMap.set(position, paths);
   return paths;
 }
 
-/**
- * Checks if a position is a valid empty space on the grid.
- *
- * @param {number} x
- * @param {number} y
- * @param {number[][]} grid
- */
-function isValidPosition(x, y, grid) {
-  if (x < 0 || y < 0 || y >= grid.length || x >= grid[y].length) return false;
-  return grid[y][x] === 0;
+class Position {
+  /**
+   * @param {number} x
+   * @param {number} y
+   */
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+
+  equals(other) {
+    return this.x === other.x && this.y === other.y;
+  }
+
+  toString() {
+    return `(${this.x}, ${this.y})`;
+  }
 }
 
-// console.log(
-//   shortestPathInAGrid([
-//     [0, 1, 0, 0, 0],
-//     [0, 0, 0, 1, 0],
-//   ])
-// );
-// console.log(
-//   shortestPathInAGrid([
-//     [0, 1],
-//     [1, 0],
-//   ])
-// );
+class Grid {
+  /**
+   * @param {number[][]} grid
+   */
+  constructor(grid) {
+    this.grid = grid;
+    this.endPosition = new Position(grid[0].length - 1, grid.length - 1);
+  }
+
+  /**
+   * @param {Position} position
+   * @returns {boolean} is valid
+   */
+  isValidPosition(position) {
+    const [x, y] = [position.x, position.y];
+    return (
+      x >= 0 &&
+      y >= 0 &&
+      y < this.grid.length &&
+      x < this.grid[y].length &&
+      this.grid[y][x] === 0
+    );
+  }
+}
+
+console.log(
+  shortestPathInAGrid([
+    [0, 1, 0, 0, 0],
+    [0, 0, 0, 1, 0],
+  ])
+);
+console.log(
+  shortestPathInAGrid([
+    [0, 1],
+    [1, 0],
+  ])
+);
+
+console.log(
+  shortestPathInAGrid([
+    [0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 1],
+    [0, 0, 0, 1, 0, 0],
+    [0, 0, 1, 1, 1, 0],
+    [0, 0, 0, 0, 0, 0],
+    [1, 1, 0, 0, 0, 0],
+    [0, 1, 0, 0, 0, 1],
+    [1, 1, 0, 0, 0, 0],
+  ])
+); // DDDDRRDDDRRR
 
 // console.log(
 //   shortestPathInAGrid([
-//     [0, 0, 0, 0, 0, 0],
-//     [0, 0, 0, 0, 0, 1],
-//     [0, 0, 0, 1, 0, 0],
-//     [0, 0, 1, 1, 1, 0],
-//     [0, 0, 0, 0, 0, 0],
-//     [1, 1, 0, 0, 0, 0],
-//     [0, 1, 0, 0, 0, 1],
-//     [1, 1, 0, 0, 0, 0],
+//     [0, 0, 0, 0, 0, 1, 0, 1],
+//     [1, 0, 0, 1, 0, 0, 0, 0],
+//     [0, 1, 0, 1, 0, 0, 0, 0],
+//     [1, 0, 0, 1, 1, 0, 0, 0],
+//     [0, 0, 1, 0, 0, 0, 0, 0],
+//     [0, 0, 1, 1, 0, 0, 0, 0],
 //   ])
-// ); // DDDDRRDDDRRR
+// );

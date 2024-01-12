@@ -1,6 +1,6 @@
 import { getServers } from 'database/servers';
 import { getStocks } from 'database/stocks';
-import { HOME_HOSTNAME, ONE_SECOND } from 'utils/constants';
+import { HOME_HOSTNAME } from 'utils/constants';
 import { formatMoney } from 'utils/format';
 import { printTable } from 'utils/table';
 

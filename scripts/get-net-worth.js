@@ -7,12 +7,14 @@ import { formatMoney } from 'utils/format';
  * @param {NS} ns
  */
 export async function main(ns) {
+  const commission = ns.stock.getConstants().StockMarketCommission;
   const moneyAvailable = ns.getServerMoneyAvailable(HOME_HOSTNAME);
   const moneyInStocks = getStocks(ns)
     .map(
       stock =>
         ns.stock.getAskPrice(stock.symbol) *
-        ns.stock.getPosition(stock.symbol)[0]
+          ns.stock.getPosition(stock.symbol)[0] -
+        commission
     )
     .reduce((a, b) => a + b);
   ns.tprintf(`Total ${formatMoney(ns, moneyAvailable + moneyInStocks)}`);
