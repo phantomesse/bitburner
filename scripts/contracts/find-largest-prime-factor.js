@@ -6,14 +6,45 @@
  * @param {number} input
  */
 export default function findLargestPrimeFactor(input) {
-  for (let i = input / 2; i > 0; i--) {
+  const squareRoot = Math.floor(Math.sqrt(input));
+  let otherPrimeFactor;
+  for (let i = 1; i <= squareRoot; i++) {
     if (input % i !== 0) continue; // Not a factor.
-    if (isPrime(i)) return i;
+    if (isPrime(input / i)) return input / i;
+    if (isPrime(i)) otherPrimeFactor = i;
   }
+  return otherPrimeFactor;
 }
 
 /** @type {Object.<number, boolean>}*/
-const NUMBER_TO_IS_PRIME = { 1: true, 2: true, 3: true };
+const numberToIsPrimeMap = {
+  1: true,
+  2: true,
+  3: true,
+  5: true,
+  7: true,
+  11: true,
+  13: true,
+  17: true,
+  19: true,
+  23: true,
+  29: true,
+  31: true,
+  37: true,
+  41: true,
+  43: true,
+  47: true,
+  53: true,
+  59: true,
+  61: true,
+  67: true,
+  71: true,
+  73: true,
+  79: true,
+  83: true,
+  89: true,
+  97: true,
+};
 
 /**
  * Checks whether a number is prime and records it into the `NUMBER_TO_IS_PRIME`
@@ -22,17 +53,20 @@ const NUMBER_TO_IS_PRIME = { 1: true, 2: true, 3: true };
  * @param {number} number
  */
 function isPrime(number) {
-  if (number in NUMBER_TO_IS_PRIME) return NUMBER_TO_IS_PRIME[number];
+  if (number in numberToIsPrimeMap) return numberToIsPrimeMap[number];
 
   let isPrime = true;
 
-  for (let i = 2; i < number / 2; i++) {
+  for (let i = 2; i < Math.sqrt(number); i++) {
     if (number % i === 0) {
       isPrime = false;
       break;
     }
   }
 
-  NUMBER_TO_IS_PRIME[number] = isPrime;
+  numberToIsPrimeMap[number] = isPrime;
   return isPrime;
 }
+
+console.log(findLargestPrimeFactor(764191163));
+// console.log(findLargestPrimeFactor(1000));
