@@ -71,7 +71,7 @@ const EQUIPMENT_NAMES = [
   'Graphene Bone Lacings',
 ];
 
-const WANTED_PENALTY_THRESHOLD = 0.9;
+const WANTED_PENALTY_THRESHOLD = 0.99;
 
 /**
  * Manages gang members.
@@ -102,11 +102,16 @@ export async function main(ns) {
     let gangInfo = ns.gang.getGangInformation();
 
     // Only engage in territory warfare if wanted penalty is below threshold and
-    // territory is less than threshold.
+    // territory is less than threshold and we have enough power.
+    const minPower = Math.max(
+      ...Object.values(ns.gang.getOtherGangInformation())
+        .filter(info => info.territory > 0)
+        .map(info => info.power)
+    );
     ns.gang.setTerritoryWarfare(
       gangInfo.wantedPenalty >= WANTED_PENALTY_THRESHOLD &&
         gangInfo.territory < 0.5 &&
-        gangInfo.territory > 0
+        gangInfo.power > minPower
     );
 
     // Recruit if possible.
