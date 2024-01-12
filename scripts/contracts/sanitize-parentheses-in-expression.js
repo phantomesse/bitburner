@@ -20,58 +20,49 @@
  * @returns {string[]} valid expressions
  */
 export default function sanitizeParenthesesInExpression(expression) {
-  // Input expression is already valid.
-  if (isValidExpression(expression)) return [expression];
+  let charactersToRemove = 0;
+  let expressions = [expression];
+  while (charactersToRemove < expression.length) {
+    const validExpressions = new Set();
+    for (const expression of expressions) {
+      if (isValidExpression(expression)) validExpressions.add(expression);
+    }
+    if (validExpressions.size > 0) return [...validExpressions];
 
-  const validExpressions = [...new Set(getValidExpressions(expression))];
-  return validExpressions.length > 0 ? validExpressions : [''];
+    const shortenedExpressions = new Set();
+    for (const expression of expressions) {
+      for (let i = 0; i < expression.length; i++) {
+        shortenedExpressions.add(
+          expression.substring(0, i) + expression.substring(i + 1)
+        );
+      }
+    }
+    expressions = [...shortenedExpressions];
+
+    charactersToRemove++;
+  }
+  return [];
 }
 
-/**
- * Returns a list of the most minimal valid exprssions.
- *
- * @param {string} expression
- * @returns {string[]} valid expressions or empty array if no valid found
- */
-function getValidExpressions(expression) {
-  if (expression.length === 1) return [];
-
-  const shortenedExpressions = new Set();
-  for (let i = 0; i < expression.length; i++) {
-    shortenedExpressions.add(expression.slice(0, i) + expression.slice(i + 1));
-  }
-  const validExpressions = [...shortenedExpressions].filter(isValidExpression);
-  if (validExpressions.length > 0) return validExpressions;
-
-  for (const shortenedExpression of shortenedExpressions) {
-    validExpressions.push(...getValidExpressions(shortenedExpression));
-  }
-  let longestExpressionLength = validExpressions.reduce(
-    (longestLength, expression) => Math.max(longestLength, expression.length),
-    0
-  );
-  return validExpressions.filter(
-    expression => expression.length === longestExpressionLength
-  );
-}
+/** @type {Object.<string, boolean>} */
+const expressionToIsValidMap = {};
 
 /**
- * Checks if an expression is valid based on the parentheses pairs.
- *
  * @param {string} expression
+ * @returns {boolean} is valid
  */
 function isValidExpression(expression) {
-  const parentheses = [];
-  const characters = expression.split('');
-  for (const character of characters) {
-    switch (character) {
-      case '(':
-        parentheses.push(1);
-        break;
-      case ')':
-        if (parentheses.pop() === undefined) return false;
-        break;
-    }
+  if (expression in expressionToIsValidMap) {
+    return expressionToIsValidMap[expression];
   }
-  return parentheses.length === 0;
+
+  let stack = 0;
+  for (let i = 0; i < expression.length; i++) {
+    const character = expression.charAt(i);
+    if (character === '(') stack++;
+    else if (character === ')') stack--;
+    if (stack < 0) break;
+  }
+  expressionToIsValidMap[expression] = stack === 0;
+  return expressionToIsValidMap[expression];
 }

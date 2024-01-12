@@ -158,7 +158,11 @@ export async function main(ns) {
       }
 
       // If wanted level is too high, then vigilante justice.
-      if (gangInfo.wantedPenalty < WANTED_PENALTY_THRESHOLD) {
+      if (
+        gangInfo.wantedPenalty < WANTED_PENALTY_THRESHOLD ||
+        (gangMember.task === vigilanteJusticeTask.name &&
+          gangInfo.wantedPenalty < 0)
+      ) {
         ns.gang.setMemberTask(gangMember.name, vigilanteJusticeTask.name);
         continue;
       }

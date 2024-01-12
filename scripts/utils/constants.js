@@ -5,6 +5,7 @@ import {
   algorithmicStockTraderIV,
 } from 'contracts/algorithmic-stock-trader';
 import arrayJumpingGame from 'contracts/array-jumping-game';
+import compressionIRLECompression from 'contracts/compression-i-rle-compression';
 import compressionIILZDecompression from 'contracts/compression-ii-lz-decompression';
 import encryptionICaesarCipher from 'contracts/encryption-i-caesar-cipher';
 import encryptionIIVigenereCipher from 'contracts/encryption-ii-vigenere-cipher';
@@ -34,29 +35,29 @@ export const UPDATE_SERVERS_PORT = 13;
 export const CONTRACT_TYPE_TO_SOLVER_MAP = {
   'Algorithmic Stock Trader I': algorithmicStockTraderI,
   'Algorithmic Stock Trader II': algorithmicStockTraderII,
-  'Algorithmic Stock Trader III': algorithmicStockTraderIII,
-  'Algorithmic Stock Trader IV': algorithmicStockTraderIV,
+  // 'Algorithmic Stock Trader III': algorithmicStockTraderIII,
+  // 'Algorithmic Stock Trader IV': algorithmicStockTraderIV,
   'Array Jumping Game II': null,
   'Array Jumping Game': arrayJumpingGame,
-  'Compression I: RLE Compression': null,
+  'Compression I: RLE Compression': compressionIRLECompression,
   'Compression II: LZ Decompression': compressionIILZDecompression,
   'Compression III: LZ Compression': null,
   'Encryption I: Caesar Cipher': encryptionICaesarCipher,
   'Encryption II: Vigenère Cipher': encryptionIIVigenereCipher,
   'Find All Valid Math Expressions': null,
-  'Find Largest Prime Factor': findLargestPrimeFactor,
+  // 'Find Largest Prime Factor': findLargestPrimeFactor,
   'Generate IP Addresses': generateIPAddresses,
   'HammingCodes: Encoded Binary to Integer': null,
   'HammingCodes: Integer to Encoded Binary': null,
-  'Merge Overlapping Intervals': mergeOverlappingIntervals,
+  // 'Merge Overlapping Intervals': mergeOverlappingIntervals,
   'Minimum Path Sum in a Triangle': null,
   'Proper 2-Coloring of a Graph': null,
   'Sanitize Parentheses in Expression': sanitizeParenthesesInExpression,
-  'Shortest Path in a Grid': shortestPathInAGrid,
-  'Spiralize Matrix': spiralizeMatrix,
+  // 'Shortest Path in a Grid': shortestPathInAGrid,
+  // 'Spiralize Matrix': spiralizeMatrix,
   'Subarray with Maximum Sum': null,
   'Total Ways to Sum II': null,
-  'Total Ways to Sum': totalWaysToSum,
+  // 'Total Ways to Sum': totalWaysToSum,
   'Unique Paths in a Grid I': uniquePathsInAGridI,
   'Unique Paths in a Grid II': null,
 };
