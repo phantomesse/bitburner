@@ -3,6 +3,8 @@ import { printTable } from 'utils/table';
 import { formatMoney, formatTime } from 'utils/format';
 import { ONE_SECOND } from 'utils/constants';
 import { createColorForString } from 'utils/colors';
+import { GROW_JS, HACK_JS, WEAKEN_JS } from 'utils/scripts';
+import { createReactElement } from 'utils/dom';
 
 /**
  * Monitors all servers that can be hacked in the --tail.
@@ -12,8 +14,8 @@ import { createColorForString } from 'utils/colors';
 export async function main(ns) {
   ns.disableLog('ALL');
   ns.tail();
-  ns.resizeTail(750, 1000);
-  ns.moveTail(200, 50);
+  ns.resizeTail(1300, 1000);
+  ns.moveTail(50, 50);
   ns.atExit(() => ns.closeTail());
 
   const allServers = getServers(ns).filter(server => server.maxMoney > 0);
@@ -33,8 +35,59 @@ export async function main(ns) {
         ns.hackAnalyzeChance(server1.hostname)
     );
 
+    const processes = getServers(ns)
+      .map(server => ns.ps(server.name))
+      .flat();
+    const serverNameToHackThreadsMap = {};
+    const serverNameToWeakenThreadsMap = {};
+    const serverNameToGrowThreadsMap = {};
+    for (const process of processes) {
+      if (![HACK_JS, WEAKEN_JS, GROW_JS].includes(process.filename)) continue;
+      const serverName = process.args[0];
+      const threadCount = process.threads;
+      const map = {
+        [HACK_JS]: serverNameToHackThreadsMap,
+        [WEAKEN_JS]: serverNameToWeakenThreadsMap,
+        [GROW_JS]: serverNameToGrowThreadsMap,
+      }[process.filename];
+      if (!(serverName in map)) map[serverName] = 0;
+      map[serverName] += threadCount;
+    }
+
     /** @type {import('utils/table').Table} */ const table = { rows: [] };
     for (const server of servers) {
+      const scripts = [];
+      if (server.hostname in serverNameToHackThreadsMap) {
+        const threadCount = ns.formatNumber(
+          serverNameToHackThreadsMap[server.hostname]
+        );
+        scripts.push(
+          createReactElement(`${threadCount} threads hacking`, {
+            color: hackColor,
+          })
+        );
+      }
+      if (server.hostname in serverNameToWeakenThreadsMap) {
+        const threadCount = ns.formatNumber(
+          serverNameToWeakenThreadsMap[server.hostname]
+        );
+        scripts.push(
+          createReactElement(`${threadCount} threads weakening`, {
+            color: weakenColor,
+          })
+        );
+      }
+      if (server.hostname in serverNameToGrowThreadsMap) {
+        const threadCount = ns.formatNumber(
+          serverNameToGrowThreadsMap[server.hostname]
+        );
+        scripts.push(
+          createReactElement(`${threadCount} threads growing`, {
+            color: growColor,
+          })
+        );
+      }
+
       /** @type {import('utils/table').Row} */ const row = {
         cells: [
           {
@@ -78,7 +131,7 @@ export async function main(ns) {
               name: 'Grow Time',
               style: { textAlign: 'right', color: growColor },
             },
-            content: ns.getGrowTime(server.hostname),
+            content: formatTime(ns, ns.getGrowTime(server.hostname)),
           },
           {
             column: {
@@ -109,6 +162,13 @@ export async function main(ns) {
               style: { textAlign: 'center', color: weakenColor },
             },
             content: formatTime(ns, ns.getWeakenTime(server.hostname)),
+          },
+          {
+            column: {
+              name: 'Scripts',
+              style: { width: 'max-content' },
+            },
+            content: scripts.length === 0 ? '-' : createReactElement(scripts),
           },
         ],
       };

@@ -10,6 +10,7 @@ import encryptionIIVigenereCipher from 'contracts/encryption-ii-vigenere-cipher'
 import findLargestPrimeFactor from 'contracts/find-largest-prime-factor';
 import generateIPAddresses from 'contracts/generate-ip-addresses';
 import mergeOverlappingIntervals from 'contracts/merge-overlapping-intervals';
+import proper2ColoringOfAGraph from 'contracts/proper-2-coloring-of-a-graph';
 import sanitizeParenthesesInExpression from 'contracts/sanitize-parentheses-in-expression';
 import spiralizeMatrix from 'contracts/spiralize-matrix';
 import subarrayWithMaximumSum from 'contracts/subarray-with-maximum-sum';
@@ -49,7 +50,7 @@ export const CONTRACT_TYPE_TO_SOLVER_MAP = {
   'HammingCodes: Integer to Encoded Binary': null,
   'Merge Overlapping Intervals': mergeOverlappingIntervals,
   'Minimum Path Sum in a Triangle': null,
-  'Proper 2-Coloring of a Graph': null,
+  'Proper 2-Coloring of a Graph': proper2ColoringOfAGraph,
   'Sanitize Parentheses in Expression': sanitizeParenthesesInExpression,
   // 'Shortest Path in a Grid': shortestPathInAGrid,
   'Spiralize Matrix': spiralizeMatrix,

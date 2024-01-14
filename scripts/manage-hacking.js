@@ -34,7 +34,7 @@ export async function main(ns) {
 
     // Get amount of RAM to resolve based on the combination of all scripts in
     // the Home server.
-    const ramToReserveInHome = getRamToReserve(ns);
+    const ramToReserveInHome = ns.args[0] ?? getRamToReserve(ns);
 
     // Get servers to hack, weaken, and grow.
     let serversToHack = getServersToHack(

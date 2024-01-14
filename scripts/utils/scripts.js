@@ -1,8 +1,8 @@
 import { HOME_HOSTNAME } from 'utils/constants';
 
-const HACK_JS = 'hack.js';
-const GROW_JS = 'grow.js';
-const WEAKEN_JS = 'weaken.js';
+export const HACK_JS = 'hack.js';
+export const GROW_JS = 'grow.js';
+export const WEAKEN_JS = 'weaken.js';
 const UTILS_JS = 'utils.js';
 const INIT_JS = 'init.js';
 
