@@ -1,4 +1,5 @@
 import { getServers } from 'database/servers';
+import { executeTerminalCommand } from 'utils/dom';
 
 /**
  * Connects to a server given in the argument.

@@ -7,6 +7,7 @@ import compressionIRLECompression from 'contracts/compression-i-rle-compression'
 import compressionIILZDecompression from 'contracts/compression-ii-lz-decompression';
 import encryptionICaesarCipher from 'contracts/encryption-i-caesar-cipher';
 import encryptionIIVigenereCipher from 'contracts/encryption-ii-vigenere-cipher';
+import findAllValidMathExpressions from 'contracts/find-all-valid-math-expressions';
 import findLargestPrimeFactor from 'contracts/find-largest-prime-factor';
 import generateIPAddresses from 'contracts/generate-ip-addresses';
 import mergeOverlappingIntervals from 'contracts/merge-overlapping-intervals';
@@ -43,7 +44,7 @@ export const CONTRACT_TYPE_TO_SOLVER_MAP = {
   'Compression III: LZ Compression': null,
   'Encryption I: Caesar Cipher': encryptionICaesarCipher,
   'Encryption II: Vigenère Cipher': encryptionIIVigenereCipher,
-  'Find All Valid Math Expressions': null,
+  // 'Find All Valid Math Expressions': findAllValidMathExpressions,
   'Find Largest Prime Factor': findLargestPrimeFactor,
   'Generate IP Addresses': generateIPAddresses,
   'HammingCodes: Encoded Binary to Integer': null,

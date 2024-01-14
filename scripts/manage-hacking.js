@@ -1,18 +1,18 @@
 import { getServers } from 'database/servers';
 import { createColorForString } from 'utils/colors';
-import {
-  HOME_HOSTNAME,
-  ONE_SECOND,
-  UPDATE_SERVERS_PORT,
-} from 'utils/constants';
-import { formatTime, formatMoney } from 'utils/format';
-import { getRamToReserve } from 'utils/scripts';
+import { HOME_HOSTNAME, ONE_SECOND } from 'utils/constants';
+import { createReactElement } from 'utils/dom';
+import { formatMoney, formatTime } from 'utils/format';
+import { GROW_JS, HACK_JS, WEAKEN_JS, getRamToReserve } from 'utils/scripts';
 import { printTable } from 'utils/table';
 
+/** Minimum amount of money on a server to allow hacking that server. */
 const MIN_MONEY_AMOUNT = 1000000;
-const HACK_JS = 'hack.js';
-const GROW_JS = 'grow.js';
-const WEAKEN_JS = 'weaken.js';
+
+/** Minimum percentage of max money on a server to allow hacking that server. */
+const MIN_MONEY_PERCENT = 0.5;
+
+const MIN_HACK_CHANCE = 0.5;
 
 /**
  * Manages hacking in all servers, reserving enough RAM in Home server to run
@@ -26,146 +26,144 @@ export async function main(ns) {
   ns.disableLog('ALL');
   ns.atExit(() => ns.closeTail());
 
-  // Get all servers from database.
-  let allServers = getServers(ns);
+  const hackWeakenGrowScripts = [HACK_JS, WEAKEN_JS, GROW_JS];
+  const minRamNecessaryToRunHackWeakenGrow = Math.min(
+    ...hackWeakenGrowScripts.map(script => ns.getScriptRam(script))
+  );
 
   while (true) {
-    if (ns.readPort(UPDATE_SERVERS_PORT) === 1) allServers = getServers(ns);
-
-    // Get amount of RAM to resolve based on the combination of all scripts in
-    // the Home server.
-    const ramToReserveInHome = ns.args[0] ?? getRamToReserve(ns);
+    const serversWithRootAccess = getServers(ns).filter(server =>
+      ns.hasRootAccess(server.hostname)
+    );
 
     // Get servers to hack, weaken, and grow.
-    let serversToHack = getServersToHack(
-      ns,
-      allServers.map(server => JSON.parse(JSON.stringify(server)))
-    );
-    let serversToWeaken = getServersToWeaken(
-      ns,
-      allServers.map(server => JSON.parse(JSON.stringify(server)))
-    );
-    let serversToGrow = getServersToGrow(
-      ns,
-      allServers.map(server => JSON.parse(JSON.stringify(server)))
+    const hackableServers = serversWithRootAccess.filter(
+      server => server.maxMoney > 0
     );
 
-    // Get all servers that can run scripts.
-    const runnableServers = allServers.filter(
-      server => ns.hasRootAccess(server.hostname) && server.maxRam > 0
+    // Get servers to hack.
+    const serversToHack = getServersToHack(ns, hackableServers);
+    const hostnameToHackToThreadCountMap = Object.fromEntries(
+      serversToHack
+        .map(server => [server.hostname, getHackThreadCount(ns, server)])
+        .filter(entry => entry[1] > 0) // Make sure thread count > 0
+    );
+    const hostnameToHackToRunningThreadCountMap = {};
+
+    // Get servers to weaken.
+    const serversToWeaken = getServersToWeaken(ns, hackableServers);
+    const hostnameToWeakenToThreadCountMap = Object.fromEntries(
+      serversToWeaken
+        .map(server => [server.hostname, getWeakenThreadCount(ns, server)])
+        .filter(entry => entry[1] > 0) // Make sure thread count > 0
+    );
+    const hostnameToWeakenToRunningThreadCountMap = {};
+
+    // Get servers to grow.
+    const serversToGrow = getServersToGrow(ns, hackableServers);
+    const hostnameToGrowToThreadCountMap = Object.fromEntries(
+      serversToGrow
+        .map(server => [server.hostname, getGrowThreadCount(ns, server)])
+        .filter(entry => entry[1] > 0) // Make sure thread count > 0
+    );
+    const hostnameToGrowToRunningThreadCountMap = {};
+
+    // Get runnable servers.
+    const ramToReserveInHome = ns.args[0] ?? getRamToReserve(ns);
+    const runnableServers = getRunnableServers(
+      ns,
+      serversWithRootAccess,
+      minRamNecessaryToRunHackWeakenGrow,
+      ramToReserveInHome
     );
 
-    // Get number of threads that are already hacking, weakening, and growing
-    // servers on all runnable servers.
-    const runningHackServerToThreadCount = {};
-    const runningWeakenServerToThreadCount = {};
-    const runningGrowServerToThreadCount = {};
+    const scriptToThreadCountMapMap = {
+      [HACK_JS]: hostnameToHackToThreadCountMap,
+      [WEAKEN_JS]: hostnameToWeakenToThreadCountMap,
+      [GROW_JS]: hostnameToGrowToThreadCountMap,
+    };
+    const scriptToRunningThreadCountMapMap = {
+      [HACK_JS]: hostnameToHackToRunningThreadCountMap,
+      [WEAKEN_JS]: hostnameToWeakenToRunningThreadCountMap,
+      [GROW_JS]: hostnameToGrowToRunningThreadCountMap,
+    };
+
+    // Subtract threads that are already running.
     for (const runnableServer of runnableServers) {
-      const processes = ns.ps(runnableServer.hostname);
+      const processes = ns
+        .ps(runnableServer.hostname)
+        .filter(process => hackWeakenGrowScripts.includes(process.filename));
       for (const process of processes) {
-        if (![HACK_JS, WEAKEN_JS, GROW_JS].includes(process.filename)) continue;
+        const threadCountMap = scriptToThreadCountMapMap[process.filename];
+        const runningThreadCountMap =
+          scriptToRunningThreadCountMapMap[process.filename];
         const targetHostname = process.args[0];
-        const threadCount = process.threads;
-        switch (process.filename) {
-          case HACK_JS:
-            if (targetHostname in runningHackServerToThreadCount) {
-              runningHackServerToThreadCount[targetHostname] += threadCount;
-            } else {
-              runningHackServerToThreadCount[targetHostname] = threadCount;
-            }
-            break;
-          case WEAKEN_JS:
-            if (targetHostname in runningWeakenServerToThreadCount) {
-              runningWeakenServerToThreadCount[targetHostname] += threadCount;
-            } else {
-              runningWeakenServerToThreadCount[targetHostname] = threadCount;
-            }
-            break;
-          case GROW_JS:
-            if (targetHostname in runningGrowServerToThreadCount) {
-              runningGrowServerToThreadCount[targetHostname] += threadCount;
-            } else {
-              runningGrowServerToThreadCount[targetHostname] = threadCount;
-            }
-            break;
+
+        // Add to running thread count map.
+        if (!(targetHostname in runningThreadCountMap)) {
+          runningThreadCountMap[targetHostname] = 0;
+        }
+        runningThreadCountMap[targetHostname] += process.threads;
+
+        // Subtract from thread count map.
+        if (!(targetHostname in threadCountMap)) continue;
+        threadCountMap[targetHostname] -= process.threads;
+        if (threadCountMap[targetHostname] <= 0) {
+          delete threadCountMap[targetHostname];
         }
       }
     }
 
-    // Subtract running script threads from threads needed.
-    for (const server of serversToHack) {
-      if (!(server.hostname in runningHackServerToThreadCount)) continue;
-      server.threadsNeeded -= runningHackServerToThreadCount[server.hostname];
-    }
-    serversToHack = serversToHack.filter(server => server.threadsNeeded > 0);
-    for (const server of serversToWeaken) {
-      if (!(server.hostname in runningWeakenServerToThreadCount)) continue;
-      server.threadsNeeded -= runningWeakenServerToThreadCount[server.hostname];
-    }
-    serversToWeaken = serversToWeaken.filter(
-      server => server.threadsNeeded > 0
-    );
-    for (const server of serversToGrow) {
-      if (!(server.hostname in runningGrowServerToThreadCount)) continue;
-      server.threadsNeeded -= runningGrowServerToThreadCount[server.hostname];
-    }
-    serversToGrow = serversToGrow.filter(server => server.threadsNeeded > 0);
-
-    // Log servers to hack, grow, and weaken.
-    logServers(ns, serversToHack, serversToGrow, serversToWeaken);
-
+    // Execute hack, weaken, and grow on runnable servers.
     for (const runnableServer of runnableServers) {
-      // Copy over scripts to faciliate hacking, weakening, and growing.
-      [HACK_JS, GROW_JS, WEAKEN_JS].forEach(scriptName => {
-        if (!ns.fileExists(scriptName, runnableServer.hostname)) {
-          ns.scp(scriptName, runnableServer.hostname);
+      for (const scriptName of hackWeakenGrowScripts) {
+        const hostnameToThreadCountMap = scriptToThreadCountMapMap[scriptName];
+        const hostnameToRunningThreadCountMap =
+          scriptToRunningThreadCountMapMap[scriptName];
+        for (const hostname in hostnameToThreadCountMap) {
+          const threadsNeeded = hostnameToThreadCountMap[hostname];
+          const threadsUsed = runScript(
+            ns,
+            scriptName,
+            runnableServer,
+            hostname,
+            threadsNeeded,
+            ramToReserveInHome
+          );
+          if (threadsUsed > 0) {
+            hostnameToThreadCountMap[hostname] -= threadsUsed;
+            if (hostnameToThreadCountMap[hostname] <= 0) {
+              delete hostnameToThreadCountMap[hostname];
+            }
+            if (!(hostname in hostnameToRunningThreadCountMap)) {
+              hostnameToRunningThreadCountMap[hostname] = 0;
+            }
+            hostnameToRunningThreadCountMap[hostname] += threadsUsed;
+          }
         }
-      });
-
-      // Hack.
-      if (serversToHack.length > 0) {
-        const serverToHack = serversToHack.shift();
-        serverToHack.threadsNeeded -= runScript(
-          ns,
-          HACK_JS,
-          runnableServer,
-          serverToHack.hostname,
-          serverToHack.threadsNeeded,
-          ramToReserveInHome
-        );
-        if (serverToHack.threadsNeeded > 0) serversToHack.unshift(serverToHack);
-      }
-
-      // Weaken.
-      if (serversToWeaken.length > 0) {
-        const serverToWeaken = serversToWeaken.shift();
-        serverToWeaken.threadsNeeded -= runScript(
-          ns,
-          WEAKEN_JS,
-          runnableServer,
-          serverToWeaken.hostname,
-          serverToWeaken.threadsNeeded,
-          ramToReserveInHome
-        );
-        if (serverToWeaken.threadsNeeded > 0) {
-          serversToWeaken.unshift(serverToWeaken);
-        }
-      }
-
-      // Grow.
-      if (serversToGrow.length > 0) {
-        const serverToGrow = serversToGrow.shift();
-        serverToGrow.threadsNeeded -= runScript(
-          ns,
-          GROW_JS,
-          runnableServer,
-          serverToGrow.hostname,
-          serverToGrow.threadsNeeded,
-          ramToReserveInHome
-        );
-        if (serverToGrow.threadsNeeded > 0) serversToGrow.unshift(serverToGrow);
       }
     }
+
+    // Log hack, weaken, and grow.
+    ns.clearLog();
+    logServersToHack(
+      ns,
+      hackableServers,
+      hostnameToHackToThreadCountMap,
+      hostnameToHackToRunningThreadCountMap
+    );
+    logServersToWeaken(
+      ns,
+      hackableServers,
+      hostnameToWeakenToThreadCountMap,
+      hostnameToWeakenToRunningThreadCountMap
+    );
+    logServersToGrow(
+      ns,
+      hackableServers,
+      hostnameToGrowToThreadCountMap,
+      hostnameToGrowToRunningThreadCountMap
+    );
 
     await ns.sleep(ONE_SECOND);
   }
@@ -176,9 +174,9 @@ export async function main(ns) {
  *
  * @param {NS} ns
  * @param {string} scriptName
- * @param {import('database/servers').Server} server
+ * @param {Server} server
  * @param {string} targetHostname
- * @param {number} maxThreads maximum number of threads to run
+ * @param {number} threadsNeeded number of threads needed
  * @param {number} ramToReserveinHome
  * @returns {number} number of threads used
  */
@@ -187,269 +185,351 @@ function runScript(
   scriptName,
   server,
   targetHostname,
-  maxThreads,
+  threadsNeeded,
   ramToReserveinHome
 ) {
+  const availableRam = getAvailableRam(ns, server, ramToReserveinHome);
   const threadsAvailable = Math.floor(
-    (server.maxRam - ns.getServerUsedRam(server.hostname)) /
-      ns.getScriptRam(scriptName, server.hostname) -
-      (server.hostname === HOME_HOSTNAME ? ramToReserveinHome : 0)
+    availableRam / ns.getScriptRam(scriptName)
   );
-  const threads = Math.min(threadsAvailable, maxThreads);
-  if (threads <= 0) return 0;
-  const pid = ns.exec(scriptName, server.hostname, threads, targetHostname);
-  return pid === 0 ? 0 : threads;
+  if (threadsAvailable === 0) return 0;
+  const threadsToUse = Math.min(threadsAvailable, threadsNeeded);
+  const pid = ns.exec(
+    scriptName,
+    server.hostname,
+    threadsToUse,
+    targetHostname
+  );
+  return pid === 0 ? 0 : threadsToUse;
 }
 
 /**
  * @param {NS} ns
- * @param {import('database/servers').Server} allServers
- * @returns {import('database/servers').Server[]}
- *          servers that can be hacked sorted from least time to hack to most
- *          adding in a `threadsNeeded` field to indicate the number of threads
- *          needed to hack half the available money
+ * @param {import('database/servers').Server} server
+ * @param {number} ramToReserveInHome
+ * @returns {number} available RAM
  */
-function getServersToHack(ns, allServers) {
-  const servers = allServers
-    .filter(
-      server =>
-        ns.hasRootAccess(server.hostname) &&
-        server.maxMoney > 0 &&
-        ns.getServerMoneyAvailable(server.hostname) >
-          Math.min(server.maxMoney / 2, MIN_MONEY_AMOUNT) &&
-        ns.hackAnalyzeChance(server.hostname) > 0.5
-    )
-    .map(server => {
-      server.threadsNeeded = Math.floor(
-        ns.hackAnalyzeThreads(
-          server.hostname,
-          ns.getServerMoneyAvailable(server.hostname) / 2
-        )
-      );
-      return server;
-    })
-    .filter(server => server.threadsNeeded > 0);
-  servers.sort((server1, server2) => {
-    ns.getHackTime(server1.hostname) - ns.getHackTime(server2.hostname);
-  });
-  return servers;
+function getAvailableRam(ns, server, ramToReserveInHome) {
+  let availableRam = server.maxRam - ns.getServerUsedRam(server.hostname);
+  if (server.hostname === HOME_HOSTNAME) availableRam -= ramToReserveInHome;
+  return availableRam;
 }
 
 /**
- * @param {NS} ns
- * @param {import('database/servers').Server} allServers
- * @returns {import('database/servers').Server[]}
- *          servers that can be grown
- */
-function getServersToGrow(ns, allServers) {
-  let servers = allServers
-    .filter(
-      server =>
-        ns.hasRootAccess(server.hostname) &&
-        server.maxMoney > 0 &&
-        ns.getServerMoneyAvailable(server.hostname) < server.maxMoney / 2
-    )
-    .map(server => {
-      server.threadsNeeded = Math.floor(
-        ns.growthAnalyze(
-          server.hostname,
-          Math.floor(
-            server.maxMoney / (ns.getServerMoneyAvailable(server.hostname) || 1)
-          )
-        )
-      );
-      return server;
-    })
-    .filter(server => server.threadsNeeded > 0);
-  const serversLimitedByHackingLevel = servers.filter(
-    server => server.hackingLevel <= ns.getHackingLevel()
-  );
-  if (serversLimitedByHackingLevel.length > 0) {
-    servers = serversLimitedByHackingLevel;
-  }
-  servers.sort((server1, server2) => {
-    ns.getGrowTime(server1.hostname) - ns.getGrowTime(server2.hostname);
-  });
-  return servers;
-}
-
-/**
- * @param {NS} ns
- * @param {import('database/servers').Server} allServers
- * @returns {import('database/servers').Server[]}
- *          servers that can be weakened
- */
-function getServersToWeaken(ns, allServers) {
-  let servers = allServers
-    .filter(
-      server =>
-        ns.hasRootAccess(server.hostname) &&
-        server.maxMoney > 0 &&
-        ns.getServerSecurityLevel(server.hostname) > server.minSecurity &&
-        ns.hackAnalyzeChance(server.hostname) <= 0.5
-    )
-    .map(server => {
-      const securityToDecrease =
-        ns.getServerSecurityLevel(server.hostname) - server.minSecurity;
-      let threads = 0;
-      do {
-        threads++;
-      } while (ns.weakenAnalyze(threads) < securityToDecrease);
-      server.threadsNeeded = threads;
-      return server;
-    })
-    .filter(server => server.threadsNeeded > 0);
-  const serversLimitedByHackingLevel = servers.filter(
-    server => server.hackingLevel <= ns.getHackingLevel()
-  );
-  if (serversLimitedByHackingLevel.length > 0) {
-    servers = serversLimitedByHackingLevel;
-  }
-
-  servers.sort((server1, server2) => {
-    ns.getWeakenTime(server1.hostname) - ns.getWeakenTime(server2.hostname);
-  });
-  return servers;
-}
-
-/**
- * Log tables showing servers to hack, grow, and weaken.
+ * Get all servers that have enough RAM available to run a hack, weaken, or grow
+ * script.
  *
  * @param {NS} ns
- * @param {import('database/servers').Server[]} serversToHack
- * @param {import('database/servers').Server[]} serversToGrow
- * @param {import('database/servers').Server[]} serversToWeaken
+ * @param {import('database/servers').Server[]} serversWithRootAccess
+ * @param {number} minRamNecessaryToRunHackWeakenGrow
+ * @param {number} ramToReserveInHome
+ * @returns {import('database/servers').Server[]} runnable servers
  */
-function logServers(ns, serversToHack, serversToGrow, serversToWeaken) {
-  ns.clearLog();
+function getRunnableServers(
+  ns,
+  serversWithRootAccess,
+  minRamNecessaryToRunHackWeakenGrow,
+  ramToReserveInHome
+) {
+  return serversWithRootAccess.filter(server => {
+    if (server.maxRam <= 0) return false;
 
-  // Print servers to hack.
-  if (serversToHack.length > 0) {
-    ns.print('Servers to hack');
+    let availableRam = getAvailableRam(ns, server, ramToReserveInHome);
+    if (availableRam < minRamNecessaryToRunHackWeakenGrow) return false;
 
-    const table = { rows: [], style: { color: ns.ui.getTheme().error } };
-    for (const server of serversToHack) {
-      const row = {
-        cells: [
-          {
-            column: { name: 'Hostname', style: {} },
-            content: server.hostname,
-          },
-          {
-            column: { name: 'Available Money', style: { textAlign: 'right' } },
-            content: formatMoney(
-              ns,
-              ns.getServerMoneyAvailable(server.hostname)
-            ),
-          },
-          {
-            column: { name: 'Hack Chance', style: { textAlign: 'right' } },
-            content: ns.formatPercent(ns.hackAnalyzeChance(server.hostname)),
-          },
-          {
-            column: { name: 'Hack Time', style: { textAlign: 'center' } },
-            content: formatTime(ns, ns.getHackTime(server.hostname)),
-          },
-          {
-            column: { name: 'Threads Needed', style: { textAlign: 'right' } },
-            content: ns.formatNumber(server.threadsNeeded, 0),
-          },
-        ],
-        style: { color: createColorForString(ns, server.hostname) },
-      };
-      table.rows.push(row);
-    }
-    printTable(ns, table);
+    return true;
+  });
+}
 
-    ns.print(' ');
+/**
+ * @param {NS} ns
+ * @param {import('database/servers').Server[]} hackableServers
+ * @returns {import('database/servers').Server[]}
+ *          servers to hack sorted by hack time
+ */
+function getServersToHack(ns, hackableServers) {
+  const servers = hackableServers.filter(
+    server =>
+      ns.getServerMoneyAvailable(server.hostname) >
+        Math.min(server.maxMoney * MIN_MONEY_PERCENT, MIN_MONEY_AMOUNT) &&
+      ns.hackAnalyzeChance(server.hostname) > MIN_HACK_CHANCE
+  );
+  servers.sort(
+    (a, b) => ns.getHackTime(a.hostname) - ns.getHackTime(b.hostname)
+  );
+  return servers;
+}
+
+/**
+ * @param {NS} ns
+ * @param {import('database/servers').Server} server
+ * @returns {number} number of threads needed to hack the given server
+ */
+function getHackThreadCount(ns, server) {
+  const moneyToHack =
+    ns.getServerMoneyAvailable(server.hostname) -
+    Math.min(server.maxMoney * MIN_MONEY_PERCENT, MIN_MONEY_AMOUNT);
+  return Math.floor(ns.hackAnalyzeThreads(server.hostname, moneyToHack));
+}
+
+/**
+ * @param {NS} ns
+ * @param {import('database/servers').Server[]} hackableServers
+ * @returns {import('database/servers').Server[]}
+ *          servers to weaken sorted by weaken time
+ */
+function getServersToWeaken(ns, hackableServers) {
+  const servers = hackableServers.filter(
+    server =>
+      ns.getServerSecurityLevel(server.hostname) > server.minSecurity &&
+      ns.hackAnalyzeChance(server.hostname) <= MIN_HACK_CHANCE
+  );
+  servers.sort(
+    (a, b) => ns.getWeakenTime(a.hostname) - ns.getWeakenTime(b.hostname)
+  );
+  return servers;
+}
+
+/**
+ * @param {NS} ns
+ * @param {import('database/servers').Server} server
+ * @returns {number} number of threads needed to weaken the given server
+ */
+function getWeakenThreadCount(ns, server) {
+  const securityToDecrease =
+    ns.getServerSecurityLevel(server.hostname) - server.minSecurity;
+  let threadCount = 0;
+  do {
+    threadCount++;
+  } while (ns.weakenAnalyze(threadCount) < securityToDecrease);
+  return threadCount;
+}
+
+/**
+ * @param {NS} ns
+ * @param {import('database/servers').Server[]} hackableServers
+ * @returns {import('database/servers').Server[]}
+ *          servers to grow sorted by grow time
+ */
+function getServersToGrow(ns, hackableServers) {
+  const servers = hackableServers.filter(
+    server =>
+      ns.getServerMoneyAvailable(server.hostname) <
+      server.maxMoney * MIN_MONEY_PERCENT
+  );
+  servers.sort(
+    (a, b) => ns.getGrowTime(a.hostname) - ns.getGrowTime(b.hostname)
+  );
+  return servers;
+}
+
+/**
+ * @param {NS} ns
+ * @param {import('database/servers').Server} server
+ * @returns {number} number of threads needed to grow the given server
+ */
+function getGrowThreadCount(ns, server) {
+  const growMultiplier = Math.floor(
+    server.maxMoney / (ns.getServerMoneyAvailable(server.hostname) || 1)
+  );
+  return Math.floor(ns.growthAnalyze(server.hostname, growMultiplier));
+}
+
+/**
+ * @param {NS} ns
+ * @param {import('database/servers').Server[]} servers
+ * @param {Object.<string, number>} hostnameToThreadCountMap
+ * @param {Object.<string, number>} hostnameToRunningThreadCountMap
+ */
+function logServersToHack(
+  ns,
+  servers,
+  hostnameToThreadCountMap,
+  hostnameToRunningThreadCountMap
+) {
+  logServers(
+    ns,
+    servers,
+    hostnameToThreadCountMap,
+    hostnameToRunningThreadCountMap,
+    'Servers to hack',
+    ns.ui.getTheme().error,
+    server => ({
+      column: { name: 'Available Money', style: { textAlign: 'right' } },
+      content: formatMoney(ns, ns.getServerMoneyAvailable(server.hostname)),
+    }),
+    server => ({
+      column: { name: 'Hack Chance', style: { textAlign: 'right' } },
+      content: ns.formatPercent(ns.hackAnalyzeChance(server.hostname)),
+    }),
+    server => ({
+      column: { name: 'Hack Time', style: { textAlign: 'center' } },
+      content: formatTime(ns, ns.getHackTime(server.hostname)),
+    })
+  );
+}
+
+/**
+ * @param {NS} ns
+ * @param {import('database/servers').Server[]} servers
+ * @param {Object.<string, number>} hostnameToThreadCountMap
+ * @param {Object.<string, number>} hostnameToRunningThreadCountMap
+ */
+function logServersToWeaken(
+  ns,
+  servers,
+  hostnameToThreadCountMap,
+  hostnameToRunningThreadCountMap
+) {
+  logServers(
+    ns,
+    servers,
+    hostnameToThreadCountMap,
+    hostnameToRunningThreadCountMap,
+    'Servers to weaken',
+    ns.ui.getTheme().warning,
+    server => ({
+      column: { name: 'Min Security', style: { textAlign: 'right' } },
+      content: ns.formatNumber(server.minSecurity, 0),
+    }),
+    server => ({
+      column: { name: 'Current Security', style: { textAlign: 'right' } },
+      content: ns.formatNumber(ns.getServerSecurityLevel(server.hostname)),
+    }),
+    server => ({
+      column: { name: 'Base Security', style: { textAlign: 'right' } },
+      content: ns.formatNumber(server.baseSecurity, 0),
+    }),
+    server => ({
+      column: { name: 'Hack Chance', style: { textAlign: 'right' } },
+      content: ns.formatPercent(ns.hackAnalyzeChance(server.hostname)),
+    }),
+    server => ({
+      column: { name: 'Weaken Time', style: { textAlign: 'center' } },
+      content: formatTime(ns, ns.getWeakenTime(server.hostname)),
+    })
+  );
+}
+
+/**
+ * @param {NS} ns
+ * @param {import('database/servers').Server[]} servers
+ * @param {Object.<string, number>} hostnameToThreadCountMap
+ * @param {Object.<string, number>} hostnameToRunningThreadCountMap
+ */
+function logServersToGrow(
+  ns,
+  servers,
+  hostnameToThreadCountMap,
+  hostnameToRunningThreadCountMap
+) {
+  logServers(
+    ns,
+    servers,
+    hostnameToThreadCountMap,
+    hostnameToRunningThreadCountMap,
+    'Servers to grow',
+    ns.ui.getTheme().success,
+    server => ({
+      column: { name: 'Available Money', style: { textAlign: 'right' } },
+      content: formatMoney(ns, ns.getServerMoneyAvailable(server.hostname)),
+    }),
+    server => ({
+      column: { name: 'Max Money', style: { textAlign: 'right' } },
+      content: formatMoney(ns, server.maxMoney),
+    }),
+    server => ({
+      column: { name: 'Grow Time', style: { textAlign: 'center' } },
+      content: formatTime(ns, ns.getGrowTime(server.hostname)),
+    })
+  );
+}
+
+/**
+ * @param {NS} ns
+ * @param {import('database/servers').Server[]} servers
+ * @param {Object.<string, number>} hostnameToThreadCountMap
+ * @param {Object.<string, number>} hostnameToRunningThreadCountMap
+ * @param {string} header
+ * @param {string} color
+ * @param {...function(import('database/servers').Server): import('utils/table').Cell} additionalCells
+ */
+function logServers(
+  ns,
+  servers,
+  hostnameToThreadCountMap,
+  hostnameToRunningThreadCountMap,
+  header,
+  color,
+  ...additionalCells
+) {
+  servers = servers.filter(
+    server =>
+      server.hostname in hostnameToThreadCountMap ||
+      server.hostname in hostnameToRunningThreadCountMap
+  );
+  if (servers.length === 0) return;
+
+  const borderColor = `${color}33`;
+  /** @type {import('utils/table').Table} */ const table = {
+    rows: [],
+    style: { color: color, borderColor: borderColor },
+  };
+  for (const server of servers) {
+    /** @type {import('utils/table').Row} */ const row = {
+      cells: [
+        {
+          column: {
+            name: 'Hostname',
+            style: { borderColor: borderColor, width: 'max-content' },
+          },
+          content: createReactElement(server.hostname, {
+            color: createColorForString(ns, server.hostname),
+          }),
+        },
+        ...additionalCells.map(fn => {
+          const cell = fn(server);
+          cell.column.style.borderColor = borderColor;
+          return cell;
+        }),
+        {
+          column: {
+            name: 'Threads Needed',
+            style: {
+              borderColor: borderColor,
+              textAlign: 'right',
+              width: 'min-content',
+            },
+          },
+          content:
+            server.hostname in hostnameToThreadCountMap
+              ? ns.formatNumber(hostnameToThreadCountMap[server.hostname], 0)
+              : '-',
+        },
+        {
+          column: {
+            name: 'Threads Running',
+            style: {
+              borderColor: borderColor,
+              textAlign: 'right',
+              width: 'min-content',
+            },
+          },
+          content:
+            server.hostname in hostnameToRunningThreadCountMap
+              ? ns.formatNumber(
+                  hostnameToRunningThreadCountMap[server.hostname],
+                  0
+                )
+              : '-',
+        },
+      ],
+    };
+    table.rows.push(row);
   }
 
-  // Print servers to weaken.
-  if (serversToWeaken.length > 0) {
-    ns.print('Servers to weaken');
-
-    const table = { rows: [], style: { color: ns.ui.getTheme().warning } };
-    for (const server of serversToWeaken) {
-      const row = {
-        cells: [
-          {
-            column: { name: 'Hostname', style: {} },
-            content: server.hostname,
-          },
-          {
-            column: { name: 'Current Security', style: { textAlign: 'right' } },
-            content: ns.formatNumber(
-              ns.getServerSecurityLevel(server.hostname)
-            ),
-          },
-          {
-            column: { name: 'Min Security', style: { textAlign: 'right' } },
-            content: ns.formatNumber(server.minSecurity, 0),
-          },
-          {
-            column: { name: 'Base Security', style: { textAlign: 'right' } },
-            content: ns.formatNumber(server.baseSecurity, 0),
-          },
-          {
-            column: { name: 'Hack Chance', style: { textAlign: 'right' } },
-            content: ns.formatPercent(ns.hackAnalyzeChance(server.hostname)),
-          },
-          {
-            column: { name: 'Weaken Time', style: { textAlign: 'center' } },
-            content: formatTime(ns, ns.getWeakenTime(server.hostname)),
-          },
-          {
-            column: { name: 'Threads Needed', style: { textAlign: 'right' } },
-            content: ns.formatNumber(server.threadsNeeded, 0),
-          },
-        ],
-        style: { color: createColorForString(ns, server.hostname) },
-      };
-      table.rows.push(row);
-    }
-    printTable(ns, table);
-
-    ns.print(' ');
-  }
-
-  // Print servers to grow.
-  if (serversToGrow.length > 0) {
-    ns.print('Servers to grow');
-
-    const table = { rows: [], style: { color: ns.ui.getTheme().success } };
-    for (const server of serversToGrow) {
-      const row = {
-        cells: [
-          {
-            column: { name: 'Hostname', style: {} },
-            content: server.hostname,
-          },
-          {
-            column: { name: 'Available Money', style: { textAlign: 'right' } },
-            content: formatMoney(
-              ns,
-              ns.getServerMoneyAvailable(server.hostname)
-            ),
-          },
-          {
-            column: { name: 'Max Money', style: { textAlign: 'right' } },
-            content: formatMoney(ns, server.maxMoney),
-          },
-          {
-            column: { name: 'Grow Time', style: { textAlign: 'center' } },
-            content: formatTime(ns, ns.getGrowTime(server.hostname)),
-          },
-          {
-            column: { name: 'Threads Needed', style: { textAlign: 'right' } },
-            content: ns.formatNumber(server.threadsNeeded, 0),
-          },
-        ],
-        style: { color: createColorForString(ns, server.hostname) },
-      };
-      table.rows.push(row);
-    }
-    printTable(ns, table);
-
-    ns.print(' ');
-  }
+  ns.printRaw(
+    createReactElement('\n ' + header, { color: color, fontWeight: 'bold' })
+  );
+  printTable(ns, table);
 }

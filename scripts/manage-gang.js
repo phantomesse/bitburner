@@ -189,23 +189,23 @@ export async function main(ns) {
 
     // If we're not engaging in territory warfare, have the member with the
     // least profit work on Territory Warfare.
-    if (gangInfo.territoryClashChance === 0) {
-      let gangMemberWithLeastProfit, leastProfit;
-      for (const gangMember of gangMembers) {
-        const profit = ns.gang.getMemberInformation(gangMember.name).moneyGain;
-        if (profit === 0) continue;
-        if (!leastProfit || profit < leastProfit) {
-          gangMemberWithLeastProfit = gangMember;
-          leastProfit = profit;
-        }
-      }
-      if (gangMemberWithLeastProfit) {
-        ns.gang.setMemberTask(
-          gangMemberWithLeastProfit.name,
-          'Territory Warfare'
-        );
-      }
-    }
+    // if (gangInfo.territoryClashChance === 0) {
+    //   let gangMemberWithLeastProfit, leastProfit;
+    //   for (const gangMember of gangMembers) {
+    //     const profit = ns.gang.getMemberInformation(gangMember.name).moneyGain;
+    //     if (profit === 0) continue;
+    //     if (!leastProfit || profit < leastProfit) {
+    //       gangMemberWithLeastProfit = gangMember;
+    //       leastProfit = profit;
+    //     }
+    //   }
+    //   if (gangMemberWithLeastProfit) {
+    //     ns.gang.setMemberTask(
+    //       gangMemberWithLeastProfit.name,
+    //       'Territory Warfare'
+    //     );
+    //   }
+    // }
 
     await ns.gang.nextUpdate();
   }

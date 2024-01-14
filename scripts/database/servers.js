@@ -9,6 +9,7 @@
  *           hostname (e.g. ['foodnstuff', 'CSEC'] for 'CSEC' server)
  * @property {[boolean]} isPurchased
  * @property {[number]} maxRam maximum RAM the server has
+ * @property {[cpuCores]} cpuCores
  * @property {[number]} maxMoney
  * @property {[number]} minSecurity
  * @property {[number]} baseSecurity

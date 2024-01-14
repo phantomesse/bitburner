@@ -96,7 +96,6 @@ function getTableForPrinting(ns, table, fillWidth) {
     .flat();
   const tableStyle = table.style ?? {};
   return createReactElement([...headerCellElements, ...cellElements], {
-    ...tableStyle,
     border: border,
     display: 'grid',
     gridTemplateColumns: table.rows[0].cells
@@ -106,6 +105,7 @@ function getTableForPrinting(ns, table, fillWidth) {
       })
       .join(' '),
     width: fillWidth ? '100%' : 'max-content',
+    ...tableStyle,
   });
 }
 

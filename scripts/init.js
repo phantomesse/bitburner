@@ -60,6 +60,7 @@ export function getServerData(ns, hostname, path) {
     organization: serverData.organizationName,
     isPurchased: serverData.purchasedByPlayer,
     maxRam: serverData.maxRam,
+    cpuCores: serverData.cpuCores,
     maxMoney: serverData.moneyMax,
     minSecurity: ns.getServerMinSecurityLevel(hostname),
     baseSecurity: ns.getServerBaseSecurityLevel(hostname),
