@@ -122,6 +122,27 @@ export async function main(ns) {
           scriptToRunningThreadCountMapMap[scriptName];
         for (const hostname in hostnameToThreadCountMap) {
           const threadsNeeded = hostnameToThreadCountMap[hostname];
+
+          // Modify threads needed based on runnable server's CPU cores.
+          const targetServer = hackableServers.find(
+            server => server.hostname === hostname
+          );
+          let adjustedThreadsNeeded = threadsNeeded;
+          if (scriptName === WEAKEN_JS) {
+            adjustedThreadsNeeded = getWeakenThreadCount(
+              ns,
+              targetServer,
+              runnableServer.cpuCores
+            );
+          }
+          if (scriptName === GROW_JS) {
+            adjustedThreadsNeeded = getGrowThreadCount(
+              ns,
+              targetServer,
+              runnableServer.cpuCores
+            );
+          }
+
           const threadsUsed = runScript(
             ns,
             scriptName,
@@ -131,7 +152,10 @@ export async function main(ns) {
             ramToReserveInHome
           );
           if (threadsUsed > 0) {
-            hostnameToThreadCountMap[hostname] -= threadsUsed;
+            hostnameToThreadCountMap[hostname] -=
+              threadsUsed === adjustedThreadsNeeded
+                ? threadsNeeded
+                : threadsUsed;
             if (hostnameToThreadCountMap[hostname] <= 0) {
               delete hostnameToThreadCountMap[hostname];
             }
@@ -142,6 +166,30 @@ export async function main(ns) {
           }
         }
       }
+    }
+
+    // Use any unused RAM on runnable servers to weaken the server with the
+    // lowest weak time even if it doesn't need weakening to gain hacking exp.
+    hackableServers.sort(
+      (a, b) => ns.getWeakenTime(a.hostname) - ns.getWeakenTime(b.hostname)
+    );
+    const serverWithLowestWeakTime = hackableServers[0];
+    const weakenScriptRam = ns.getScriptRam(WEAKEN_JS);
+    for (const runnableServer of runnableServers) {
+      const availableRam = getAvailableRam(
+        ns,
+        runnableServer,
+        ramToReserveInHome
+      );
+      const threadCount = Math.floor(availableRam / weakenScriptRam);
+      runScript(
+        ns,
+        WEAKEN_JS,
+        runnableServer,
+        serverWithLowestWeakTime.hostname,
+        threadCount,
+        ramToReserveInHome
+      );
     }
 
     // Log hack, weaken, and grow.
@@ -188,12 +236,20 @@ function runScript(
   threadsNeeded,
   ramToReserveinHome
 ) {
+  // If script file doesn't exist, then copy it over to that server.
+  if (!ns.fileExists(scriptName, server.hostname)) {
+    ns.scp(scriptName, server.hostname);
+  }
+
+  // Get threads to use.
   const availableRam = getAvailableRam(ns, server, ramToReserveinHome);
   const threadsAvailable = Math.floor(
     availableRam / ns.getScriptRam(scriptName)
   );
-  if (threadsAvailable === 0) return 0;
   const threadsToUse = Math.min(threadsAvailable, threadsNeeded);
+  if (threadsToUse <= 0) return 0;
+
+  // Execute script.
   const pid = ns.exec(
     scriptName,
     server.hostname,
@@ -293,15 +349,16 @@ function getServersToWeaken(ns, hackableServers) {
 /**
  * @param {NS} ns
  * @param {import('database/servers').Server} server
+ * @param {[number]} cpuCores
  * @returns {number} number of threads needed to weaken the given server
  */
-function getWeakenThreadCount(ns, server) {
+function getWeakenThreadCount(ns, server, cpuCores) {
   const securityToDecrease =
     ns.getServerSecurityLevel(server.hostname) - server.minSecurity;
   let threadCount = 0;
   do {
     threadCount++;
-  } while (ns.weakenAnalyze(threadCount) < securityToDecrease);
+  } while (ns.weakenAnalyze(threadCount, cpuCores) < securityToDecrease);
   return threadCount;
 }
 
@@ -326,13 +383,16 @@ function getServersToGrow(ns, hackableServers) {
 /**
  * @param {NS} ns
  * @param {import('database/servers').Server} server
+ * @param {[number]} cpuCores
  * @returns {number} number of threads needed to grow the given server
  */
-function getGrowThreadCount(ns, server) {
+function getGrowThreadCount(ns, server, cpuCores) {
   const growMultiplier = Math.floor(
     server.maxMoney / (ns.getServerMoneyAvailable(server.hostname) || 1)
   );
-  return Math.floor(ns.growthAnalyze(server.hostname, growMultiplier));
+  return Math.floor(
+    ns.growthAnalyze(server.hostname, growMultiplier, cpuCores)
+  );
 }
 
 /**
