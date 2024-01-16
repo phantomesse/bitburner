@@ -174,22 +174,24 @@ export async function main(ns) {
       (a, b) => ns.getWeakenTime(a.hostname) - ns.getWeakenTime(b.hostname)
     );
     const serverWithLowestWeakTime = hackableServers[0];
-    const weakenScriptRam = ns.getScriptRam(WEAKEN_JS);
-    for (const runnableServer of runnableServers) {
-      const availableRam = getAvailableRam(
-        ns,
-        runnableServer,
-        ramToReserveInHome
-      );
-      const threadCount = Math.floor(availableRam / weakenScriptRam);
-      runScript(
-        ns,
-        WEAKEN_JS,
-        runnableServer,
-        serverWithLowestWeakTime.hostname,
-        threadCount,
-        ramToReserveInHome
-      );
+    if (ns.getWeakenTime(serverWithLowestWeakTime.hostname) < ONE_SECOND) {
+      const weakenScriptRam = ns.getScriptRam(WEAKEN_JS);
+      for (const runnableServer of runnableServers) {
+        const availableRam = getAvailableRam(
+          ns,
+          runnableServer,
+          ramToReserveInHome
+        );
+        const threadCount = Math.floor(availableRam / weakenScriptRam);
+        runScript(
+          ns,
+          WEAKEN_JS,
+          runnableServer,
+          serverWithLowestWeakTime.hostname,
+          threadCount,
+          ramToReserveInHome
+        );
+      }
     }
 
     // Log hack, weaken, and grow.

@@ -2,9 +2,7 @@ import { getServers, updateServers } from 'database/servers';
 import {
   HOME_HOSTNAME,
   MAX_PURCHASED_SERVER_COUNT,
-  ONE_MINUTE,
   ONE_SECOND,
-  UPDATE_SERVERS_PORT,
 } from 'utils/constants';
 import { formatMoney } from 'utils/format';
 
@@ -46,7 +44,6 @@ export async function main(ns) {
               baseSecurity: 0,
               hackingLevel: 0,
             });
-            ns.writePort(UPDATE_SERVERS_PORT, 1);
             ns.toast(
               `Purchased ${hostname} (${ns.formatRam(
                 ram,
@@ -68,7 +65,6 @@ export async function main(ns) {
             hostname: hostname,
             maxRam: ram,
           });
-          ns.writePort(UPDATE_SERVERS_PORT, 1);
           ns.toast(
             `Upgraded ${hostname} from ${ns.formatRam(
               currentRam,

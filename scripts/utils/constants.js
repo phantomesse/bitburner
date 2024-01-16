@@ -11,6 +11,7 @@ import findAllValidMathExpressions from 'contracts/find-all-valid-math-expressio
 import findLargestPrimeFactor from 'contracts/find-largest-prime-factor';
 import generateIPAddresses from 'contracts/generate-ip-addresses';
 import mergeOverlappingIntervals from 'contracts/merge-overlapping-intervals';
+import minimumPathSumInATriangle from 'contracts/minimum-path-sum-in-a-triangle';
 import proper2ColoringOfAGraph from 'contracts/proper-2-coloring-of-a-graph';
 import sanitizeParenthesesInExpression from 'contracts/sanitize-parentheses-in-expression';
 import spiralizeMatrix from 'contracts/spiralize-matrix';
@@ -29,9 +30,6 @@ export const ONE_SECOND = 1000;
 /** One minute in milliseconds. */
 export const ONE_MINUTE = ONE_SECOND * 60;
 
-/** Port to tell other scripts that the server list has been updated. */
-export const UPDATE_SERVERS_PORT = 13;
-
 export const CONTRACT_TYPE_TO_SOLVER_MAP = {
   'Algorithmic Stock Trader I': algorithmicStockTraderI,
   'Algorithmic Stock Trader II': algorithmicStockTraderII,
@@ -44,13 +42,13 @@ export const CONTRACT_TYPE_TO_SOLVER_MAP = {
   'Compression III: LZ Compression': null,
   'Encryption I: Caesar Cipher': encryptionICaesarCipher,
   'Encryption II: Vigenère Cipher': encryptionIIVigenereCipher,
-  // 'Find All Valid Math Expressions': findAllValidMathExpressions,
+  'Find All Valid Math Expressions': findAllValidMathExpressions,
   'Find Largest Prime Factor': findLargestPrimeFactor,
   'Generate IP Addresses': generateIPAddresses,
   'HammingCodes: Encoded Binary to Integer': null,
   'HammingCodes: Integer to Encoded Binary': null,
   'Merge Overlapping Intervals': mergeOverlappingIntervals,
-  'Minimum Path Sum in a Triangle': null,
+  'Minimum Path Sum in a Triangle': minimumPathSumInATriangle,
   'Proper 2-Coloring of a Graph': proper2ColoringOfAGraph,
   'Sanitize Parentheses in Expression': sanitizeParenthesesInExpression,
   // 'Shortest Path in a Grid': shortestPathInAGrid,

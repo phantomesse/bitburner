@@ -60,7 +60,3 @@ function getExpressions(digits, target, expressionThusFar) {
   }
   return expressions;
 }
-
-// console.log(findAllValidMathExpressions(['123', 6]));
-// console.log(findAllValidMathExpressions(['105', 5]));
-// console.log(findAllValidMathExpressions(['76772493723', 24]));
