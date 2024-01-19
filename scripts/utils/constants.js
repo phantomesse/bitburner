@@ -17,12 +17,15 @@ import sanitizeParenthesesInExpression from 'contracts/sanitize-parentheses-in-e
 import spiralizeMatrix from 'contracts/spiralize-matrix';
 import subarrayWithMaximumSum from 'contracts/subarray-with-maximum-sum';
 import totalWaysToSum from 'contracts/total-ways-to-sum';
-import uniquePathsInAGridI from 'contracts/unique-paths-in-a-grid-i';
+import {
+  uniquePathsInAGridI,
+  uniquePathsInAGridII,
+} from 'contracts/unique-paths-in-a-grid';
 
 export const HOME_HOSTNAME = 'home';
 
 /** Maximum number of servers that we can buy. */
-export const MAX_PURCHASED_SERVER_COUNT = 25;
+export const MAX_PURCHASED_SERVER_COUNT = 26;
 
 /** One second in milliseconds. */
 export const ONE_SECOND = 1000;
@@ -57,5 +60,5 @@ export const CONTRACT_TYPE_TO_SOLVER_MAP = {
   'Total Ways to Sum II': null,
   'Total Ways to Sum': totalWaysToSum,
   'Unique Paths in a Grid I': uniquePathsInAGridI,
-  'Unique Paths in a Grid II': null,
+  'Unique Paths in a Grid II': uniquePathsInAGridII,
 };

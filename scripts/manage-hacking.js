@@ -114,9 +114,27 @@ export async function main(ns) {
       }
     }
 
+    // Determine order of hack, weaken, and grow based on the least amount of
+    // time.
+    const getMinTime = (hostnameToThreadCountMap, getTimeFn) => {
+      const hostname = Object.keys(hostnameToThreadCountMap)[0];
+      return hostname ? getTimeFn(hostname) : Infinity;
+    };
+    const scriptToMinTimeMap = {
+      [HACK_JS]: getMinTime(hostnameToHackToThreadCountMap, ns.getHackTime),
+      [WEAKEN_JS]: getMinTime(
+        hostnameToWeakenToThreadCountMap,
+        ns.getWeakenTime
+      ),
+      [GROW_JS]: getMinTime(hostnameToGrowToThreadCountMap, ns.getGrowTime),
+    };
+    const scriptsInOrder = Object.keys(scriptToMinTimeMap)
+      .filter(script => scriptToMinTimeMap[script] < Infinity)
+      .sort((a, b) => scriptToMinTimeMap[a] - scriptToMinTimeMap[b]);
+
     // Execute hack, weaken, and grow on runnable servers.
     for (const runnableServer of runnableServers) {
-      for (const scriptName of hackWeakenGrowScripts) {
+      for (const scriptName of scriptsInOrder) {
         const hostnameToThreadCountMap = scriptToThreadCountMapMap[scriptName];
         const hostnameToRunningThreadCountMap =
           scriptToRunningThreadCountMapMap[scriptName];
@@ -196,24 +214,34 @@ export async function main(ns) {
 
     // Log hack, weaken, and grow.
     ns.clearLog();
-    logServersToHack(
-      ns,
-      hackableServers,
-      hostnameToHackToThreadCountMap,
-      hostnameToHackToRunningThreadCountMap
-    );
-    logServersToWeaken(
-      ns,
-      hackableServers,
-      hostnameToWeakenToThreadCountMap,
-      hostnameToWeakenToRunningThreadCountMap
-    );
-    logServersToGrow(
-      ns,
-      hackableServers,
-      hostnameToGrowToThreadCountMap,
-      hostnameToGrowToRunningThreadCountMap
-    );
+    for (const script of scriptsInOrder) {
+      switch (script) {
+        case HACK_JS:
+          logServersToHack(
+            ns,
+            hackableServers,
+            hostnameToHackToThreadCountMap,
+            hostnameToHackToRunningThreadCountMap
+          );
+          break;
+        case WEAKEN_JS:
+          logServersToWeaken(
+            ns,
+            hackableServers,
+            hostnameToWeakenToThreadCountMap,
+            hostnameToWeakenToRunningThreadCountMap
+          );
+          break;
+        case GROW_JS:
+          logServersToGrow(
+            ns,
+            hackableServers,
+            hostnameToGrowToThreadCountMap,
+            hostnameToGrowToRunningThreadCountMap
+          );
+          break;
+      }
+    }
 
     await ns.sleep(ONE_SECOND);
   }
@@ -313,7 +341,9 @@ function getServersToHack(ns, hackableServers) {
       ns.hackAnalyzeChance(server.hostname) > MIN_HACK_CHANCE
   );
   servers.sort(
-    (a, b) => ns.getHackTime(a.hostname) - ns.getHackTime(b.hostname)
+    (a, b) =>
+      ns.getHackTime(a.hostname) * getHackThreadCount(ns, a) -
+      ns.getHackTime(b.hostname) * getHackThreadCount(ns, b)
   );
   return servers;
 }
@@ -343,7 +373,9 @@ function getServersToWeaken(ns, hackableServers) {
       ns.hackAnalyzeChance(server.hostname) <= MIN_HACK_CHANCE
   );
   servers.sort(
-    (a, b) => ns.getWeakenTime(a.hostname) - ns.getWeakenTime(b.hostname)
+    (a, b) =>
+      ns.getWeakenTime(a.hostname) * getWeakenThreadCount(ns, a) -
+      ns.getWeakenTime(b.hostname) * getWeakenThreadCount(ns, b)
   );
   return servers;
 }
@@ -377,7 +409,9 @@ function getServersToGrow(ns, hackableServers) {
       server.maxMoney * MIN_MONEY_PERCENT
   );
   servers.sort(
-    (a, b) => ns.getGrowTime(a.hostname) - ns.getGrowTime(b.hostname)
+    (a, b) =>
+      ns.getGrowTime(a.hostname) * getGrowThreadCount(ns, a) -
+      ns.getGrowTime(b.hostname) * getGrowThreadCount(ns, b)
   );
   return servers;
 }
