@@ -1,6 +1,8 @@
 import {
   algorithmicStockTraderI,
   algorithmicStockTraderII,
+  algorithmicStockTraderIII,
+  algorithmicStockTraderIV,
 } from 'contracts/algorithmic-stock-trader';
 import arrayJumpingGame from 'contracts/array-jumping-game';
 import compressionIRLECompression from 'contracts/compression-i-rle-compression';
