@@ -17,12 +17,23 @@ export class Charter {
     this.division = division;
     this.office = office;
     this.industryData = ns.corporation.getIndustryData(division.type);
+
     this.warehouse = ns.corporation.hasWarehouse(
       this.division.name,
       this.office.city
     )
       ? ns.corporation.getWarehouse(division.name, office.city)
       : null;
+
+    /** Name of all the research that we have no researched yet. */
+    const constants = ns.corporation.getConstants();
+    this.lockedResearchNames = (
+      this.industryData.makesProducts
+        ? constants.researchNames
+        : constants.researchNamesBase
+    ).filter(
+      researchName => !ns.corporation.hasResearched(division.name, researchName)
+    );
 
     this.charterMaterials = this._getMaterials(ns);
     this.mostEffectiveProductionMaterialName =

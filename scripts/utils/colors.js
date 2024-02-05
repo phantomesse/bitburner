@@ -140,3 +140,11 @@ function rgbaToHsla(rgba) {
 
   return new HSLA(h, s, l, rgba.a);
 }
+
+/**
+ * @param {string} hexString (e.g. #FFFFFF)
+ * @returns {string} translucent hex string (e.g. #FFFFFF33)
+ */
+export function getDimmedColor(hexString) {
+  return hexString + '33';
+}

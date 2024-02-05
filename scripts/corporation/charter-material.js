@@ -17,8 +17,8 @@ export class CharterMaterial {
    * @param {import("../../NetscriptDefinitions").Material} material
    */
   constructor(ns, material) {
-    this.materialData = ns.corporation.getMaterialData(material.name);
     this.material = material;
+    this.materialData = ns.corporation.getMaterialData(material.name);
 
     /** Amount of space this material is taking up in the warehouse. */
     this.spaceTakenUp = material.stored * this.materialData.size;
