@@ -15,13 +15,16 @@ export class Charter {
    */
   constructor(ns, division, office) {
     this.division = division;
+    this.divisionName = division.name;
     this.office = office;
+    this.city = office.city;
     this.industryData = ns.corporation.getIndustryData(division.type);
 
-    this.warehouse = ns.corporation.hasWarehouse(
-      this.division.name,
-      this.office.city
-    )
+    this.hasWarehouse = ns.corporation.hasWarehouse(
+      this.divisionName,
+      this.city
+    );
+    this.warehouse = this.hasWarehouse
       ? ns.corporation.getWarehouse(division.name, office.city)
       : null;
 
@@ -34,6 +37,11 @@ export class Charter {
     ).filter(
       researchName => !ns.corporation.hasResearched(division.name, researchName)
     );
+    this.needsResearchers = this.lockedResearchNames.length > 0;
+    this.needsInterns =
+      (this.lockedResearchNames.includes('AutoBrew') ||
+        this.lockedResearchNames.includes('AutoPartyManager')) &&
+      (office.avgMorale < 100 || office.avgEnergy < 100);
 
     this.charterMaterials = this._getMaterials(ns);
     this.mostEffectiveProductionMaterialName =
@@ -80,8 +88,8 @@ export class Charter {
     ];
     return materialNames.map(materialName => {
       const material = ns.corporation.getMaterial(
-        this.division.name,
-        this.office.city,
+        this.divisionName,
+        this.city,
         materialName
       );
       return new CharterMaterial(ns, material);
@@ -122,7 +130,7 @@ export class Charter {
   }
 
   toString() {
-    return `${this.division.name} - ${this.office.city}`;
+    return `${this.divisionName} - ${this.city}`;
   }
 }
 

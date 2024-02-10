@@ -103,15 +103,18 @@ export async function main(ns) {
 
     // Only engage in territory warfare if wanted penalty is below threshold and
     // territory is less than threshold and we have enough power.
-    const minPower = Math.max(
-      ...Object.values(ns.gang.getOtherGangInformation())
-        .filter(info => info.territory > 0)
-        .map(info => info.power)
-    );
+    const otherGangInfo = ns.gang.getOtherGangInformation();
+    let maxClashWinChance = 1;
+    for (const gangName in otherGangInfo) {
+      if (otherGangInfo[gangName].territory === 0) continue;
+      const clashChance = ns.gang.getChanceToWinClash(gangName);
+      maxClashWinChance = Math.max(maxClashWinChance, clashChance);
+    }
     ns.gang.setTerritoryWarfare(
-      gangInfo.wantedPenalty >= WANTED_PENALTY_THRESHOLD &&
+      (gangInfo.wantedPenalty >= WANTED_PENALTY_THRESHOLD &&
         gangInfo.territory < 0.5 &&
-        gangInfo.power > minPower
+        maxClashWinChance > 0.5) ||
+        (gangInfo.territory < 1 && maxClashWinChance > 0.9)
     );
 
     // Recruit if possible.
@@ -189,23 +192,23 @@ export async function main(ns) {
 
     // If we're not engaging in territory warfare, have the member with the
     // least profit work on Territory Warfare.
-    // if (gangInfo.territoryClashChance === 0) {
-    //   let gangMemberWithLeastProfit, leastProfit;
-    //   for (const gangMember of gangMembers) {
-    //     const profit = ns.gang.getMemberInformation(gangMember.name).moneyGain;
-    //     if (profit === 0) continue;
-    //     if (!leastProfit || profit < leastProfit) {
-    //       gangMemberWithLeastProfit = gangMember;
-    //       leastProfit = profit;
-    //     }
-    //   }
-    //   if (gangMemberWithLeastProfit) {
-    //     ns.gang.setMemberTask(
-    //       gangMemberWithLeastProfit.name,
-    //       'Territory Warfare'
-    //     );
-    //   }
-    // }
+    if (gangInfo.territoryClashChance === 0) {
+      let gangMemberWithLeastProfit, leastProfit;
+      for (const gangMember of gangMembers) {
+        const profit = ns.gang.getMemberInformation(gangMember.name).moneyGain;
+        if (profit === 0) continue;
+        if (!leastProfit || profit < leastProfit) {
+          gangMemberWithLeastProfit = gangMember;
+          leastProfit = profit;
+        }
+      }
+      if (gangMemberWithLeastProfit) {
+        ns.gang.setMemberTask(
+          gangMemberWithLeastProfit.name,
+          'Territory Warfare'
+        );
+      }
+    }
 
     await ns.gang.nextUpdate();
   }

@@ -3,6 +3,15 @@ import { PRODUCTION_MATERIAL_NAMES } from 'corporation/charter-material';
 import { ONE_MINUTE, ONE_SECOND } from 'utils/constants';
 import { formatMoney } from 'utils/format';
 
+const CITIES = [
+  'Aevum',
+  'Chongqing',
+  'Sector-12',
+  'New Tokyo',
+  'Ishima',
+  'Volhaven',
+];
+
 /**
  * Manages corporation.
  *
@@ -14,14 +23,66 @@ export async function main(ns) {
 
   while (true) {
     const charters = getCharters(ns);
+
+    manageUpgrades(ns);
+    expandIndustries(ns);
+    expandOffices(ns);
+
     manageResearch(ns, charters);
     manageWarehouses(ns, charters);
     manageEmployees(ns, charters);
+    hireAdverts(ns, charters);
 
-    manageProductionMaterials(ns, charters);
+    // manageProductionMaterials(ns, [...charters]);
     manageMaterials(ns, charters);
 
     await ns.corporation.nextUpdate();
+  }
+}
+
+/**  @param {NS} ns */
+function manageUpgrades(ns) {
+  const upgradeNames = ns.corporation.getConstants().upgradeNames;
+  for (const upgradeName of upgradeNames) {
+    try {
+      ns.corporation.levelUpgrade(upgradeName);
+    } catch (_) {}
+  }
+}
+
+/** @param {NS} ns */
+function expandIndustries(ns) {
+  const industryNames = ns.corporation.getConstants().industryNames;
+  const divisionNames = ns.corporation.getCorporation().divisions;
+  for (const industryName of industryNames) {
+    const divisionName = `${industryName} Division`;
+    if (divisionNames.includes(divisionName)) continue;
+    try {
+      ns.corporation.expandIndustry(industryName, divisionName);
+    } catch (_) {}
+  }
+}
+
+/** @param {NS} ns */
+function expandOffices(ns) {
+  const divisionNames = ns.corporation.getCorporation().divisions;
+  for (const divisionName of divisionNames) {
+    for (const city of CITIES) {
+      try {
+        ns.corporation.expandCity(divisionName, city);
+      } catch (_) {}
+    }
+  }
+}
+
+/**
+ * @param {NS} ns
+ * @param {Charter[]} charters
+ */
+function hireAdverts(ns, charters) {
+  for (const charter of charters) {
+    if (!charter.hasWarehouse) continue;
+    ns.corporation.hireAdVert(charter.division.name);
   }
 }
 
@@ -30,13 +91,12 @@ export async function main(ns) {
  * @param {Charter[]} charters
  */
 function manageResearch(ns, charters) {
-  const chartersWithLockedResearch = charters.filter(
-    charter => charter.lockedResearchNames.length > 0
-  );
-  for (const charter of chartersWithLockedResearch) {
+  for (const charter of charters) {
+    if (charter.lockedResearchNames.length === 0) continue;
+
     for (const researchName of charter.lockedResearchNames) {
       try {
-        ns.corporation.research(charter.division.name, researchName);
+        ns.corporation.research(charter.divisionName, researchName);
         ns.toast(`Researched ${researchName} in ${charter}`);
       } catch (_) {}
     }
@@ -49,8 +109,8 @@ function manageResearch(ns, charters) {
  */
 function manageWarehouses(ns, charters) {
   for (const charter of charters) {
-    const divisionName = charter.division.name;
-    const city = charter.office.city;
+    const divisionName = charter.divisionName;
+    const city = charter.city;
     if (charter.warehouse) {
       if (charter.warehouse.sizeUsed < charter.warehouse.size * 0.99) continue;
       const upgradeCost = ns.corporation.getUpgradeWarehouseCost(
@@ -73,7 +133,13 @@ function manageWarehouses(ns, charters) {
       }
     } else {
       ns.corporation.purchaseWarehouse(divisionName, city);
-      ns.toast(`Purchased warehouse in ${charter}`, 'success', ONE_SECOND * 10);
+      if (ns.corporation.hasWarehouse(divisionName, city)) {
+        ns.toast(
+          `Purchased warehouse in ${charter}`,
+          'success',
+          ONE_SECOND * 10
+        );
+      }
     }
   }
 }
@@ -84,94 +150,94 @@ function manageWarehouses(ns, charters) {
  */
 function manageEmployees(ns, charters) {
   for (const charter of charters) {
-    const divisionName = charter.division.name;
-    const city = charter.office.city;
-
-    const assignJobs = (jobTitle, employeeCount) => {
-      ns.corporation.setAutoJobAssignment(
-        divisionName,
-        city,
-        jobTitle,
-        employeeCount
-      );
-    };
-
-    // Rebalance employees based on productivity.
-    /** @type {import('../NetscriptDefinitions').CorpEmployeePosition[]} */
-    const jobTitles = [];
-    const hasWarehouse = charter.warehouse !== null;
-    if (hasWarehouse) {
-      jobTitles.push('Operations', 'Engineer', 'Business', 'Management');
-    } else {
-      assignJobs('Operations', 0);
-      assignJobs('Engineer', 0);
-      assignJobs('Business', 0);
-    }
-    if (charter.lockedResearchNames.length > 0 || !hasWarehouse) {
-      jobTitles.push('Research & Development');
-    } else {
-      assignJobs('Research & Development', 0);
-    }
-    if (
-      charter.lockedResearchNames.includes('AutoBrew') ||
-      charter.lockedResearchNames.includes('AutoPartyManager')
-    ) {
-      jobTitles.push('Intern');
-    } else {
-      assignJobs('Intern', 0);
-    }
-
-    let movingEmployee = false;
-    if (
-      jobTitles.filter(jobTitle => charter.office.employeeJobs[jobTitle] === 0)
-        .length > 0
-    ) {
-      // Assign jobs evenly by employee count since we don't have production
-      // per job data.
-      const employeeCountPerJob = Math.floor(
-        charter.office.numEmployees / jobTitles.length
-      );
-      for (const jobTitle of jobTitles) {
-        const employeeCount =
-          employeeCountPerJob +
-          (jobTitle === jobTitles[0]
-            ? charter.office.numEmployees % employeeCountPerJob
-            : 0);
-        assignJobs(jobTitle, employeeCount);
-      }
-    } else {
-      // Assign jobs by production by replacing the one employee from the most
-      // production job to the least production job.
-
-      // Sort job titles from least production to most production
-      jobTitles.sort(
-        (jobTitle1, jobTitle2) =>
-          charter.office.employeeProductionByJob[jobTitle1] -
-          charter.office.employeeProductionByJob[jobTitle2]
-      );
-
-      // Move one employee from most production job to least production job.
-      const mostProductionJob = jobTitles.slice(-1)[0];
-      assignJobs(
-        mostProductionJob,
-        charter.office.employeeJobs[mostProductionJob] - 1
-      );
-      movingEmployee = true;
-    }
+    const divisionName = charter.divisionName;
+    const city = charter.city;
 
     // Try to upgrade office size.
     ns.corporation.upgradeOfficeSize(divisionName, city, 1);
 
-    // Try to hire more employees.
-    ns.corporation.hireEmployee(divisionName, city, jobTitles[0]);
+    // Try to hire a new employee.
+    ns.corporation.hireEmployee(divisionName, city);
 
-    // Assign any unassigned.
-    if (charter.office.employeeJobs.Unassigned > 0) {
-      assignJobs(
-        jobTitles[0],
-        charter.office.employeeJobs[jobTitles[0]] +
-          charter.office.employeeJobs.Unassigned +
-          (movingEmployee ? 1 : 0)
+    // Get necessary job titles sorted from least production to most production.
+    const necessaryJobTitles = [
+      ...new Set([
+        ...(charter.hasWarehouse
+          ? ['Operations', 'Engineer', 'Business', 'Management']
+          : ['Research & Development']),
+        ...(charter.needsResearchers ? ['Research & Development'] : []),
+      ]),
+    ];
+    const employeeProductionByJob = charter.office.employeeProductionByJob;
+    necessaryJobTitles.sort(
+      (jobTitle1, jobTitle2) =>
+        employeeProductionByJob[jobTitle1] - employeeProductionByJob[jobTitle2]
+    );
+
+    // Remove all employees in unnecessary jobs.
+    const employeeJobs = { ...charter.office.employeeJobs };
+    for (const jobTitle in employeeJobs) {
+      if (necessaryJobTitles.includes(jobTitle)) continue;
+      if (jobTitle === 'Intern' && charter.needsInterns) continue;
+      if (jobTitle === 'Unassigned') continue;
+      employeeJobs[jobTitle] = 0;
+    }
+
+    // Assign all unassigned employees.
+    const jobTitleWithLeastProduction = necessaryJobTitles[0];
+    employeeJobs[jobTitleWithLeastProduction] += employeeJobs.Unassigned;
+    employeeJobs.Unassigned = 0;
+
+    // Move an employee from the most production job to the least production
+    // job.
+    const jobTitleWithMostProduction = necessaryJobTitles.slice(-1)[0];
+    if (employeeJobs[jobTitleWithMostProduction] > 0) {
+      employeeJobs[jobTitleWithMostProduction]--;
+      employeeJobs[jobTitleWithLeastProduction]++;
+    }
+
+    // Move interns around so we don't have too many interns, but enough interns
+    // to max out energy and morale.
+    if (charter.needsInterns) {
+      if (employeeJobs.Intern > charter.office.numEmployees / 3) {
+        const employeesToMove =
+          employeeJobs.Intern - Math.floor(charter.office.numEmployees / 3);
+        employeeJobs.Intern -= employeesToMove;
+        employeeJobs[jobTitleWithLeastProduction] += employeesToMove;
+      } else if (
+        charter.office.avgMorale < charter.office.maxMorale ||
+        charter.office.avgEnergy < charter.office.maxEnergy
+      ) {
+        employeeJobs.Intern++;
+        for (let i = necessaryJobTitles.length - 1; i >= 0; i--) {
+          if (employeeJobs[necessaryJobTitles[i]] > 0) {
+            employeeJobs[necessaryJobTitles[i]]--;
+            break;
+          }
+        }
+      } else {
+        employeeJobs.Intern = 0;
+      }
+    }
+
+    // Assign jobs.
+    const entries = Object.entries(employeeJobs);
+    entries.sort((entry1, entry2) => {
+      const [jobTitle1, employeeCount1] = entry1;
+      const [jobTitle2, employeeCount2] = entry2;
+      const oldEmployeeJobs = charter.office.employeeJobs;
+      const oldEmployeeCount1 = oldEmployeeJobs[jobTitle1];
+      const oldEmployeeCount2 = oldEmployeeJobs[jobTitle2];
+      const delta1 = employeeCount1 - oldEmployeeCount1;
+      const delta2 = employeeCount2 - oldEmployeeCount2;
+      return delta1 - delta2;
+    });
+    for (const entry of entries) {
+      ns.corporation.setAutoJobAssignment(
+        divisionName,
+        city,
+        entry[0],
+        entry[1]
       );
     }
   }
@@ -182,8 +248,9 @@ function manageEmployees(ns, charters) {
  * @param {Charter[]} charters
  */
 function manageProductionMaterials(ns, charters) {
-  const chartersWithWarehouses = charters.filter(charter => charter.warehouse);
-  for (const charter of chartersWithWarehouses) {
+  for (const charter of charters) {
+    if (!charter.hasWarehouse) continue;
+
     const allocatedMaterialStorage = charter.warehouse.size / 2;
 
     // Remove excess production material.
@@ -468,16 +535,16 @@ function cancelImports(ns, materialName, importCharter, charters) {
  */
 function manageMaterials(ns, charters) {
   for (const charter of charters) {
+    if (!charter.warehouse) continue;
     for (const materialName of charter.industryData.producedMaterials ?? []) {
-      ns.corporation.sellMaterial(
-        charter.division.name,
-        charter.office.city,
-        materialName,
-        'MAX',
-        'MP'
-      );
-
       try {
+        ns.corporation.sellMaterial(
+          charter.division.name,
+          charter.office.city,
+          materialName,
+          'MAX',
+          'MP'
+        );
         ns.corporation.setMaterialMarketTA1(
           charter.division.name,
           charter.office.city,
