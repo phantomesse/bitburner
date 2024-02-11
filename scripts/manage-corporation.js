@@ -1,5 +1,9 @@
 import { Charter, getCharters } from 'corporation/charter';
-import { PRODUCTION_MATERIAL_NAMES } from 'corporation/charter-material';
+import {
+  CharterMaterial,
+  PRODUCTION_MATERIAL_NAMES,
+} from 'corporation/charter-material';
+import { getPotentialProductName } from 'corporation/product-names';
 import { ONE_MINUTE, ONE_SECOND } from 'utils/constants';
 import { formatMoney } from 'utils/format';
 
@@ -33,8 +37,9 @@ export async function main(ns) {
     manageEmployees(ns, charters);
     hireAdverts(ns, charters);
 
-    // manageProductionMaterials(ns, [...charters]);
+    // manageProductionMaterials(ns, charters);
     manageMaterials(ns, charters);
+    manageProducts(ns, charters);
 
     await ns.corporation.nextUpdate();
   }
@@ -162,10 +167,10 @@ function manageEmployees(ns, charters) {
     // Get necessary job titles sorted from least production to most production.
     const necessaryJobTitles = [
       ...new Set([
+        ...(charter.needsResearchers ? ['Research & Development'] : []),
         ...(charter.hasWarehouse
           ? ['Operations', 'Engineer', 'Business', 'Management']
           : ['Research & Development']),
-        ...(charter.needsResearchers ? ['Research & Development'] : []),
       ]),
     ];
     const employeeProductionByJob = charter.office.employeeProductionByJob;
@@ -248,9 +253,10 @@ function manageEmployees(ns, charters) {
  * @param {Charter[]} charters
  */
 function manageProductionMaterials(ns, charters) {
-  for (const charter of charters) {
-    if (!charter.hasWarehouse) continue;
-
+  const chartersWithWarehouses = charters.filter(
+    charter => charter.hasWarehouse
+  );
+  for (const charter of chartersWithWarehouses) {
     const allocatedMaterialStorage = charter.warehouse.size / 2;
 
     // Remove excess production material.
@@ -536,6 +542,33 @@ function cancelImports(ns, materialName, importCharter, charters) {
 function manageMaterials(ns, charters) {
   for (const charter of charters) {
     if (!charter.warehouse) continue;
+
+    const producedCharterMaterials = (
+      charter.industryData.producedMaterials ?? []
+    ).map(materialName =>
+      charter.charterMaterials.find(
+        charterMaterial => charterMaterial.material.name === materialName
+      )
+    );
+    const producedProducts = charter.division.products.map(productName =>
+      ns.corporation.getProduct(charter.divisionName, charter.city, productName)
+    );
+    const maxProducedAmount = Math.max(
+      ...[
+        ...producedCharterMaterials.map(
+          (/** @type {CharterMaterial} */ charterMaterial) =>
+            charterMaterial.material.productionAmount
+        ),
+        ...producedProducts.map(product => product.productionAmount),
+      ]
+    );
+    for (const materialName in charter.industryData.requiredMaterials ?? {}) {
+      const amountNeeded =
+        maxProducedAmount *
+        charter.industryData.requiredMaterials[materialName];
+      getMaterialSource(ns, materialName, amountNeeded, charter, charters);
+    }
+
     for (const materialName of charter.industryData.producedMaterials ?? []) {
       try {
         ns.corporation.sellMaterial(
@@ -555,6 +588,90 @@ function manageMaterials(ns, charters) {
           charter.division.name,
           charter.office.city,
           materialName,
+          true
+        );
+      } catch (_) {}
+    }
+  }
+}
+
+/**
+ * Gets the cheapest but highest quality source of a material and creates
+ * export/import and buy connections.
+ *
+ * @param {NS} ns
+ * @param {import('../NetscriptDefinitions').CorpMaterialName} materialName
+ * @param {number} amountPerCycle
+ * @param {Charter} requestingCharter
+ * @param {Charter[]} charters
+ */
+function getMaterialSource(
+  ns,
+  materialName,
+  amountPerCycle,
+  requestingCharter,
+  charters
+) {
+  const chartersThatProduceMaterial = [];
+  const chartersThatSellMaterial = [];
+  for (const charter of charters) {
+    if ((charter.industryData.producedMaterials ?? []).includes(materialName)) {
+      chartersThatProduceMaterial.push(charter);
+    }
+    if (
+      charter.charterMaterials.find(
+        (/** @type {CharterMaterial} */ charterMaterial) =>
+          charterMaterial.material.name === materialName
+      )
+    ) {
+      chartersThatSellMaterial.push(charter);
+    }
+  }
+}
+
+/**
+ * @param {NS} ns
+ * @param {Charter[]} charters
+ */
+function manageProducts(ns, charters) {
+  for (const charter of charters) {
+    if (!charter.industryData.makesProducts) continue;
+
+    // Make new products.
+    const funds = ns.corporation.getCorporation().funds;
+    const division = ns.corporation.getDivision(charter.divisionName);
+    if (division.products.length < division.maxProducts) {
+      const productName = getPotentialProductName(
+        division.type,
+        ...division.products
+      );
+      ns.corporation.makeProduct(
+        charter.divisionName,
+        charter.city,
+        productName,
+        Math.floor(funds / 2),
+        Math.floor(funds / 2)
+      );
+    }
+
+    // Sell products.
+    for (const productName of division.products) {
+      ns.corporation.sellProduct(
+        charter.divisionName,
+        charter.city,
+        productName,
+        'MAX',
+        'MP'
+      );
+      try {
+        ns.corporation.setProductMarketTA1(
+          charter.divisionName,
+          productName,
+          true
+        );
+        ns.corporation.setProductMarketTA2(
+          charter.divisionName,
+          productName,
           true
         );
       } catch (_) {}
