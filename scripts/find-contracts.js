@@ -73,8 +73,9 @@ function attemptContract(ns, contract) {
     contract.server.hostname
   );
   const solver = CONTRACT_TYPE_TO_SOLVER_MAP[contract.type];
+  const answer = solver(data);
   const reward = ns.codingcontract.attempt(
-    solver(data),
+    answer,
     contract.fileName,
     contract.server.hostname
   );
