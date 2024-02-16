@@ -74,14 +74,17 @@ function attemptContract(ns, contract) {
   );
   const solver = CONTRACT_TYPE_TO_SOLVER_MAP[contract.type];
   const answer = solver(data);
-  const reward = ns.codingcontract.attempt(
-    answer,
-    contract.fileName,
-    contract.server.hostname
-  );
-  return reward
-    ? createReactElement(reward, { color: theme.success })
-    : createReactElement('Attempt failed!', { color: theme.error });
+  if (answer) {
+    const reward = ns.codingcontract.attempt(
+      answer,
+      contract.fileName,
+      contract.server.hostname
+    );
+    return reward
+      ? createReactElement(reward, { color: theme.success })
+      : createReactElement('Attempt failed!', { color: theme.error });
+  }
+  return createReactElement('Attempt failed!', { color: theme.error });
 }
 
 /**

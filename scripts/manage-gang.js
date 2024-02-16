@@ -110,12 +110,13 @@ export async function main(ns) {
       const clashChance = ns.gang.getChanceToWinClash(gangName);
       maxClashWinChance = Math.max(maxClashWinChance, clashChance);
     }
-    ns.gang.setTerritoryWarfare(
-      (gangInfo.wantedPenalty >= WANTED_PENALTY_THRESHOLD &&
-        gangInfo.territory < 0.5 &&
-        maxClashWinChance > 0.5) ||
-        (gangInfo.territory < 1 && maxClashWinChance > 0.9)
-    );
+    // ns.gang.setTerritoryWarfare(
+    //   (gangInfo.territory > 0 &&
+    //     gangInfo.wantedPenalty >= WANTED_PENALTY_THRESHOLD &&
+    //     gangInfo.territory < 0.5 &&
+    //     maxClashWinChance > 0.5) ||
+    //     (gangInfo.territory < 1 && maxClashWinChance > 0.9)
+    // );
 
     // Recruit if possible.
     const recruit = recruitGangMember(ns);
@@ -145,20 +146,20 @@ export async function main(ns) {
       }
 
       // Upgrade equipment.
-      if (ns.args.length === 0 || ns.args[0] !== 0) {
-        for (const equipmentName of EQUIPMENT_NAMES) {
-          const moneyAvailable =
-            ns.args[0] || ns.getServerMoneyAvailable(HOME_HOSTNAME) / 4;
-          if (ns.gang.getEquipmentCost(equipmentName) < moneyAvailable) {
-            ns.gang.purchaseEquipment(gangMember.name, equipmentName);
-          }
-        }
-      }
+      // if (ns.args.length === 0 || ns.args[0] !== 0) {
+      //   for (const equipmentName of EQUIPMENT_NAMES) {
+      //     const moneyAvailable =
+      //       ns.args[0] || ns.getServerMoneyAvailable(HOME_HOSTNAME) / 4;
+      //     if (ns.gang.getEquipmentCost(equipmentName) < moneyAvailable) {
+      //       ns.gang.purchaseEquipment(gangMember.name, equipmentName);
+      //     }
+      //   }
+      // }
 
-      if (gangInfo.territoryClashChance > 0) {
-        ns.gang.setMemberTask(gangMember.name, 'Territory Warfare');
-        continue;
-      }
+      // if (gangInfo.territoryClashChance > 0) {
+      // ns.gang.setMemberTask(gangMember.name, 'Territory Warfare');
+      //   continue;
+      // }
 
       // If wanted level is too high, then vigilante justice.
       if (

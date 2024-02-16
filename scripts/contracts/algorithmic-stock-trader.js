@@ -1,3 +1,34 @@
+class Transaction {
+  constructor(buyDay, sellDay, stockPrices) {
+    this.buyDay = buyDay;
+    this.sellDay = sellDay;
+    this.buyPrice = stockPrices[buyDay];
+    this.sellPrice = stockPrices[sellDay];
+    this.profit = this.sellPrice - this.buyPrice;
+  }
+
+  toString() {
+    return `buy ${this.buyDay} ($${this.buyPrice}), sell ${this.sellDay} ($${this.sellPrice})`;
+  }
+}
+
+class Permutation {
+  constructor(...transactions) {
+    this.transactions = transactions;
+    this.profit = transactions
+      .map(transaction => transaction.profit)
+      .reduce((a, b) => a + b);
+  }
+
+  toString() {
+    return (
+      '[\n' +
+      this.transactions.map(transaction => ` ${transaction}`).join('\n') +
+      '\n]'
+    );
+  }
+}
+
 /**
  * Algorithmic Stock Trader I
  *
@@ -18,114 +49,92 @@ export const algorithmicStockTraderI = stockPrices =>
 export const algorithmicStockTraderII = stockPrices =>
   getMaxProfit(stockPrices, stockPrices.length);
 
-/**
- * Algorithmic Stock Trader III
- *
- * @param {number[]} stockPrices
- *        where the i-th element represents the stock on day i
- * @returns {number} max profit using at most 2 transactions
- */
-export const algorithmicStockTraderIII = stockPrices =>
-  getMaxProfit(stockPrices, 2);
+//  * Algorithmic Stock Trader III
+//  *
+//  * @param {number[]} stockPrices
+//  *        where the i-th element represents the stock on day i
+//  * @returns {number} max profit using at most 2 transactions
+//  */
+// export const algorithmicStockTraderIII = stockPrices =>
+//   getMaxProfit(stockPrices, 2);
+
+// /**
+//  * Algorithmic Stock Trader IV
+//  *
+//  * @param {(number, number[])[]} input [k, stockPrices]
+//  * @returns {number} max profit using at most k transactions
+//  */
+// export function algorithmicStockTraderIV(input) {
+//   const [k, stockPrices] = input;
+//   return getMaxProfit(stockPrices, k);
+// }
 
 /**
- * Algorithmic Stock Trader IV
  *
- * @param {(number, number[])[]} input [k, stockPrices]
- * @returns {number} max profit using at most k transactions
- */
-export function algorithmicStockTraderIV(input) {
-  const [k, stockPrices] = input;
-  return getMaxProfit(stockPrices, k);
-}
-
-/**
  * @param {number[]} stockPrices
- * @param {number} maxTransactions
- * @returns {number} max profit
+ * @param {number} transactionCount
  */
-function getMaxProfit(stockPrices, maxTransactions) {
-  // Get all profitable transactions.
-  const buyDayToProfitableTransactions = {};
-  for (let buyDay = 0; buyDay < stockPrices.length - 1; buyDay++) {
-    buyDayToProfitableTransactions[buyDay] = getProfitableTransactions(
-      buyDay,
-      stockPrices
+function getMaxProfit(stockPrices, transactionCount) {
+  const transactions = getPositiveTransactions(stockPrices);
+  if (transactions.length === 0) return 0;
+
+  if (transactionCount === 1) {
+    return Math.max(...transactions.map(transaction => transaction.profit));
+  }
+
+  const sellDayToNextTransactionsMap = {};
+  const sellDays = transactions.map(transaction => transaction.sellDay);
+  for (const sellDay of sellDays) {
+    sellDayToNextTransactionsMap[sellDay] = transactions.filter(
+      transaction => transaction.buyDay > sellDay
     );
   }
 
-  // If there aren't any profitable transactions, return 0.
-  if (
-    Object.values(buyDayToProfitableTransactions).filter(
-      transactions => transactions.length > 0
-    ).length === 0
-  ) {
-    return 0;
+  const permutations = [];
+  for (const transaction of transactions) {
+    permutations.push(
+      getMostProfitablePermutation(transaction, sellDayToNextTransactionsMap)
+    );
   }
-
-  /** @type {Permutation[]} */ const permutations = [];
-  for (let buyDay = 0; buyDay < stockPrices.length - 1; buyDay++) {}
-  console.log(buyDayToProfitableTransactions);
+  permutations.sort((p1, p2) => p2.profit - p1.profit);
+  return permutations[0].profit;
 }
 
-console.log(
-  algorithmicStockTraderI([
-    119, 161, 114, 148, 145, 155, 87, 85, 100, 1, 3, 79, 65, 31, 43, 98, 177,
-    183, 65, 44,
-  ])
-);
-
 /**
- * @typedef Transaction
- * @property {number} buyDay
- * @property {number} sellDay
- * @property {number} profit
- *
- * @typedef {Transaction[]} Permutation
+ * @param {number[]} stockPrices
+ * @returns {Transaction[]} all possible positive profit transactions
  */
+function getPositiveTransactions(stockPrices) {
+  const transactions = [];
+  for (let buyDay = 0; buyDay < stockPrices.length - 1; buyDay++) {
+    for (let sellDay = buyDay + 1; sellDay < stockPrices.length; sellDay++) {
+      const transaction = new Transaction(buyDay, sellDay, stockPrices);
+      if (transaction.profit > 0) transactions.push(transaction);
+    }
+  }
+  return transactions;
+}
 
 /**
  * @param {Transaction} transaction
- * @param {number} maxTransactions
- * @param {Object.<number, Transaction[]>} buyDayToProfitableTransactions
- * @returns {Permutation[]}
- *          all profitable permutations starting from the given transaction
+ * @param {Object.<number, Transaction[]>} sellDayToNextTransactionsMap
+ * @param {Permutation}
  */
-function getProfitablePermutations(
+function getMostProfitablePermutation(
   transaction,
-  maxTransactions,
-  buyDayToProfitableTransactions
+  sellDayToNextTransactionsMap
 ) {
-  const permutations = [[transaction]];
-  if (maxTransactions === 1) return permutations;
-
-  const lastBuyDay = Math.max(...Object.keys(buyDayToProfitableTransactions));
-  for (let buyDay = transaction.sellDay + 1; buyDay <= lastBuyDay; buyDay++) {
-    const nextTransactions = buyDayToProfitableTransactions[buyDay];
-    if (nextTransactions.length === 0) continue;
-
-    for (const nextTransaction of nextTransactions) {
-      const nextPermutations = getProfitablePermutations();
-    }
+  const permutations = [];
+  const nextTransactions = sellDayToNextTransactionsMap[transaction.sellDay];
+  if (nextTransactions.length === 0) return new Permutation(transaction);
+  for (const nextTransaction of nextTransactions) {
+    permutations.push(
+      getMostProfitablePermutation(
+        nextTransaction,
+        sellDayToNextTransactionsMap
+      )
+    );
   }
-
-  return permutations;
-}
-
-/**
- * @param {number} buyDay
- * @param {number[]} stockPrices
- * @returns {Transaction[]}
- *          all transactions starting from given buy day that are profitable
- */
-function getProfitableTransactions(buyDay, stockPrices) {
-  const transactions = [];
-  const buyPrice = stockPrices[buyDay];
-  for (let sellDay = buyDay + 1; sellDay < stockPrices.length; sellDay++) {
-    const sellPrice = stockPrices[sellDay];
-    const profit = sellPrice - buyPrice;
-    if (profit <= 0) continue;
-    transactions.push(/** @type {Transaction} */ { buyDay, sellDay, profit });
-  }
-  return transactions;
+  permutations.sort((p1, p2) => p2.profit - p1.profit);
+  return new Permutation(transaction, ...permutations[0].transactions);
 }
