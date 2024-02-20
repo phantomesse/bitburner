@@ -71,7 +71,7 @@ const EQUIPMENT_NAMES = [
   'Graphene Bone Lacings',
 ];
 
-const WANTED_PENALTY_THRESHOLD = 0.99;
+const WANTED_PENALTY_THRESHOLD = 0; // 0.99;
 
 /**
  * Manages gang members.
@@ -146,15 +146,15 @@ export async function main(ns) {
       }
 
       // Upgrade equipment.
-      // if (ns.args.length === 0 || ns.args[0] !== 0) {
-      //   for (const equipmentName of EQUIPMENT_NAMES) {
-      //     const moneyAvailable =
-      //       ns.args[0] || ns.getServerMoneyAvailable(HOME_HOSTNAME) / 4;
-      //     if (ns.gang.getEquipmentCost(equipmentName) < moneyAvailable) {
-      //       ns.gang.purchaseEquipment(gangMember.name, equipmentName);
-      //     }
-      //   }
-      // }
+      if (ns.args.length === 0 || ns.args[0] !== 0) {
+        for (const equipmentName of EQUIPMENT_NAMES) {
+          const moneyAvailable =
+            ns.args[0] || ns.getServerMoneyAvailable(HOME_HOSTNAME) / 4;
+          if (ns.gang.getEquipmentCost(equipmentName) < moneyAvailable) {
+            ns.gang.purchaseEquipment(gangMember.name, equipmentName);
+          }
+        }
+      }
 
       // if (gangInfo.territoryClashChance > 0) {
       // ns.gang.setMemberTask(gangMember.name, 'Territory Warfare');
