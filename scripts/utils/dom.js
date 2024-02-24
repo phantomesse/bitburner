@@ -68,4 +68,4 @@ function executeCommand(command) {
  *
  * @returns {Document}
  */
-const getDocument = () => eval('document');
+export const getDocument = () => eval('document');

@@ -71,7 +71,7 @@ const EQUIPMENT_NAMES = [
   'Graphene Bone Lacings',
 ];
 
-const WANTED_PENALTY_THRESHOLD = 0; // 0.99;
+const WANTED_PENALTY_THRESHOLD = 0.99;
 
 /**
  * Manages gang members.

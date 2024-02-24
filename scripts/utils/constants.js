@@ -63,6 +63,7 @@ export const CONTRACT_TYPE_TO_SOLVER_MAP = {
   'Unique Paths in a Grid II': uniquePathsInAGridII,
 };
 
+/** @type {import("../NetscriptDefinitions").CrimeType[]} */
 export const CRIME_TYPES = [
   'Shoplift',
   'Rob Store',

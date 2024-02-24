@@ -42,6 +42,7 @@ export async function main(ns) {
   ns.run('manage-hacking.js', { preventDuplicates: true });
   ns.run('manage-hacknet.js', { preventDuplicates: true });
   ns.run('manage-servers.js', { preventDuplicates: true });
+  ns.run('manage-life.js', { preventDuplicates: true });
 }
 
 /**

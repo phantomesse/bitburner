@@ -67,6 +67,3 @@ function isPrime(number) {
   numberToIsPrimeMap[number] = isPrime;
   return isPrime;
 }
-
-console.log(findLargestPrimeFactor(764191163));
-// console.log(findLargestPrimeFactor(1000));
