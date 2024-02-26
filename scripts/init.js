@@ -31,6 +31,7 @@ export async function main(ns) {
   if (ns.stock.hasWSEAccount() && ns.stock.hasTIXAPIAccess()) {
     writeStocks(ns);
     ns.run('manage-stocks.js', { preventDuplicates: true });
+    ns.run('monitor-net-worth.js', { preventDuplicates: true });
   }
   try {
     writeGangTasks(ns);
@@ -43,6 +44,9 @@ export async function main(ns) {
   ns.run('manage-hacknet.js', { preventDuplicates: true });
   ns.run('manage-servers.js', { preventDuplicates: true });
   ns.run('manage-life.js', { preventDuplicates: true });
+  ns.run('apply-to-all-jobs.js', { preventDuplicates: true });
+  ns.run('gym-workout.js', { preventDuplicates: true });
+  ns.run('find-backdoors.js', { preventDuplicates: true });
 }
 
 /**

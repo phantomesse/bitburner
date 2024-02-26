@@ -19,13 +19,17 @@ export function getNetWorth(ns) {
  * @returns {number} money value in stocks
  */
 export function getStockValue(ns) {
-  const commission = ns.stock.getConstants().StockMarketCommission;
-  return getStocks(ns)
-    .map(
-      stock =>
-        ns.stock.getAskPrice(stock.symbol) *
-          ns.stock.getPosition(stock.symbol)[0] -
-        commission
-    )
-    .reduce((a, b) => a + b);
+  try {
+    const commission = ns.stock.getConstants().StockMarketCommission;
+    return getStocks(ns)
+      .map(
+        stock =>
+          ns.stock.getAskPrice(stock.symbol) *
+            ns.stock.getPosition(stock.symbol)[0] -
+          commission
+      )
+      .reduce((a, b) => a + b);
+  } catch (_) {
+    return 0;
+  }
 }

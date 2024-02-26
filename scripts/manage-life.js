@@ -1,4 +1,4 @@
-import { HOME_HOSTNAME, ONE_SECOND } from 'utils/constants';
+import { ONE_SECOND } from 'utils/constants';
 
 const PROGRAM_NAMES = [
   'BruteSSH.exe',

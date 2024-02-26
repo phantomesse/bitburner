@@ -1,4 +1,4 @@
-import { HOME_HOSTNAME, ONE_SECOND } from 'utils/constants';
+import { ONE_SECOND } from 'utils/constants';
 import { getDocument } from 'utils/dom';
 import { formatMoney } from 'utils/format';
 import { getNetWorth } from 'utils/money';
