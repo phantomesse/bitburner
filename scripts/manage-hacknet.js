@@ -58,6 +58,12 @@ export async function main(ns) {
         () => ns.hacknet.getCoreUpgradeCost(i) < moneyAvailable,
         () => ns.hacknet.upgradeCore(i)
       );
+
+      // Upgrade cache.
+      upgrade(
+        () => ns.hacknet.getCacheUpgradeCost(i) < moneyAvailable,
+        () => ns.hacknet.upgradeCache(i)
+      );
     }
 
     log(ns);
