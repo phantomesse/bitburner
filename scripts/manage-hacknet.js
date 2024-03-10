@@ -29,7 +29,7 @@ export async function main(ns) {
 
   while (true) {
     ns.clearLog();
-    const moneyAvailable = ns.getServerMoneyAvailable(HOME_HOSTNAME) / 2;
+    const moneyAvailable = ns.getServerMoneyAvailable(HOME_HOSTNAME);
 
     // Attempt to purchase a new node.
     if (
