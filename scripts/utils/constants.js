@@ -24,9 +24,6 @@ import {
 
 export const HOME_HOSTNAME = 'home';
 
-/** Maximum number of servers that we can buy. */
-export const MAX_PURCHASED_SERVER_COUNT = 26;
-
 /** One second in milliseconds. */
 export const ONE_SECOND = 1000;
 

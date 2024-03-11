@@ -1,9 +1,5 @@
 import { getServers, updateServers } from 'database/servers';
-import {
-  HOME_HOSTNAME,
-  MAX_PURCHASED_SERVER_COUNT,
-  ONE_SECOND,
-} from 'utils/constants';
+import { HOME_HOSTNAME, ONE_SECOND } from 'utils/constants';
 import { formatMoney } from 'utils/format';
 
 const MAX_RAM_POWER = 20;
@@ -27,30 +23,28 @@ export async function main(ns) {
       const ram = Math.pow(2, power);
 
       // Attempt to purchase a server.
-      if (purchasedHostnames.length < MAX_PURCHASED_SERVER_COUNT) {
-        const cost = ns.getPurchasedServerCost(ram);
-        if (cost <= moneyAvailable) {
-          const hostname = ns.purchaseServer('lauren', ram);
-          if (hostname.length > 0) {
-            purchasedHostnames.push(hostname);
-            updateServers(ns, {
-              hostname: hostname,
-              organization: '',
-              path: [hostname],
-              isPurchased: true,
-              maxRam: ram,
-              maxMoney: 0,
-              minSecurity: 0,
-              baseSecurity: 0,
-              hackingLevel: 0,
-            });
-            ns.toast(
-              `Purchased ${hostname} (${ns.formatRam(
-                ram,
-                0
-              )}) for ${formatMoney(ns, cost)}`
-            );
-          }
+      const cost = ns.getPurchasedServerCost(ram);
+      if (cost <= moneyAvailable) {
+        const hostname = ns.purchaseServer('lauren', ram);
+        if (hostname.length > 0) {
+          purchasedHostnames.push(hostname);
+          updateServers(ns, {
+            hostname: hostname,
+            organization: '',
+            path: [hostname],
+            isPurchased: true,
+            maxRam: ram,
+            maxMoney: 0,
+            minSecurity: 0,
+            baseSecurity: 0,
+            hackingLevel: 0,
+          });
+          ns.toast(
+            `Purchased ${hostname} (${ns.formatRam(ram, 0)}) for ${formatMoney(
+              ns,
+              cost
+            )}`
+          );
         }
       }
 

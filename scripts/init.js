@@ -33,19 +33,23 @@ export async function main(ns) {
     ns.run('manage-stocks.js', { preventDuplicates: true });
     ns.run('monitor-net-worth.js', { preventDuplicates: true });
   }
-  try {
-    writeGangTasks(ns);
-    if (ns.gang.inGang()) ns.run('manage-gang.js', { preventDuplicates: true });
-  } catch (_) {}
+  // try {
+  //   writeGangTasks(ns);
+  //   if (ns.gang.inGang()) ns.run('manage-gang.js', { preventDuplicates: true });
+  // } catch (_) {}
+
+  if (ns.getPurchasedServerLimit() > 0) {
+    ns.run('manage-servers.js', { preventDuplicates: true });
+  }
 
   // Start scripts.
   ns.run('gain-access.js', { preventDuplicates: true });
-  ns.run('manage-hacking.js', { preventDuplicates: true });
   ns.run('manage-hacknet.js', { preventDuplicates: true });
-  ns.run('manage-servers.js', { preventDuplicates: true });
+  ns.run('manage-hashes.js', { preventDuplicates: true });
   ns.run('manage-life.js', { preventDuplicates: true });
   ns.run('apply-to-all-jobs.js', { preventDuplicates: true });
-  ns.run('gym-workout.js', { preventDuplicates: true });
+  // ns.run('gym-workout.js', { preventDuplicates: true });
+  ns.run('manage-hacking.js', { preventDuplicates: true }, 4);
   ns.run('find-backdoors.js', { preventDuplicates: true });
 }
 
