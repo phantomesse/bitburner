@@ -1,6 +1,8 @@
 import {
   algorithmicStockTraderI,
   algorithmicStockTraderII,
+  algorithmicStockTraderIII,
+  algorithmicStockTraderIV,
 } from 'contracts/algorithmic-stock-trader';
 import arrayJumpingGame from 'contracts/array-jumping-game';
 import compressionIRLECompression from 'contracts/compression-i-rle-compression';
@@ -32,9 +34,9 @@ export const ONE_MINUTE = ONE_SECOND * 60;
 
 export const CONTRACT_TYPE_TO_SOLVER_MAP = {
   'Algorithmic Stock Trader I': algorithmicStockTraderI,
-  // 'Algorithmic Stock Trader II': algorithmicStockTraderII,
-  // 'Algorithmic Stock Trader III': algorithmicStockTraderIII,
-  // 'Algorithmic Stock Trader IV': algorithmicStockTraderIV,
+  'Algorithmic Stock Trader II': algorithmicStockTraderII,
+  'Algorithmic Stock Trader III': algorithmicStockTraderIII,
+  'Algorithmic Stock Trader IV': algorithmicStockTraderIV,
   'Array Jumping Game II': null,
   'Array Jumping Game': arrayJumpingGame,
   'Compression I: RLE Compression': compressionIRLECompression,
