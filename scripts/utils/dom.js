@@ -1,30 +1,4 @@
 /**
- * @typedef {Object.<string, (string|number)>} Style
- */
-
-import { ONE_SECOND } from 'utils/constants';
-
-/**
- * Creates a React element that can be appended to the terminal or --tail logs.
- *
- * @param {import("NetscriptDefinitions").ReactNode} content
- * @param {[Style]} style optional CSS
- * @param {[string]} tag to override <div>
- * @returns {import("NetscriptDefinitions").ReactElement}
- */
-export function createReactElement(content, style, tag) {
-  if (Array.isArray(content)) {
-    return React.createElement(
-      tag ?? 'div',
-      { style: style ?? {} },
-      ...content
-    );
-  } else {
-    return React.createElement(tag ?? 'div', { style: style ?? {} }, content);
-  }
-}
-
-/**
  * Executes terminal commands (e.g. `connect n00dles`) without RAM penalties.
  *
  * @param {NS} ns

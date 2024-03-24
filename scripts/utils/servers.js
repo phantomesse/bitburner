@@ -1,46 +1,21 @@
-import { HOME_HOSTNAME } from 'utils/constants';
+export const HOME_HOSTNAME = 'home';
+export const SERVERS_DATABASE_FILE = 'database/servers.txt';
 
 /**
- * Gets all hostnames available.
+ * @typedef ServerDetails
+ * @property {string} hostname
+ * @property {string[]} path
+ * @property {boolean} hasRootAccess
+ * @property {number} maxRam
+ * @property {number} cpuCores
+ * @property {number} maxMoney
+ * @property {number} minSecurity
+ * @property {number} baseSecurity
+ * @property {number} hackingLevel
  *
  * @param {NS} ns
- * @param {[string]} rootHostname
- * @param {[string]} previousHostname
- * @returns {string[]} all hostnames
+ * @returns {ServerDetails[]} all servers not including the HOME server
  */
-export function getAllHostnames(ns, rootHostname, previousHostname) {
-  const childrenHostnames = ns
-    .scan(rootHostname)
-    .filter(hostname => hostname !== previousHostname);
-  const allHostnames = [...childrenHostnames];
-  for (const childHostname of childrenHostnames) {
-    allHostnames.push(...getAllHostnames(ns, childHostname, rootHostname));
-  }
-  return [...new Set(allHostnames)];
-}
-
-/**
- * @typedef {@type string[]} Path
- *
- * Gets a list of all paths to hosts.
- *
- * @param {NS} ns
- * @param {string} rootHostname
- * @param {[Path]} path
- * @returns {Path[]} all paths including home as the first server
- */
-export function getAllPaths(ns, rootHostname, path) {
-  path = path ?? [];
-
-  const childrenHostnames = ns
-    .scan(rootHostname)
-    .filter(hostname => hostname !== path[path.length - 1]);
-  if (childrenHostnames.length === 0) return [];
-
-  const allPaths = [];
-  for (const childHostname of childrenHostnames) {
-    allPaths.push([...path, rootHostname, childHostname]);
-    allPaths.push(...getAllPaths(ns, childHostname, [...path, rootHostname]));
-  }
-  return allPaths;
+export function getAllServers(ns) {
+  return JSON.parse(ns.read(SERVERS_DATABASE_FILE));
 }

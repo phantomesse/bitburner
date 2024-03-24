@@ -1,17 +1,18 @@
-import { getServers } from 'database/servers';
 import { executeTerminalCommand } from 'utils/dom';
+import { getAllServers } from 'utils/servers';
 
 /**
- * Connects to a server given in the argument.
+ * Connects to server by the given hostname.
  *
  * @param {NS} ns
  */
-export async function main(ns) {
-  const server = getServers(ns).find(server => server.hostname === ns.args[0]);
-  const commands = [
-    server.path.map(hostname => `connect ${hostname}`).join('; '),
-  ];
-  await executeTerminalCommand(ns, ...commands);
+export function main(ns) {
+  const path = getAllServers(ns).find(
+    server => server.hostname === ns.args[0]
+  ).path;
+  for (const hostname of path) {
+    executeTerminalCommand(ns, `connect ${hostname}`);
+  }
 }
 
 export const autocomplete = data => data.servers;
