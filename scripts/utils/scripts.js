@@ -1,5 +1,11 @@
 import { MANAGE_SCRIPTS_PORT } from 'utils/ports';
 
+export const HACK_SCRIPT = 'hack.js';
+export const WEAKEN_SCRIPT = 'weaken.js';
+export const GROW_SCRIPT = 'grow.js';
+
+export const QUEUE_SCRIPT_RAM = 1.6;
+
 /**
  * @typedef QueuedScript
  * @property {string} script name of script

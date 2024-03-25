@@ -1,8 +1,7 @@
 import { MANAGE_SCRIPTS_PORT, NULL_PORT_DATA } from 'utils/ports';
+import { QUEUE_SCRIPT_RAM } from 'utils/scripts';
 import { HOME_HOSTNAME } from 'utils/servers';
 import { ONE_SECOND } from 'utils/time';
-
-const QUEUE_SCRIPT = 'queue-script.js';
 
 /**
  * Coordinate and queues running scripts on HOME server.
@@ -45,7 +44,7 @@ export async function main(ns) {
 function getAvailableRam(ns) {
   const maxRam = ns.getServerMaxRam(HOME_HOSTNAME);
   const usedRam = ns.getServerUsedRam(HOME_HOSTNAME);
-  const reservedRam = ns.getScriptRam(QUEUE_SCRIPT);
+  const reservedRam = QUEUE_SCRIPT_RAM;
   return maxRam - usedRam - reservedRam;
 }
 

@@ -1,4 +1,18 @@
 /**
+ * @typedef {Object.<string, (string|number)>} Style
+ *
+ * @param {import("NetscriptDefinitions").ReactNode} content
+ * @param {[Style]} style optional CSS
+ * @returns {import("NetscriptDefinitions").ReactElement}
+ */
+export function createReactElement(content, style) {
+  if (Array.isArray(content)) {
+    return React.createElement('div', { style: style ?? {} }, ...content);
+  }
+  return React.createElement('div', { style: style ?? {} }, content);
+}
+
+/**
  * Executes terminal commands (e.g. `connect n00dles`) without RAM penalties.
  *
  * @param {NS} ns

@@ -1,3 +1,4 @@
+import { GROW_SCRIPT, HACK_SCRIPT, WEAKEN_SCRIPT } from 'utils/scripts';
 import { getAllServers } from 'utils/servers';
 
 /**
@@ -6,21 +7,28 @@ import { getAllServers } from 'utils/servers';
  * @param {NS} ns
  */
 export function main(ns) {
-  const hostnames = getAllServers(ns)
-    .filter(server => !server.hasRootAccess)
-    .map(server => server.hostname);
+  const servers = getAllServers(ns);
 
-  for (const hostname of hostnames) {
+  for (const server of servers) {
     // Run darkweb programs and nuke.
-    const programFns = [
-      ns.brutessh,
-      ns.ftpcrack,
-      ns.relaysmtp,
-      ns.httpworm,
-      ns.sqlinject,
-      ns.nuke,
-    ];
-    for (const programFn of programFns) maybeRunProgram(programFn, hostname);
+    if (!server.hasRootAccess) {
+      const programFns = [
+        ns.brutessh,
+        ns.ftpcrack,
+        ns.relaysmtp,
+        ns.httpworm,
+        ns.sqlinject,
+        ns.nuke,
+      ];
+      for (const programFn of programFns) {
+        maybeRunProgram(programFn, server.hostname);
+      }
+    }
+
+    // Copy over hack/weaken/grow scripts.
+    if (ns.hasRootAccess(server.hostname)) {
+      copyHackWeakenGrowScripts(ns, server.hostname);
+    }
   }
 }
 
@@ -34,4 +42,14 @@ function maybeRunProgram(programFn, hostname) {
   try {
     programFn(hostname);
   } catch (_) {}
+}
+
+/**
+ * Copies over hack/weaken/grow scripts to a server.
+ *
+ * @param {NS} ns
+ * @param {string} hostname
+ */
+function copyHackWeakenGrowScripts(ns, hostname) {
+  ns.scp([HACK_SCRIPT, WEAKEN_SCRIPT, GROW_SCRIPT], hostname);
 }

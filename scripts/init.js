@@ -8,4 +8,5 @@ export function main(ns) {
 
   queueScript(ns, 'update-servers.js');
   queueScript(ns, 'gain-access.js');
+  queueScript(ns, 'manage-hacking.js');
 }

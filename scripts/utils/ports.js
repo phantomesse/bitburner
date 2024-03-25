@@ -1,4 +1,3 @@
 export const NULL_PORT_DATA = 'NULL PORT DATA';
 
-export const UPDATE_SERVERS_TO_MANAGE_HACKING_PORT = 100;
 export const MANAGE_SCRIPTS_PORT = 101;

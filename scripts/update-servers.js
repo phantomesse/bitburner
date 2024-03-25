@@ -1,4 +1,3 @@
-import { UPDATE_SERVERS_TO_MANAGE_HACKING_PORT } from 'utils/ports';
 import { HOME_HOSTNAME, SERVERS_DATABASE_FILE } from 'utils/servers';
 
 /**
@@ -9,7 +8,10 @@ import { HOME_HOSTNAME, SERVERS_DATABASE_FILE } from 'utils/servers';
  */
 export function main(ns) {
   // Get all servers.
-  const serverHostnameToPathMap = getServerHostnameToPathMap(ns);
+  const serverHostnameToPathMap = {
+    [HOME_HOSTNAME]: [],
+    ...getServerHostnameToPathMap(ns),
+  };
   const servers = [];
   for (const hostname in serverHostnameToPathMap) {
     const path = serverHostnameToPathMap[hostname];
@@ -18,9 +20,6 @@ export function main(ns) {
 
   // Write servers to file.
   ns.write(SERVERS_DATABASE_FILE, JSON.stringify(servers), 'w');
-
-  // Update servers port.
-  ns.writePort(UPDATE_SERVERS_TO_MANAGE_HACKING_PORT, 0);
 }
 
 /**
@@ -60,7 +59,7 @@ function getServerDetails(ns, hostname, path) {
   return /** @type {import('utils/servers.js').ServerDetails} */ {
     hostname: hostname,
     path: path,
-    hasRootAccess: serverInfo.hasRootAccess,
+    hasRootAccess: serverInfo.hasAdminRights,
     maxRam: serverInfo.maxRam,
     cpuCores: serverInfo.cpuCores,
     maxMoney: serverInfo.moneyMax,
