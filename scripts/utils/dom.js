@@ -1,3 +1,5 @@
+import { ONE_SECOND } from 'utils/time';
+
 /**
  * @typedef {Object.<string, (string|number)>} Style
  *
