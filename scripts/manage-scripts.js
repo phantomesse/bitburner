@@ -1,6 +1,9 @@
 import { MANAGE_SCRIPTS_PORT, NULL_PORT_DATA } from 'utils/ports';
-import { QUEUE_SCRIPT_RAM } from 'utils/scripts';
-import { HOME_HOSTNAME } from 'utils/servers';
+import {
+  HOME_HOSTNAME,
+  RESERVED_RAM_DATABASE_FILE,
+  getReservedRam,
+} from 'utils/servers';
 import { ONE_SECOND } from 'utils/time';
 
 /**
@@ -25,15 +28,18 @@ export async function main(ns) {
 
     // Execute all scripts that we can run from the queue.
     const scriptsToAddBackToQueue = [];
+    let ramToReserve = 0;
     for (const queuedScript of scriptQueue) {
       const wasSuccessful = maybeRunScript(ns, queuedScript);
       if (wasSuccessful) {
         ns.toast(`Running ${queuedScript.script} ${queuedScript.args}`, 'info');
       } else {
         scriptsToAddBackToQueue.push(queuedScript);
+        ramToReserve += ns.getScriptRam(queuedScript.script);
       }
     }
     scriptQueue = scriptsToAddBackToQueue;
+    ns.write(RESERVED_RAM_DATABASE_FILE, ramToReserve, 'w');
 
     ns.clearLog();
     ns.print(scriptQueue);
@@ -49,7 +55,7 @@ export async function main(ns) {
 function getAvailableRam(ns) {
   const maxRam = ns.getServerMaxRam(HOME_HOSTNAME);
   const usedRam = ns.getServerUsedRam(HOME_HOSTNAME);
-  const reservedRam = QUEUE_SCRIPT_RAM;
+  const reservedRam = getReservedRam(ns);
   return maxRam - usedRam - reservedRam;
 }
 
@@ -61,14 +67,14 @@ function getAvailableRam(ns) {
  * @returns {boolean} whether the script was successfully run
  */
 function maybeRunScript(ns, queuedScript) {
-  const neededRam = ns.getScriptRam(queuedScript.script);
-  const availableRam = getAvailableRam(ns);
-  if (neededRam > availableRam) return false;
-
-  const pid = ns.run(
-    queuedScript.script,
-    queuedScript.threadOrOptions,
-    ...queuedScript.args
-  );
-  return pid > 0;
+  try {
+    const pid = ns.run(
+      queuedScript.script,
+      queuedScript.threadOrOptions,
+      ...queuedScript.args
+    );
+    return pid > 0;
+  } catch (_) {
+    return true;
+  }
 }

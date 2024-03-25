@@ -1,12 +1,7 @@
 import { getHackColor } from 'utils/colors';
 import { formatMoney, formatTime } from 'utils/format';
-import {
-  GROW_SCRIPT,
-  HACK_SCRIPT,
-  WEAKEN_SCRIPT,
-  QUEUE_SCRIPT_RAM,
-} from 'utils/scripts';
-import { HOME_HOSTNAME, getAllServers } from 'utils/servers';
+import { GROW_SCRIPT, HACK_SCRIPT, WEAKEN_SCRIPT } from 'utils/scripts';
+import { HOME_HOSTNAME, getAllServers, getReservedRam } from 'utils/servers';
 import { printTable } from 'utils/table';
 import { ONE_SECOND } from 'utils/time';
 
@@ -450,6 +445,6 @@ function getAvailableThreads(ns, hostname, scriptRam) {
   const usedRam = ns.getServerUsedRam(hostname);
   const maxRam = ns.getServerMaxRam(hostname);
   const availableRam =
-    maxRam - usedRam - (hostname === HOME_HOSTNAME ? QUEUE_SCRIPT_RAM : 0);
-  return Math.floor(availableRam / scriptRam);
+    maxRam - usedRam - (hostname === HOME_HOSTNAME ? getReservedRam(ns) : 0);
+  return Math.max(0, Math.floor(availableRam / scriptRam));
 }

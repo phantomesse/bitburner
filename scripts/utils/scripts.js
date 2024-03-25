@@ -5,8 +5,6 @@ export const WEAKEN_SCRIPT = 'weaken.js';
 export const GROW_SCRIPT = 'grow.js';
 export const UPDATE_SERVERS_SCRIPT = 'update-servers.js';
 
-export const QUEUE_SCRIPT_RAM = 1.6;
-
 /**
  * @typedef QueuedScript
  * @property {string} script name of script
