@@ -3,6 +3,7 @@ import { MANAGE_SCRIPTS_PORT } from 'utils/ports';
 export const HACK_SCRIPT = 'hack.js';
 export const WEAKEN_SCRIPT = 'weaken.js';
 export const GROW_SCRIPT = 'grow.js';
+export const UPDATE_SERVERS_SCRIPT = 'update-servers.js';
 
 export const QUEUE_SCRIPT_RAM = 1.6;
 

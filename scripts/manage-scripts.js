@@ -12,6 +12,8 @@ import { ONE_SECOND } from 'utils/time';
  * @param {NS} ns
  */
 export async function main(ns) {
+  ns.disableLog('ALL');
+
   /** @type {import('utils/scripts').QueuedScript[]} */ let scriptQueue = [];
 
   while (true) {
@@ -32,6 +34,9 @@ export async function main(ns) {
       }
     }
     scriptQueue = scriptsToAddBackToQueue;
+
+    ns.clearLog();
+    ns.print(scriptQueue);
 
     await ns.sleep(ONE_SECOND / 2);
   }
