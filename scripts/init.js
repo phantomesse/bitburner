@@ -15,4 +15,5 @@ export function main(ns) {
 
   queueScript(ns, 'manage-hacknet.js');
   queueScript(ns, 'manage-hashes.js');
+  queueScript(ns, 'buy-programs.js');
 }
