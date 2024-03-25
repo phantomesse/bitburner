@@ -5,7 +5,7 @@ import { HOME_HOSTNAME, getAllServers, getReservedRam } from 'utils/servers';
 import { printTable } from 'utils/table';
 import { ONE_SECOND } from 'utils/time';
 
-const MIN_HACK_CHANCE = 0.5;
+const MIN_AVERAGE_HACK_MONEY_PER_SECOND = 100;
 
 const HACK_RAM = 1.7;
 const WEAKEN_RAM = 1.75;
@@ -122,7 +122,11 @@ export async function main(ns) {
  */
 function getServersToHack(ns, servers) {
   return servers
-    .filter(server => ns.hackAnalyzeChance(server.hostname) > MIN_HACK_CHANCE)
+    .filter(
+      server =>
+        getAverageHackMoneyPerSecond(ns, server) >
+        MIN_AVERAGE_HACK_MONEY_PER_SECOND
+    )
     .sort(
       (server1, server2) =>
         getAverageHackMoneyPerSecond(ns, server2) -
