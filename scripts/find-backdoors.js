@@ -3,13 +3,13 @@ import {
   getAllServerNames,
   getPath,
   HOME_SERVER_NAME,
-  isOwned,
+  isPurchased,
 } from 'utils/server';
 
 /** @param {NS} ns */
 export async function main(ns) {
   const unownedServerNames = getAllServerNames(ns).filter(
-    (serverName) => !isOwned(serverName)
+    (serverName) => !isPurchased(serverName)
   );
 
   const terminalCommands = [];

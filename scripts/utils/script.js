@@ -1,13 +1,13 @@
+import { HOME_SERVER_NAME } from 'utils/server';
+
 export const HACK_JS = 'hack.js';
 export const GROW_JS = 'grow.js';
 export const WEAKEN_JS = 'weaken.js';
 
-export const NUKE_JS = 'nuke.js';
-
 export const PURCHASE_SERVER_JS = 'purchase-server.js';
 export const UPGRADE_SERVER_JS = 'upgrade-server.js';
 
-export const RESERVED_RAM = 4;
+export const RESERVED_RAM = 7;
 
 /**
  * @param {NS} ns
@@ -30,6 +30,6 @@ function getAvailableRam(ns, serverName = HOME_SERVER_NAME) {
   return (
     ns.getServerMaxRam(serverName) -
     ns.getServerUsedRam(serverName) -
-    RESERVED_RAM
+    (serverName === HOME_SERVER_NAME ? RESERVED_RAM : 0)
   );
 }

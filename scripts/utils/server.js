@@ -51,11 +51,11 @@ export function getPath(ns, rootServerName, targetServerName, prevServerName) {
 
 /**
  * @param {string} serverName
- * @returns {boolean} whether we own this server
+ * @returns {boolean} whether we purchased this server
  */
-export function isOwned(serverName) {
+export function isPurchased(serverName) {
   return (
-    serverName === HOME_SERVER_NAME ||
+    serverName === HOME_SERVER_NAME &&
     serverName.startsWith(PURCHASED_SERVER_PREFIX)
   );
 }
@@ -69,9 +69,70 @@ export function isHackable(ns, serverName) {
   const currentHackingLevel = ns.getHackingLevel();
 
   return (
-    !isOwned(serverName) &&
+    !isPurchased(serverName) &&
     ns.hasRootAccess(serverName) &&
     ns.getServerMaxMoney(serverName) > 0 &&
     ns.getServerRequiredHackingLevel(serverName) <= currentHackingLevel
+  );
+}
+
+/**
+ * @param {NS} ns
+ * @param {string} serverName
+ * @returns {number} score based on how worth it it is to hack where a higher
+ *                   score means that it is better to hack
+ */
+export function getHackScore(ns, serverName) {
+  const maxMoney = ns.getServerMaxMoney(serverName);
+  const availableMoney = ns.getServerMoneyAvailable(serverName);
+  if (availableMoney / maxMoney < 0.1) return 0;
+
+  return (
+    (ns.hackAnalyze(serverName) *
+      ns.hackAnalyzeChance(serverName) *
+      (availableMoney / maxMoney) *
+      1000000000000) /
+    Math.pow(ns.getHackTime(serverName), 2)
+  );
+}
+
+/**
+ * @param {NS} ns
+ * @param {string} serverName
+ * @returns {number} score based on how worth it it is to grow where a higher
+ *                   score means that it is better to grow
+ */
+export function getGrowScore(ns, serverName) {
+  const maxMoney = ns.getServerMaxMoney(serverName);
+  const availableMoney = ns.getServerMoneyAvailable(serverName);
+  if (availableMoney / maxMoney >= 0.9) return 0;
+
+  const growThreadCount = ns.growthAnalyze(
+    serverName,
+    maxMoney / availableMoney
+  );
+  return (
+    (1 /
+      growThreadCount /
+      Math.pow(ns.getGrowTime(serverName), 2) /
+      ns.growthAnalyzeSecurity(growThreadCount)) *
+    1000000000000000
+  );
+}
+
+/**
+ * @param {NS} ns
+ * @param {string} serverName
+ * @returns {number} score based on how worth it it is to weaken where a higher
+ *                   score means that it is better to weaken
+ */
+export function getWeakenScore(ns, serverName) {
+  const currentSecurityLevel = ns.getServerSecurityLevel(serverName);
+  const minSecurityLevel = ns.getServerMinSecurityLevel(serverName);
+  if (currentSecurityLevel === minSecurityLevel) return 0;
+
+  return (
+    (currentSecurityLevel - minSecurityLevel) /
+    Math.pow(ns.getWeakenTime(serverName), 2)
   );
 }

@@ -58,13 +58,22 @@ export class Cell {
    * @param {string = ''} content
    * @param {string|number} [value] for sorting
    * @param {Object.<string, (string|number)> = {}} columnStyles
+   * @param {Object.<string, (string|number)> = {}} cellStyles
    */
-  constructor(rowId, columnName, content = '', value = 0, columnStyles = {}) {
+  constructor(
+    rowId,
+    columnName,
+    content = '',
+    value = 0,
+    columnStyles = {},
+    cellStyles = {}
+  ) {
     this.rowId = rowId;
     this.columnName = columnName;
     this.content = content;
     this.value = value;
     this.columnStyles = columnStyles;
+    this.cellStyles = cellStyles;
   }
 }
 
@@ -124,6 +133,7 @@ export function printTable(ns, table) {
       const styles = {
         ...cellStyles,
         ...cell.columnStyles,
+        ...cell.cellStyles,
       };
       if (!cell.content) styles['color'] = borderColor;
       cellElements.push(
@@ -137,7 +147,7 @@ export function printTable(ns, table) {
     {
       style: {
         display: 'grid',
-        'grid-template-columns': `repeat(${columns.length}, 1fr)`,
+        'grid-template-columns': `repeat(${columns.length}, max-content)`,
       },
     },
     ...cellElements

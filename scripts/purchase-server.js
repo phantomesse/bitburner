@@ -1,3 +1,4 @@
+import { getMoneyAvailableToSpend } from 'utils/money';
 import { PURCHASED_SERVER_PREFIX } from 'utils/server';
 
 /**
@@ -7,10 +8,13 @@ import { PURCHASED_SERVER_PREFIX } from 'utils/server';
  */
 export async function main(ns) {
   for (let i = 20; i >= 2; i--) {
-    const serverSize = Math.pow(2, i);
-    const serverName = ns.purchaseServer(PURCHASED_SERVER_PREFIX, serverSize);
+    const ram = Math.pow(2, i);
+    if (ns.getPurchasedServerCost(ram) > getMoneyAvailableToSpend(ns)) {
+      continue;
+    }
+    const serverName = ns.purchaseServer(PURCHASED_SERVER_PREFIX, ram);
     if (serverName) {
-      ns.toast(`purchased ${serverName} (${ns.formatRam(serverSize, 0)})`);
+      ns.toast(`purchased ${serverName} (${ns.formatRam(ram, 0)})`);
       return;
     }
   }

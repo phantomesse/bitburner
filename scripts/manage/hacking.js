@@ -3,34 +3,64 @@ import {
   HACK_JS,
   GROW_JS,
   WEAKEN_JS,
-  NUKE_JS,
 } from 'utils/script';
 import {
   getAllServerNames,
+  getGrowScore,
+  getHackScore,
+  getWeakenScore,
   HOME_SERVER_NAME,
   isHackable,
-  isOwned,
 } from 'utils/server';
 
 /** @param {NS} ns */
 export async function main(ns) {
+  ns.disableLog('ALL');
+  ns.clearLog();
+
   while (true) {
     const allServerNames = getAllServerNames(ns);
 
-    const ownedServerNames = allServerNames.filter(isOwned);
-    const unownedServerNames = allServerNames.filter(
-      (serverName) => !isOwned(serverName)
-    );
-    for (const serverName of unownedServerNames) {
-      if (!ns.hasRootAccess(serverName)) ns.run(NUKE_JS, {}, serverName);
+    for (const serverName of allServerNames) {
+      if (!ns.hasRootAccess(serverName)) {
+        runProgram(() => ns.brutessh(serverName));
+        runProgram(() => ns.ftpcrack(serverName));
+        runProgram(() => ns.relaysmtp(serverName));
+        runProgram(() => ns.httpworm(serverName));
+        runProgram(() => ns.sqlinject(serverName));
+        runProgram(() => ns.nuke(serverName));
+      }
+    }
 
-      if (isHackable(ns, serverName)) {
-        if (ns.hackAnalyzeChance(serverName) > 0.5) {
-          hack(ns, serverName, ownedServerNames);
-        }
+    const rootAccessServerNames = allServerNames.filter(ns.hasRootAccess);
+    const hackableServerNames = allServerNames
+      .filter((serverName) => isHackable(ns, serverName))
+      .sort(
+        (server1, server2) =>
+          Math.max(
+            getHackScore(ns, server2),
+            getGrowScore(ns, server2),
+            getWeakenScore(ns, server2)
+          ) -
+          Math.max(
+            getHackScore(ns, server1),
+            getGrowScore(ns, server1),
+            getWeakenScore(ns, server1)
+          )
+      );
 
-        weaken(ns, serverName, ownedServerNames);
-        grow(ns, serverName, ownedServerNames);
+    for (const serverName of hackableServerNames) {
+      const hackScore = getHackScore(ns, serverName);
+      const growScore = getGrowScore(ns, serverName);
+      const weakenScore = getWeakenScore(ns, serverName);
+      const highestScore = Math.max(hackScore, growScore, weakenScore);
+
+      if (highestScore === hackScore) {
+        hack(ns, serverName, rootAccessServerNames);
+      } else if (highestScore === growScore) {
+        grow(ns, serverName, rootAccessServerNames);
+      } else {
+        weaken(ns, serverName, rootAccessServerNames);
       }
     }
 
@@ -41,80 +71,165 @@ export async function main(ns) {
 /**
  * @param {NS} ns
  * @param {string} serverNameToHack
- * @param {string[]} ownedServerNames
+ * @param {string[]} rootAccessServerNames
  */
-function hack(ns, serverNameToHack, ownedServerNames) {
+function hack(ns, serverNameToHack, rootAccessServerNames) {
   const currentlyAvailableMoney = ns.getServerMoneyAvailable(serverNameToHack);
   if (Math.round(currentlyAvailableMoney) === 0) {
     return;
   }
 
-  const neededThreadCount = Math.floor(
-    ns.hackAnalyzeThreads(serverNameToHack, currentlyAvailableMoney)
-  );
+  const neededThreadCount =
+    Math.floor(
+      ns.hackAnalyzeThreads(serverNameToHack, currentlyAvailableMoney)
+    ) -
+    getAlreadyRunningThreadCount(
+      ns,
+      HACK_JS,
+      serverNameToHack,
+      rootAccessServerNames
+    );
+  if (neededThreadCount <= 0) return;
 
-  runScript(ns, HACK_JS, serverNameToHack, ownedServerNames, neededThreadCount);
+  runScript(
+    ns,
+    HACK_JS,
+    serverNameToHack,
+    rootAccessServerNames,
+    neededThreadCount
+  );
 }
 
 /**
  * @param {NS} ns
  * @param {string} serverNameToHack
- * @param {string[]} ownedServerNames
+ * @param {string[]} rootAccessServerNames
  */
-function grow(ns, serverNameToGrow, ownedServerNames) {
-  const currentlyAvailableMoney = ns.getServerMoneyAvailable(serverNameToGrow);
+function grow(ns, serverNameToGrow, rootAccessServerNames) {
+  const availableMoney = ns.getServerMoneyAvailable(serverNameToGrow);
   const maxMoney = ns.getServerMaxMoney(serverNameToGrow);
-  if (currentlyAvailableMoney / maxMoney > 0.5) return;
+  if (availableMoney / maxMoney > 0.5) return;
 
-  const neededThreadCount = Math.floor(
-    ns.growthAnalyze(serverNameToGrow, maxMoney / currentlyAvailableMoney)
+  const neededThreadCount =
+    Math.floor(ns.growthAnalyze(serverNameToGrow, maxMoney / availableMoney)) -
+    getAlreadyRunningThreadCount(
+      ns,
+      GROW_JS,
+      serverNameToGrow,
+      rootAccessServerNames
+    );
+  if (neededThreadCount <= 0) return;
+
+  runScript(
+    ns,
+    GROW_JS,
+    serverNameToGrow,
+    rootAccessServerNames,
+    neededThreadCount
   );
-
-  runScript(ns, GROW_JS, serverNameToGrow, ownedServerNames, neededThreadCount);
 }
 
 /**
  * @param {NS} ns
  * @param {string} serverNameToWeaken
- * @param {string[]} ownedServerNames
+ * @param {string[]} rootAccessServerNames
  */
-function weaken(ns, serverNameToWeaken, ownedServerNames) {
+function weaken(ns, serverNameToWeaken, rootAccessServerNames) {
   const currentSecurityLevel = ns.getServerSecurityLevel(serverNameToWeaken);
   const minSecurityLevel = ns.getServerMinSecurityLevel(serverNameToWeaken);
   if (currentSecurityLevel === minSecurityLevel) return;
-  runScript(ns, WEAKEN_JS, serverNameToWeaken, ownedServerNames, 1);
+
+  let neededThreadCount = 0;
+  while (
+    ns.weakenAnalyze(neededThreadCount + 1) <
+    currentSecurityLevel - minSecurityLevel
+  ) {
+    neededThreadCount++;
+  }
+  neededThreadCount -= getAlreadyRunningThreadCount(
+    ns,
+    WEAKEN_JS,
+    serverNameToWeaken,
+    rootAccessServerNames
+  );
+  if (neededThreadCount <= 0) return;
+
+  runScript(
+    ns,
+    WEAKEN_JS,
+    serverNameToWeaken,
+    rootAccessServerNames,
+    neededThreadCount
+  );
 }
 
 /**
  * @param {NS} ns
  * @param {string} scriptName
  * @param {string} targetServerName
- * @param {string[]} ownedServerNames
+ * @param {string[]} rootAccessServerNames
  * @param {number} neededThreadCount of threads needed
  */
 function runScript(
   ns,
   scriptName,
   targetServerName,
-  ownedServerNames,
+  rootAccessServerNames,
   neededThreadCount
 ) {
-  for (const ownedServerName of ownedServerNames) {
-    if (!ns.fileExists(scriptName, ownedServerName)) {
-      ns.scp(scriptName, ownedServerName, HOME_SERVER_NAME);
+  for (const rootAccessServerName of rootAccessServerNames) {
+    if (!ns.fileExists(scriptName, rootAccessServerName)) {
+      ns.scp(scriptName, rootAccessServerName, HOME_SERVER_NAME);
     }
     const threadCount = Math.min(
-      getThreadsAvailableToRunScript(ns, scriptName, ownedServerName),
+      getThreadsAvailableToRunScript(ns, scriptName, rootAccessServerName),
       neededThreadCount
     );
     if (neededThreadCount === 0) return;
     if (threadCount <= 0) continue;
     const pid = ns.exec(
       scriptName,
-      ownedServerName,
+      rootAccessServerName,
       threadCount,
       targetServerName
     );
     if (pid > 0) neededThreadCount -= threadCount;
   }
+}
+
+/**
+ * @param {NS} ns
+ * @param {string} scriptName
+ * @param {string} targetServerName
+ * @param {string[]} rootAccessServerNames
+ * @returns {number} number of threads that are already running for a given
+ *                   script and target server
+ */
+function getAlreadyRunningThreadCount(
+  ns,
+  scriptName,
+  targetServerName,
+  rootAccessServerNames
+) {
+  let alreadyRunningThreadCount = 0;
+  for (const rootAccessServerName of rootAccessServerNames) {
+    const processes = ns
+      .ps(rootAccessServerName)
+      .filter(
+        (process) =>
+          process.filename === scriptName &&
+          process.args[0] === targetServerName
+      );
+    for (const process of processes) {
+      alreadyRunningThreadCount += process.threads;
+    }
+  }
+  return alreadyRunningThreadCount;
+}
+
+/** @param {function} programFn */
+function runProgram(programFn) {
+  try {
+    programFn();
+  } catch (_) {}
 }
