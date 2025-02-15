@@ -1,31 +1,28 @@
 import { executeTerminalCommand } from 'utils/dom';
-import { getAllServers } from 'utils/servers';
+import {
+  getAllServerNames,
+  getPath,
+  HOME_SERVER_NAME,
+  isOwned,
+} from 'utils/server';
 
-/**
- * Run backdoor script on all servers that we can.
- *
- * @param {NS} ns
- */
+/** @param {NS} ns */
 export async function main(ns) {
-  const hackingLevel = ns.getHackingLevel();
-  const servers = getAllServers(ns).filter(server => {
-    const serverData = ns.getServer(server.hostname);
-    return (
-      server.hasRootAccess &&
-      server.hackingLevel <= hackingLevel &&
-      !serverData.purchasedByPlayer &&
-      !serverData.backdoorInstalled
-    );
-  });
+  const unownedServerNames = getAllServerNames(ns).filter(
+    (serverName) => !isOwned(serverName)
+  );
 
-  for (const server of servers) {
-    const commands = [
+  const terminalCommands = [];
+  for (const serverName of unownedServerNames) {
+    if (ns.getServer(serverName).backdoorInstalled) continue;
+
+    const path = getPath(ns, HOME_SERVER_NAME, serverName);
+    terminalCommands.push(
       'home',
-      ...server.path.map(hostname => `connect ${hostname}`),
-      'backdoor',
-    ].join('; ');
-    await executeTerminalCommand(ns, commands);
+      ...path.map((pathServerName) => `connect ${pathServerName}`),
+      'backdoor'
+    );
   }
 
-  await executeTerminalCommand(ns, 'home');
+  executeTerminalCommand(ns, ...terminalCommands, 'home');
 }

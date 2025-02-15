@@ -1,101 +1,147 @@
-/**
- * @typedef Table
- * @property {Row[]} rows
- * @property {[string]} name
- * @property {string} baseColor in hex form starting with '#'
- *
- * @typedef Row
- * @property {Cell} cells
- *
- * @typedef Cell
- * @property {Column} column
- * @property {string} content
- *
- * @typedef Column
- * @property {string} name
- * @property {[import('utils/dom').Style]} style
- */
+export class Table {
+  /** @param {string} [columnNameToSortBy] */
+  constructor(columnNameToSortBy) {
+    /** @type {Cell[]} */ this.cells = [];
+    this.columnNameToSortBy = columnNameToSortBy;
+  }
 
-import { createReactElement } from 'utils/dom';
+  /**
+   * @returns {Row[]}
+   */
+  getRows() {
+    const rowIdToRowMap = {};
+
+    for (const cell of this.cells) {
+      if (!(cell.rowId in rowIdToRowMap)) {
+        rowIdToRowMap[cell.rowId] = new Row();
+      }
+      rowIdToRowMap[cell.rowId].columnNameToCellMap[cell.columnName] = cell;
+    }
+
+    /** @type {Row[]} */ let rows = Object.values(rowIdToRowMap);
+    if (this.columnNameToSortBy) {
+      rows = rows.sort((row1, row2) => {
+        const value1 = row1.columnNameToCellMap[this.columnNameToSortBy].value;
+        const value2 = row2.columnNameToCellMap[this.columnNameToSortBy].value;
+        return typeof value1 === 'string'
+          ? value1.localeCompare(value2)
+          : value1 - value2;
+      });
+    }
+
+    return rows;
+  }
+
+  /**
+   * @returns {Column[]}
+   */
+  getColumns() {
+    const columnNameToColumnMap = {};
+
+    for (const cell of this.cells) {
+      const columnName = cell.columnName;
+      if (columnName in columnNameToColumnMap) continue;
+      columnNameToColumnMap[columnName] = new Column(
+        columnName,
+        cell.columnStyles
+      );
+    }
+
+    return Object.values(columnNameToColumnMap);
+  }
+}
+
+export class Cell {
+  /**
+   * @param {string} rowId
+   * @param {string} columnName
+   * @param {string = ''} content
+   * @param {string|number} [value] for sorting
+   * @param {Object.<string, (string|number)> = {}} columnStyles
+   */
+  constructor(rowId, columnName, content = '', value = 0, columnStyles = {}) {
+    this.rowId = rowId;
+    this.columnName = columnName;
+    this.content = content;
+    this.value = value;
+    this.columnStyles = columnStyles;
+  }
+}
+
+class Row {
+  constructor() {
+    /** @type {Object.<string, Cell>} */ this.columnNameToCellMap = {};
+  }
+}
+
+class Column {
+  /**
+   * @param {string} name
+   * @param {Object.<string, (string|number)> = {}} styles
+   */
+  constructor(name, styles) {
+    this.name = name;
+    this.styles = styles;
+  }
+}
 
 /**
- * Prints a table to the --tail logs.
+ * Prints a table to logs.
  *
  * @param {NS} ns
  * @param {Table} table
  */
 export function printTable(ns, table) {
-  ns.printRaw(createTableReactElement(ns, table));
-}
-
-/**
- * Prints a table to the --tail logs.
- *
- * @param {NS} ns
- * @param {Table} table
- */
-export function tprintTable(ns, table) {
-  ns.tprintRaw(createTableReactElement(ns, table));
-}
-
-/**
- * @param {NS} ns
- * @param {Table} table
- * @returns {import('NetscriptDefinitions').ReactElement}
- */
-function createTableReactElement(ns, table) {
-  const primaryColorHex = table.baseColor ?? ns.ui.getTheme().primary;
-  const borderStyle = `.5px solid ${primaryColorHex}66`;
-  const defaultCellStyling = {
-    border: borderStyle,
-    color: primaryColorHex,
-    padding: '4px',
+  const borderColor = ns.ui.getTheme().welllight;
+  const cellStyles = {
+    border: `1px ${borderColor} solid`,
+    padding: '4px 8px',
+    display: 'flex',
+    'align-items': 'center',
+    'justify-content': 'center',
+    'text-align': 'center',
   };
 
-  // Add column headers.
-  const cellElements = [
-    table.rows[0].cells.map(cell =>
-      createReactElement(cell.column.name, {
-        ...defaultCellStyling,
-        background: `${primaryColorHex}22`,
-        'font-weight': 'bold',
-        ...cell.column.style,
-      })
-    ),
-  ];
+  const cellElements = [];
 
-  // Add content cells.
-  for (const row of table.rows) {
+  // Add header row cells.
+  const columns = table.getColumns();
+  for (const column of columns) {
     cellElements.push(
-      ...row.cells.map(cell =>
-        createReactElement(cell.content, {
-          ...defaultCellStyling,
-          ...cell.column.style,
-        })
+      React.createElement(
+        'div',
+        { style: { ...cellStyles, ...column.styles, 'font-weight': 'bold' } },
+        column.name
       )
     );
   }
 
-  // Add optional table name.
-  if (table.name) {
-    cellElements.splice(
-      0,
-      0,
-      createReactElement(table.name, {
-        ...defaultCellStyling,
-        background: `${primaryColorHex}22`,
-        'font-weight': 'bold',
-        'grid-column': '1 / -1',
-        'text-align': 'center',
-      })
-    );
+  // Add each row.
+  const rows = table.getRows();
+  for (const row of rows) {
+    for (const column of columns) {
+      const cell = row.columnNameToCellMap[column.name];
+      const styles = {
+        ...cellStyles,
+        ...cell.columnStyles,
+      };
+      if (!cell.content) styles['color'] = borderColor;
+      cellElements.push(
+        React.createElement('div', { style: styles }, cell.content ?? '-')
+      );
+    }
   }
 
-  return createReactElement(cellElements, {
-    display: 'grid',
-    'grid-template-columns': table.rows[0].cells.map(_ => 'auto').join(' '),
-    border: borderStyle,
-    width: 'max-content',
-    'max-width': '100%',
-  });
+  const tableElement = React.createElement(
+    'div',
+    {
+      style: {
+        display: 'grid',
+        'grid-template-columns': `repeat(${columns.length}, 1fr)`,
+      },
+    },
+    ...cellElements
+  );
+
+  ns.printRaw(tableElement);
 }

@@ -1,19 +1,3 @@
-import { ONE_SECOND } from 'utils/time';
-
-/**
- * @typedef {Object.<string, (string|number)>} Style
- *
- * @param {import("NetscriptDefinitions").ReactNode} content
- * @param {[Style]} style optional CSS
- * @returns {import("NetscriptDefinitions").ReactElement}
- */
-export function createReactElement(content, style) {
-  if (Array.isArray(content)) {
-    return React.createElement('div', { style: style ?? {} }, ...content);
-  }
-  return React.createElement('div', { style: style ?? {} }, content);
-}
-
 /**
  * Executes terminal commands (e.g. `connect n00dles`) without RAM penalties.
  *
@@ -22,9 +6,13 @@ export function createReactElement(content, style) {
  */
 export async function executeTerminalCommand(ns, ...commands) {
   for (let command of commands) {
+    ns.tprint('trying to run ' + command);
     let wasSuccessful = executeCommand(command);
+    ns.tprint(wasSuccessful);
     while (!wasSuccessful) {
-      await ns.sleep(ONE_SECOND / 2);
+      ns.tprint('here');
+      await ns.sleep(1000);
+      ns.tprint('after sleep');
       wasSuccessful = executeCommand(command);
     }
   }
@@ -58,4 +46,4 @@ function executeCommand(command) {
  *
  * @returns {Document}
  */
-export const getDocument = () => eval('document');
+const getDocument = () => eval('document');

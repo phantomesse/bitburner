@@ -1,12 +1,12 @@
 /**
- * Grows a server by the given hostname.
+ * Attemps to grow a server once.
+ *
+ * Run: `run grow.js <serverName>`
  *
  * @param {NS} ns
  */
 export async function main(ns) {
-  try {
-    await ns.grow(ns.args[0], { stock: true });
-  } catch (_) {}
+  await ns.grow(ns.args[0]);
 }
 
-export const autocomplete = data => data.servers;
+export const autocomplete = (data) => data.servers;

@@ -1,12 +1,12 @@
 /**
- * Hacks a server by the given hostname.
+ * Attemps to hack a server once.
+ *
+ * Run: `run hack.js <serverName>`
  *
  * @param {NS} ns
  */
 export async function main(ns) {
-  try {
-    await ns.hack(ns.args[0], { stock: true });
-  } catch (_) {}
+  await ns.hack(ns.args[0]);
 }
 
-export const autocomplete = data => data.servers;
+export const autocomplete = (data) => data.servers;
