@@ -3,17 +3,18 @@ import {
   getAllServerNames,
   getPath,
   HOME_SERVER_NAME,
+  isHackable,
   isPurchased,
 } from 'utils/server';
 
 /** @param {NS} ns */
 export async function main(ns) {
-  const unownedServerNames = getAllServerNames(ns).filter(
-    (serverName) => !isPurchased(serverName)
+  const serverNames = getAllServerNames(ns).filter((serverName) =>
+    isHackable(ns, serverName)
   );
 
   const terminalCommands = [];
-  for (const serverName of unownedServerNames) {
+  for (const serverName of serverNames) {
     if (ns.getServer(serverName).backdoorInstalled) continue;
 
     const path = getPath(ns, HOME_SERVER_NAME, serverName);

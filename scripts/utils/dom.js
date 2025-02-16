@@ -6,13 +6,9 @@
  */
 export async function executeTerminalCommand(ns, ...commands) {
   for (let command of commands) {
-    ns.tprint('trying to run ' + command);
     let wasSuccessful = executeCommand(command);
-    ns.tprint(wasSuccessful);
     while (!wasSuccessful) {
-      ns.tprint('here');
       await ns.sleep(1000);
-      ns.tprint('after sleep');
       wasSuccessful = executeCommand(command);
     }
   }

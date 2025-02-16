@@ -1,7 +1,7 @@
 /**
- * Attemps to hack a server once.
+ * Attempts to hack a server once.
  *
- * Run: `run hack.js <serverName>`
+ * Usage: `run hack.js <serverName>`
  *
  * @param {NS} ns
  */

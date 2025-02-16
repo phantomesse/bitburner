@@ -1,7 +1,7 @@
 /**
- * Attemps to weaken a server once.
+ * Attempts to weaken a server once.
  *
- * Run: `run weaken.js <serverName>`
+ * Usage: `run weaken.js <serverName>`
  *
  * @param {NS} ns
  */

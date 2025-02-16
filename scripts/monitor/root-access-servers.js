@@ -4,9 +4,10 @@ import {
   getHackColor,
   getWeakenColor,
 } from 'utils/color';
+import { formatTime } from 'utils/format';
 import { GROW_JS, HACK_JS, WEAKEN_JS } from 'utils/script';
 import { getAllServerNames } from 'utils/server';
-import { Cell, printTable, Table } from 'utils/table';
+import { Cell, LEFT_ALIGN_STYLES, printTable, Table } from 'utils/table';
 
 /** @param {NS} ns */
 export async function main(ns) {
@@ -25,14 +26,12 @@ export async function main(ns) {
 
       table.cells.push({
         columnName: 'Server Name',
-        columnStyles: {
-          'justify-content': 'flex-start',
-          'text-align': 'left',
-        },
+        columnStyles: LEFT_ALIGN_STYLES,
         rowId: serverName,
         content: serverName,
         value: serverName,
         cellStyles: {
+          'align-items': 'flex-start',
           color: createColorForString(ns, serverName),
         },
       });
@@ -77,9 +76,10 @@ function getAvailableRamCell(ns, serverName) {
   /** @type {Cell} */ const cell = {
     columnName: 'Available RAM',
     rowId: serverName,
-    value: maxRam / availableRam,
+    value: 1 / maxRam,
     cellStyles: {
       position: 'relative',
+      'align-items': 'flex-start',
       'min-width': 'max-content',
     },
   };
@@ -124,27 +124,27 @@ function getRunningScriptsCell(
 ) {
   /** @type {Cell} */ const cell = {
     columnName,
-    columnStyles,
+    columnStyles: {
+      ...LEFT_ALIGN_STYLES,
+      ...columnStyles,
+      'align-items': 'flex-start',
+      width: '380px',
+    },
     rowId: serverName,
   };
 
-  const targetServerNameToThreadCountMap = {};
   const processes = ns
     .ps(serverName)
     .filter((process) => process.filename === scriptName);
+  const scriptElements = [];
   for (const process of processes) {
     const targetServerName = process.args[0];
     const threadCount = process.threads;
-    if (targetServerName in targetServerNameToThreadCountMap) {
-      targetServerNameToThreadCountMap[targetServerName] += threadCount;
-    } else {
-      targetServerNameToThreadCountMap[targetServerName] = threadCount;
-    }
-  }
 
-  const scriptElements = [];
-  for (const targetServerName in targetServerNameToThreadCountMap) {
-    const threadCount = targetServerNameToThreadCountMap[targetServerName];
+    const processInfo = ns.getRunningScript(process.pid);
+    const totalRunningTime =
+      processInfo.offlineRunningTime + processInfo.onlineRunningTime;
+
     const serverNameElement = React.createElement(
       'span',
       {
@@ -154,8 +154,21 @@ function getRunningScriptsCell(
       },
       targetServerName
     );
+
+    const scriptMetadataElement = React.createElement(
+      'span',
+      {
+        style: {
+          'font-size': 'smaller',
+        },
+      },
+      ` (${threadCount} threads, started ${formatTime(
+        totalRunningTime * 1000
+      )} ago)`
+    );
+
     scriptElements.push(
-      React.createElement('div', {}, serverNameElement, ` (${threadCount})`)
+      React.createElement('div', {}, serverNameElement, scriptMetadataElement)
     );
   }
 

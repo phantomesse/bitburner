@@ -12,7 +12,7 @@ import {
   getWeakenScore,
   isHackable,
 } from 'utils/server';
-import { Cell, printTable, Table } from 'utils/table';
+import { Cell, LEFT_ALIGN_STYLES, printTable, Table } from 'utils/table';
 
 /** @param {NS} ns */
 export async function main(ns) {
@@ -26,14 +26,11 @@ export async function main(ns) {
       isHackable(ns, serverName)
     );
 
-    const table = new Table('Hack Score');
+    const table = new Table('Score');
     for (const serverName of hackableServerNames) {
       table.cells.push({
         columnName: 'Server Name',
-        columnStyles: {
-          'justify-content': 'flex-start',
-          'text-align': 'left',
-        },
+        columnStyles: LEFT_ALIGN_STYLES,
         rowId: serverName,
         content: serverName,
         value: serverName,
@@ -68,8 +65,19 @@ export async function main(ns) {
         columnStyles: { color: getWeakenColor(ns) },
       });
 
-      // Hack
+      // Overall score.
       const hackScore = getHackScore(ns, serverName);
+      const growScore = getGrowScore(ns, serverName);
+      const weakenScore = getWeakenScore(ns, serverName);
+      const overallScore = Math.max(hackScore, growScore, weakenScore);
+      table.cells.push({
+        columnName: 'Score',
+        rowId: serverName,
+        content: ns.formatNumber(overallScore, 2),
+        value: 1 / overallScore,
+      });
+
+      // Hack
       table.cells.push({
         columnName: 'Hack Score',
         rowId: serverName,
@@ -97,7 +105,6 @@ export async function main(ns) {
       });
 
       // Grow
-      const growScore = getGrowScore(ns, serverName);
       table.cells.push({
         columnName: 'Grow Score',
         rowId: serverName,
@@ -118,7 +125,6 @@ export async function main(ns) {
       });
 
       // Weaken
-      const weakenScore = getWeakenScore(ns, serverName);
       table.cells.push({
         columnName: 'Weaken Score',
         rowId: serverName,

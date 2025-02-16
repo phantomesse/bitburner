@@ -3,11 +3,12 @@ import { HOME_SERVER_NAME } from 'utils/server';
 export const HACK_JS = 'hack.js';
 export const GROW_JS = 'grow.js';
 export const WEAKEN_JS = 'weaken.js';
+export const QUEUE_SCRIPT_JS = 'queue-script.js';
 
-export const PURCHASE_SERVER_JS = 'purchase-server.js';
-export const UPGRADE_SERVER_JS = 'upgrade-server.js';
+export const ADDITIONAL_RESERVED_RAM_PORT = 123;
 
-export const RESERVED_RAM = 7;
+// const HOME_RESERVED_RAM = 2.9;
+const HOME_RESERVED_RAM = 24;
 
 /**
  * @param {NS} ns
@@ -27,9 +28,15 @@ export function getThreadsAvailableToRunScript(ns, scriptName, serverName) {
  * @returns {number} available RAM on given server
  */
 function getAvailableRam(ns, serverName = HOME_SERVER_NAME) {
+  const portData = ns.peek(ADDITIONAL_RESERVED_RAM_PORT);
+  const additionalReservedRam =
+    portData === 'NULL PORT DATA' ? 0 : portData.ram;
+
   return (
     ns.getServerMaxRam(serverName) -
     ns.getServerUsedRam(serverName) -
-    (serverName === HOME_SERVER_NAME ? RESERVED_RAM : 0)
+    (serverName === HOME_SERVER_NAME
+      ? HOME_RESERVED_RAM + additionalReservedRam
+      : 0)
   );
 }

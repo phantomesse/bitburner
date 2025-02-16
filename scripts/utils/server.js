@@ -85,14 +85,14 @@ export function isHackable(ns, serverName) {
 export function getHackScore(ns, serverName) {
   const maxMoney = ns.getServerMaxMoney(serverName);
   const availableMoney = ns.getServerMoneyAvailable(serverName);
-  if (availableMoney / maxMoney < 0.1) return 0;
+  if (availableMoney / maxMoney < 0.1 && availableMoney < 1000000) {
+    return 0;
+  }
 
   return (
-    (ns.hackAnalyze(serverName) *
-      ns.hackAnalyzeChance(serverName) *
-      (availableMoney / maxMoney) *
-      1000000000000) /
-    Math.pow(ns.getHackTime(serverName), 2)
+    ((availableMoney / maxMoney + ns.hackAnalyzeChance(serverName)) /
+      ns.getHackTime(serverName)) *
+    100000
   );
 }
 
@@ -105,19 +105,7 @@ export function getHackScore(ns, serverName) {
 export function getGrowScore(ns, serverName) {
   const maxMoney = ns.getServerMaxMoney(serverName);
   const availableMoney = ns.getServerMoneyAvailable(serverName);
-  if (availableMoney / maxMoney >= 0.9) return 0;
-
-  const growThreadCount = ns.growthAnalyze(
-    serverName,
-    maxMoney / availableMoney
-  );
-  return (
-    (1 /
-      growThreadCount /
-      Math.pow(ns.getGrowTime(serverName), 2) /
-      ns.growthAnalyzeSecurity(growThreadCount)) *
-    1000000000000000
-  );
+  return (maxMoney / availableMoney / ns.getGrowTime(serverName)) * 100000;
 }
 
 /**
@@ -132,7 +120,7 @@ export function getWeakenScore(ns, serverName) {
   if (currentSecurityLevel === minSecurityLevel) return 0;
 
   return (
-    (currentSecurityLevel - minSecurityLevel) /
-    Math.pow(ns.getWeakenTime(serverName), 2)
+    (currentSecurityLevel / minSecurityLevel / ns.getWeakenTime(serverName)) *
+    100000
   );
 }

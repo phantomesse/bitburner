@@ -1,7 +1,7 @@
 /**
- * Attemps to grow a server once.
+ * Attempts to grow a server once.
  *
- * Run: `run grow.js <serverName>`
+ * Usage: `run grow.js <serverName>`
  *
  * @param {NS} ns
  */

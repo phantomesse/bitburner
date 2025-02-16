@@ -1,3 +1,8 @@
+export const LEFT_ALIGN_STYLES = {
+  'justify-content': 'flex-start',
+  'text-align': 'left',
+};
+
 export class Table {
   /** @param {string} [columnNameToSortBy] */
   constructor(columnNameToSortBy) {
@@ -95,12 +100,12 @@ class Column {
 }
 
 /**
- * Prints a table to logs.
+ * Gets React Element for printing table.
  *
  * @param {NS} ns
  * @param {Table} table
  */
-export function printTable(ns, table) {
+function getTableElement(ns, table) {
   const borderColor = ns.ui.getTheme().welllight;
   const cellStyles = {
     border: `1px ${borderColor} solid`,
@@ -142,7 +147,7 @@ export function printTable(ns, table) {
     }
   }
 
-  const tableElement = React.createElement(
+  return React.createElement(
     'div',
     {
       style: {
@@ -152,6 +157,24 @@ export function printTable(ns, table) {
     },
     ...cellElements
   );
+}
 
-  ns.printRaw(tableElement);
+/**
+ * Prints a table to logs.
+ *
+ * @param {NS} ns
+ * @param {Table} table
+ */
+export function printTable(ns, table) {
+  ns.printRaw(getTableElement(ns, table));
+}
+
+/**
+ * Prints a table to terminal.
+ *
+ * @param {NS} ns
+ * @param {Table} table
+ */
+export function tprintTable(ns, table) {
+  ns.tprintRaw(getTableElement(ns, table));
 }
