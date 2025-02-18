@@ -1,4 +1,4 @@
-import { HOME_SERVER_NAME } from 'utils/server';
+import { getAllServerNames, HOME_SERVER_NAME } from 'utils/server';
 
 export const HACK_JS = 'hack.js';
 export const GROW_JS = 'grow.js';
@@ -7,8 +7,18 @@ export const QUEUE_SCRIPT_JS = 'queue-script.js';
 
 export const ADDITIONAL_RESERVED_RAM_PORT = 123;
 
-// const HOME_RESERVED_RAM = 2.9;
-const HOME_RESERVED_RAM = 24;
+/**
+ * @param {NS} ns
+ * @param {string} scriptName
+ * @returns {number} number of threads
+ */
+export function getAvailableThreadsAcrossAllRootAccessServers(ns, scriptName) {
+  const totalRam = getAllServerNames(ns)
+    .filter(ns.hasRootAccess)
+    .map(ns.getServerMaxRam)
+    .reduce((a, b) => a + b);
+  return Math.floor(totalRam / ns.getScriptRam(scriptName));
+}
 
 /**
  * @param {NS} ns
@@ -28,15 +38,15 @@ export function getThreadsAvailableToRunScript(ns, scriptName, serverName) {
  * @returns {number} available RAM on given server
  */
 function getAvailableRam(ns, serverName = HOME_SERVER_NAME) {
+  const reservedRam = ns.getScriptRam(QUEUE_SCRIPT_JS);
+
   const portData = ns.peek(ADDITIONAL_RESERVED_RAM_PORT);
   const additionalReservedRam =
-    portData === 'NULL PORT DATA' ? 0 : portData.ram;
+    portData === 'NULL PORT DATA' ? 0 : portData.ram + reservedRam;
 
   return (
     ns.getServerMaxRam(serverName) -
     ns.getServerUsedRam(serverName) -
-    (serverName === HOME_SERVER_NAME
-      ? HOME_RESERVED_RAM + additionalReservedRam
-      : 0)
+    (serverName === HOME_SERVER_NAME ? reservedRam + additionalReservedRam : 0)
   );
 }

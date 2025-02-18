@@ -69,7 +69,7 @@ export async function main(ns) {
           serverName
         );
         if (reward) {
-          outputCell.content = `✅ ${answer}`;
+          outputCell.content = `✅ ${reward}`;
           outputCell.cellStyles = { color: ns.ui.getTheme().success };
         } else {
           outputCell.content = `❌ ${answer}`;

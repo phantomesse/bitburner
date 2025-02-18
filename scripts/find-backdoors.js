@@ -4,7 +4,6 @@ import {
   getPath,
   HOME_SERVER_NAME,
   isHackable,
-  isPurchased,
 } from 'utils/server';
 
 /** @param {NS} ns */

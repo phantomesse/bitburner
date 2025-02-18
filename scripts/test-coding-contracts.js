@@ -51,14 +51,14 @@ function testContractType(ns, codingContractType) {
       columnName: 'Input',
       rowId: fileName,
       content: `${input}`,
-      columnStyles: LEFT_ALIGN_STYLES,
+      columnStyles: { ...LEFT_ALIGN_STYLES, width: '200px' },
     });
 
     const solver = CODING_CONTRACT_TYPE_TO_SOLVER_MAP[codingContractType];
     /** @type {Cell} */ const outputCell = {
       columnName: 'Output',
       rowId: fileName,
-      columnStyles: LEFT_ALIGN_STYLES,
+      columnStyles: { ...LEFT_ALIGN_STYLES, width: '200px' },
     };
     if (solver) {
       const answer = solver(input);

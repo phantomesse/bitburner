@@ -24,7 +24,7 @@ export async function main(ns) {
       const serverName = ns.purchaseServer(PURCHASED_SERVER_PREFIX, ram);
       if (serverName) {
         ns.toast(`purchased ${serverName} (${ns.formatRam(ram, 0)})`);
-        return;
+        break;
       }
     }
 

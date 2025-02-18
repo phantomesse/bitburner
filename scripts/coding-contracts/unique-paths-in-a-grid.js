@@ -16,15 +16,53 @@
  */
 export function solveUniquePathsInAGridI(input) {
   const [rowCount, columnCount] = input;
-  const grid = new Grid(rowCount, columnCount);
+  const grid = Grid.fromRowAndColumnCounts(rowCount, columnCount);
   return getUniquePathCount(grid.grid, { rowIndex: 0, columnIndex: 0 });
 }
 
 /**
- * @param {Grid} grid
+ * Unique Paths in a Grid II
+ *
+ * You are located in the top-left corner of the following grid:
+ *
+ * 0,0,0,
+ * 0,0,0,
+ * 0,0,0,
+ * 0,0,0,
+ * 0,0,0,
+ * 1,0,0,
+ * 1,0,1,
+ * 0,0,0,
+ * 0,0,1,
+ * 0,0,0,
+ * 0,1,0,
+ * 0,0,0,
+ *
+ * You are trying reach the bottom-right corner of the grid, but you can only
+ * move down or right on each step. Furthermore, there are obstacles on the grid
+ * that you cannot move onto. These obstacles are denoted by '1', while empty
+ * spaces are denoted by 0.
+ *
+ * Determine how many unique paths there are from start to finish.
+ *
+ * NOTE: The data returned for this contract is an 2D array of numbers
+ * representing the grid.
+ *
+ * @param {(0|1)[][]} input
+ * @returns {number}
+ */
+export function solveUniquePathsInAGridII(input) {
+  const grid = new Grid(input);
+  return getUniquePathCount(grid.grid, { rowIndex: 0, columnIndex: 0 });
+}
+
+/**
+ * @param {(0|1)[][]} grid
  * @param {Coordinates} coords
  */
 function getUniquePathCount(grid, coords) {
+  if (grid[coords.rowIndex][coords.columnIndex] === 1) return 0;
+
   if (
     coords.rowIndex === grid.length - 1 &&
     coords.columnIndex === grid[0].length - 1
@@ -61,14 +99,23 @@ class Coordinates {
 }
 
 class Grid {
+  /** @param {(0|1)[][]} grid */
+  constructor(grid) {
+    this.grid = grid;
+  }
+
   /**
    * @param {number} rowCount
    * @param {number} columnCount
    */
-  constructor(rowCount, columnCount) {
-    this.grid = Array(rowCount);
-    for (let i = 0; i < this.grid.length; i++) {
-      this.grid[i] = Array.from('x'.repeat(columnCount));
+  static fromRowAndColumnCounts(rowCount, columnCount) {
+    const grid = Array(rowCount);
+    for (let i = 0; i < grid.length; i++) {
+      grid[i] = Array(columnCount);
+      for (let j = 0; j < columnCount; j++) {
+        grid[i][j] = 0;
+      }
     }
+    return new Grid(grid);
   }
 }

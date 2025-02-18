@@ -85,10 +85,6 @@ export function isHackable(ns, serverName) {
 export function getHackScore(ns, serverName) {
   const maxMoney = ns.getServerMaxMoney(serverName);
   const availableMoney = ns.getServerMoneyAvailable(serverName);
-  if (availableMoney / maxMoney < 0.1 && availableMoney < 1000000) {
-    return 0;
-  }
-
   return (
     ((availableMoney / maxMoney + ns.hackAnalyzeChance(serverName)) /
       ns.getHackTime(serverName)) *

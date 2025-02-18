@@ -13,7 +13,7 @@ export async function main(ns) {
   while (true) {
     // Purchase new hacknet nodes.
     const purchaseNodeCost = ns.hacknet.getPurchaseNodeCost();
-    while (purchaseNodeCost <= getMoneyAvailableToSpend(ns)) {
+    while (purchaseNodeCost <= getMoneyAvailableToSpendForHacknet(ns)) {
       const nodeIndex = ns.hacknet.purchaseNode();
       if (nodeIndex === -1) break;
       ns.print(
@@ -86,7 +86,7 @@ function upgrade(
   // Calculate how many times we can upgrade.
   const moneyAvailableToSpend = Math.min(
     productionInOneHour,
-    getMoneyAvailableToSpend(ns)
+    getMoneyAvailableToSpendForHacknet(ns)
   );
   let upgradeAmount = 0;
   while (
@@ -121,4 +121,9 @@ function upgrade(
  */
 function getHacknetNodeName(nodeIndex) {
   return `hacknet-node-${nodeIndex}`;
+}
+
+/** @param {NS} ns */
+function getMoneyAvailableToSpendForHacknet(ns) {
+  return getMoneyAvailableToSpend(ns) / 2;
 }

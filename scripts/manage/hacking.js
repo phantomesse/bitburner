@@ -3,6 +3,7 @@ import {
   HACK_JS,
   GROW_JS,
   WEAKEN_JS,
+  getAvailableThreadsAcrossAllRootAccessServers as getTotalThreadsAcrossAllRootAccessServers,
 } from 'utils/script';
 import {
   getAllServerNames,
@@ -13,7 +14,7 @@ import {
   isHackable,
 } from 'utils/server';
 
-const MAX_THREAD_COUNT = 500;
+const MAX_THREAD_COUNT = Infinity;
 
 /** @param {NS} ns */
 export async function main(ns) {
@@ -34,7 +35,16 @@ export async function main(ns) {
       }
     }
 
-    const rootAccessServerNames = allServerNames.filter(ns.hasRootAccess);
+    // Move home server to the last in the root access server names so that we
+    // save as much RAM on home as possible.
+    const rootAccessServerNames = [
+      ...allServerNames.filter(
+        (serverName) =>
+          serverName !== HOME_SERVER_NAME && ns.hasRootAccess(serverName)
+      ),
+      HOME_SERVER_NAME,
+    ];
+
     const hackableServerNames = allServerNames
       .filter((serverName) => isHackable(ns, serverName))
       .sort(
@@ -51,18 +61,81 @@ export async function main(ns) {
           )
       );
 
-    for (const serverName of hackableServerNames) {
-      const hackScore = getHackScore(ns, serverName);
-      const growScore = getGrowScore(ns, serverName);
-      const weakenScore = getWeakenScore(ns, serverName);
+    const hackTimeToServerNameMap = {};
+    const growTimeToServerNameMap = {};
+    const weakenTimeToServerNameMap = {};
+    for (const targetServerName of hackableServerNames) {
+      const hackScore = getHackScore(ns, targetServerName);
+      const growScore = getGrowScore(ns, targetServerName);
+      const weakenScore = getWeakenScore(ns, targetServerName);
       const highestScore = Math.max(hackScore, growScore, weakenScore);
 
       if (highestScore === hackScore) {
-        hack(ns, serverName, rootAccessServerNames);
+        hack(ns, targetServerName, rootAccessServerNames);
       } else if (highestScore === growScore) {
-        grow(ns, serverName, rootAccessServerNames);
+        grow(ns, targetServerName, rootAccessServerNames);
       } else {
-        weaken(ns, serverName, rootAccessServerNames);
+        weaken(ns, targetServerName, rootAccessServerNames);
+      }
+
+      hackTimeToServerNameMap[ns.getHackTime(targetServerName)] =
+        targetServerName;
+      growTimeToServerNameMap[ns.getGrowTime(targetServerName)] =
+        targetServerName;
+      weakenTimeToServerNameMap[ns.getWeakenTime(targetServerName)] =
+        targetServerName;
+    }
+
+    const fastestToHackServerName = Object.entries(
+      hackTimeToServerNameMap
+    ).sort((entry1, entry2) => entry1[0] - entry2[0])[0][1];
+    const fastestToGrowServerName = Object.entries(
+      growTimeToServerNameMap
+    ).sort((entry1, entry2) => entry1[0] - entry2[0])[0][1];
+    const fastestToWeakenServerName = Object.entries(
+      weakenTimeToServerNameMap
+    ).sort((entry1, entry2) => entry1[0] - entry2[0])[0][1];
+    for (const rootAccessServerName of rootAccessServerNames) {
+      let weakenThreadCount = getThreadsAvailableToRunScript(
+        ns,
+        WEAKEN_JS,
+        rootAccessServerName
+      );
+      if (weakenThreadCount > 0) {
+        weaken(ns, fastestToWeakenServerName, [rootAccessServerName]);
+      }
+
+      const growThreadCount = getThreadsAvailableToRunScript(
+        ns,
+        GROW_JS,
+        rootAccessServerName
+      );
+      if (growThreadCount > 0) {
+        grow(ns, fastestToGrowServerName, [rootAccessServerName]);
+      }
+
+      const hackThreadCount = getThreadsAvailableToRunScript(
+        ns,
+        HACK_JS,
+        rootAccessServerName
+      );
+      if (hackThreadCount > 0) {
+        hack(ns, fastestToHackServerName, [rootAccessServerName]);
+      }
+
+      // Weaken fastest to weaken server even if it's at the min security level
+      // just for the hack skill gain.
+      weakenThreadCount = getThreadsAvailableToRunScript(
+        ns,
+        WEAKEN_JS,
+        rootAccessServerName
+      );
+      if (weakenThreadCount > 0) {
+        if (!ns.fileExists(WEAKEN_JS, rootAccessServerName)) {
+          ns.scp(WEAKEN_JS, rootAccessServerName, HOME_SERVER_NAME);
+        }
+
+        ns.run(WEAKEN_JS, weakenThreadCount, fastestToWeakenServerName);
       }
     }
 
@@ -72,26 +145,28 @@ export async function main(ns) {
 
 /**
  * @param {NS} ns
- * @param {string} serverNameToHack
+ * @param {string} targetServer
  * @param {string[]} rootAccessServerNames
  */
-function hack(ns, serverNameToHack, rootAccessServerNames) {
-  const currentlyAvailableMoney = ns.getServerMoneyAvailable(serverNameToHack);
+function hack(ns, targetServer, rootAccessServerNames) {
+  const currentlyAvailableMoney = ns.getServerMoneyAvailable(targetServer);
   if (Math.round(currentlyAvailableMoney) === 0) {
     return;
   }
 
+  const maxThreadCount =
+    getTotalThreadsAcrossAllRootAccessServers(ns, HACK_JS) / 2;
   const neededThreadCount =
     Math.min(
       Math.floor(
-        ns.hackAnalyzeThreads(serverNameToHack, currentlyAvailableMoney / 2)
+        ns.hackAnalyzeThreads(targetServer, currentlyAvailableMoney / 2)
       ),
-      MAX_THREAD_COUNT
+      maxThreadCount
     ) -
     getAlreadyRunningThreadCount(
       ns,
       HACK_JS,
-      serverNameToHack,
+      targetServer,
       rootAccessServerNames
     );
   if (neededThreadCount <= 0) return;
@@ -99,7 +174,7 @@ function hack(ns, serverNameToHack, rootAccessServerNames) {
   runScript(
     ns,
     HACK_JS,
-    serverNameToHack,
+    targetServer,
     rootAccessServerNames,
     neededThreadCount
   );
@@ -107,25 +182,22 @@ function hack(ns, serverNameToHack, rootAccessServerNames) {
 
 /**
  * @param {NS} ns
- * @param {string} serverNameToHack
+ * @param {string} targetServerName
  * @param {string[]} rootAccessServerNames
  */
-function grow(ns, serverNameToGrow, rootAccessServerNames) {
-  const availableMoney = ns.getServerMoneyAvailable(serverNameToGrow);
-  const maxMoney = ns.getServerMaxMoney(serverNameToGrow);
-  if (availableMoney / maxMoney > 0.5) return;
+function grow(ns, targetServerName, rootAccessServerNames) {
+  const availableMoney = ns.getServerMoneyAvailable(targetServerName);
+  const maxMoney = ns.getServerMaxMoney(targetServerName);
+  if (availableMoney === maxMoney) return;
 
+  const maxThreadCount =
+    getTotalThreadsAcrossAllRootAccessServers(ns, GROW_JS) / 2;
   const neededThreadCount =
-    Math.min(
-      Math.floor(
-        ns.growthAnalyze(serverNameToGrow, maxMoney / 2 / availableMoney)
-      ),
-      MAX_THREAD_COUNT
-    ) -
+    Math.min(getThreadCountNeededToGrow(ns, targetServerName), maxThreadCount) -
     getAlreadyRunningThreadCount(
       ns,
       GROW_JS,
-      serverNameToGrow,
+      targetServerName,
       rootAccessServerNames
     );
   if (neededThreadCount <= 0) return;
@@ -133,7 +205,7 @@ function grow(ns, serverNameToGrow, rootAccessServerNames) {
   runScript(
     ns,
     GROW_JS,
-    serverNameToGrow,
+    targetServerName,
     rootAccessServerNames,
     neededThreadCount
   );
@@ -141,37 +213,68 @@ function grow(ns, serverNameToGrow, rootAccessServerNames) {
 
 /**
  * @param {NS} ns
- * @param {string} serverNameToWeaken
+ * @param {string} targetServerName
+ * @param {number = 1} cores
+ */
+function getThreadCountNeededToGrow(ns, targetServerName, cores = 1) {
+  const availableMoney = ns.getServerMoneyAvailable(targetServerName);
+  const maxMoney = ns.getServerMaxMoney(targetServerName);
+  return Math.floor(
+    ns.growthAnalyze(targetServerName, maxMoney / availableMoney, cores)
+  );
+}
+
+/**
+ * @param {NS} ns
+ * @param {string} targetServerName
  * @param {string[]} rootAccessServerNames
  */
-function weaken(ns, serverNameToWeaken, rootAccessServerNames) {
-  const currentSecurityLevel = ns.getServerSecurityLevel(serverNameToWeaken);
-  const minSecurityLevel = ns.getServerMinSecurityLevel(serverNameToWeaken);
+function weaken(ns, targetServerName, rootAccessServerNames) {
+  const currentSecurityLevel = ns.getServerSecurityLevel(targetServerName);
+  const minSecurityLevel = ns.getServerMinSecurityLevel(targetServerName);
   if (currentSecurityLevel === minSecurityLevel) return;
 
-  let neededThreadCount = 0;
-  while (
-    ns.weakenAnalyze(neededThreadCount + 1) <
-    currentSecurityLevel - minSecurityLevel
-  ) {
-    neededThreadCount++;
-  }
-  neededThreadCount = Math.min(neededThreadCount, MAX_THREAD_COUNT);
-  neededThreadCount -= getAlreadyRunningThreadCount(
-    ns,
-    WEAKEN_JS,
-    serverNameToWeaken,
-    rootAccessServerNames
-  );
+  const maxThreadCount =
+    getTotalThreadsAcrossAllRootAccessServers(ns, WEAKEN_JS) / 2;
+  const neededThreadCount =
+    Math.min(
+      getThreadCountNeededToWeaken(ns, targetServerName),
+      maxThreadCount
+    ) -
+    getAlreadyRunningThreadCount(
+      ns,
+      WEAKEN_JS,
+      targetServerName,
+      rootAccessServerNames
+    );
   if (neededThreadCount <= 0) return;
 
   runScript(
     ns,
     WEAKEN_JS,
-    serverNameToWeaken,
+    targetServerName,
     rootAccessServerNames,
     neededThreadCount
   );
+}
+
+/**
+ * @param {NS} ns
+ * @param {string} targetServerName
+ * @param {number = 1} cores
+ */
+function getThreadCountNeededToWeaken(ns, targetServerName, cores = 1) {
+  const currentSecurityLevel = ns.getServerSecurityLevel(targetServerName);
+  const minSecurityLevel = ns.getServerMinSecurityLevel(targetServerName);
+
+  let neededThreadCount = 0;
+  while (
+    ns.weakenAnalyze(neededThreadCount + 1, cores) <
+    currentSecurityLevel - minSecurityLevel
+  ) {
+    neededThreadCount++;
+  }
+  return neededThreadCount;
 }
 
 /**
@@ -192,9 +295,30 @@ function runScript(
     if (!ns.fileExists(scriptName, rootAccessServerName)) {
       ns.scp(scriptName, rootAccessServerName, HOME_SERVER_NAME);
     }
+
+    let threadDiscountFromCpuCores = 0; // Only for grow and weaken.
+    if (scriptName === GROW_JS) {
+      threadDiscountFromCpuCores =
+        neededThreadCount -
+        getThreadCountNeededToGrow(
+          ns,
+          targetServerName,
+          ns.getServer(rootAccessServerName).cpuCores
+        );
+    }
+    if (scriptName === WEAKEN_JS) {
+      threadDiscountFromCpuCores =
+        neededThreadCount -
+        getThreadCountNeededToWeaken(
+          ns,
+          targetServerName,
+          ns.getServer(rootAccessServerName).cpuCores
+        );
+    }
+
     const threadCount = Math.min(
       getThreadsAvailableToRunScript(ns, scriptName, rootAccessServerName),
-      neededThreadCount
+      neededThreadCount - threadDiscountFromCpuCores
     );
     if (neededThreadCount === 0) return;
     if (threadCount <= 0) continue;
