@@ -40,7 +40,7 @@ export async function main(ns) {
       sell(ns, symbol);
     }
 
-    await ns.sleep(1000);
+    await ns.sleep(ns.stock.getConstants().msPerStockUpdate);
   }
 }
 

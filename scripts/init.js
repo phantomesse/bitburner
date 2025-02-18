@@ -34,6 +34,7 @@ function writeStockData(ns) {
     /** @type {StockData} */ const stockData = {
       symbol,
       organization: ns.stock.getOrganization(symbol),
+      maxShares: ns.stock.getMaxShares(symbol),
     };
     stockDataList.push(stockData);
   }

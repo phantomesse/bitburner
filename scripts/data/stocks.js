@@ -3,6 +3,7 @@ const STOCK_DATA_FILE_NAME = 'data/stocks.json';
 export class StockData {
   /** @type {string} */ symbol;
   /** @type {string} */ organization;
+  /** @type {number} */ maxShares;
 }
 
 /**

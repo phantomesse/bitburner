@@ -6,6 +6,7 @@ import { solveEncryptionI } from 'coding-contracts/encryption-i';
 import { solveEncryptionII } from 'coding-contracts/encryption-ii';
 import { solveFindLargestPrimeFactor } from 'coding-contracts/find-largest-prime-factor';
 import { solveMergeOverlappingIntervals } from 'coding-contracts/merge-overlapping-intervals';
+import { solveMinimumPathSumInATriangle } from 'coding-contracts/minimum-path-sum-in-a-triangle';
 import { solveSanitizeParenthesesInExpression } from 'coding-contracts/sanitize-parentheses-in-expression';
 import { solveShortestPathInAGrid } from 'coding-contracts/shortest-path-in-a-grid';
 import { solveSpiralizeMatrix } from 'coding-contracts/spiralize-matrix';
@@ -29,10 +30,10 @@ export const CODING_CONTRACT_TYPE_TO_SOLVER_MAP = {
   'Algorithmic Stock Trader II': null,
   'Algorithmic Stock Trader III': null,
   'Algorithmic Stock Trader IV': null,
-  'Minimum Path Sum in a Triangle': null,
+  'Minimum Path Sum in a Triangle': solveMinimumPathSumInATriangle,
   'Unique Paths in a Grid I': solveUniquePathsInAGridI,
   'Unique Paths in a Grid II': solveUniquePathsInAGridII,
-  'Shortest Path in a Grid': null; //solveShortestPathInAGrid,
+  'Shortest Path in a Grid': null, //solveShortestPathInAGrid,
   'Sanitize Parentheses in Expression': null, //solveSanitizeParenthesesInExpression,
   'Find All Valid Math Expressions': null,
   'HammingCodes: Integer to Encoded Binary': null,
