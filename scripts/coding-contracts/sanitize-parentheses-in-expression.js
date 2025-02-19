@@ -23,76 +23,92 @@
  * @returns {string[]}
  */
 export function solveSanitizeParenthesesInExpression(input) {
-  return getMinimalRemovalValidStrings(input);
+  return getValidStrings(input);
 }
+
+const stringToValidStringsMap = {};
 
 /**
  * @param {string} string
  * @returns {string[]}
  */
-function getMinimalRemovalValidStrings(string) {
-  if (isValid(string) || string === '') return [string];
+function getValidStrings(string) {
+  if (string in stringToValidStringsMap) return stringToValidStringsMap[string];
 
-  const allSubstrings = new Set();
-  const validStrings = [];
+  if (isValid(string)) {
+    stringToValidStringsMap[string] = [string];
+    return stringToValidStringsMap[string];
+  }
+
+  // Get substrings.
+  const substrings = getSubstrings(string);
+
+  const validStrings = new Set();
+  for (const substring of substrings) {
+    if (isValid(substring)) validStrings.add(substring);
+  }
+  if (validStrings.size > 0) {
+    stringToValidStringsMap[string] = [...validStrings];
+    return stringToValidStringsMap[string];
+  }
+
+  let longestValidStringLength = 0;
+  for (const substring of substrings) {
+    const validStringList = getValidStrings(substring);
+    for (const validString of validStringList) {
+      validStrings.add(validString);
+      longestValidStringLength = Math.max(
+        longestValidStringLength,
+        validString.length
+      );
+    }
+  }
+
+  stringToValidStringsMap[string] = [...validStrings].filter(
+    (validString) => validString.length === longestValidStringLength
+  );
+  return stringToValidStringsMap[string];
+}
+
+const stringToSubstringsMap = {};
+
+/**
+ * @param {string} string
+ * @returns {string[]}
+ */
+function getSubstrings(string) {
+  if (string in stringToSubstringsMap) return stringToSubstringsMap[string];
+
+  const substrings = new Set();
   for (let i = 0; i < string.length; i++) {
-    const substring = string.substring(0, i) + string.substring(i + 1);
-
-    if (isValid(substring) && !validStrings.includes(substring)) {
-      validStrings.push(substring);
-    }
-
-    if (substring.length > 1) allSubstrings.add(substring);
+    const character = string.charAt(i);
+    if (character !== '(' && character !== ')') continue;
+    substrings.add(string.substring(0, i) + string.substring(i + 1));
   }
-  if (validStrings.length > 0) return validStrings;
-  if (allSubstrings.size === 0) return [''];
-
-  console.log(
-    `string is ${string} and all substrings are ${[...allSubstrings]}`
-  );
-  for (const substring of allSubstrings) {
-    // Add all valid strings from the substring to the list of valid strings.
-    const validStringsFromSubstring = getMinimalRemovalValidStrings(substring);
-    for (const validString of validStringsFromSubstring) {
-      if (!validStrings.includes(validString)) validStrings.push(validString);
-    }
-  }
-
-  if (validStrings.length === 0) return [''];
-
-  // Only keep the longest valid strings.
-  validStrings.sort((string1, string2) => string2.length - string1.length);
-  const validStringLength = validStrings[0].length;
-  const temp = validStrings.filter(
-    (validString) => validString.length === validStringLength
-  );
-  console.log(temp);
-  return temp;
+  stringToSubstringsMap[string] = [...substrings];
+  return stringToSubstringsMap[string];
 }
 
 const stringToIsValidMap = {};
 
 /**
  * @param {string} string
- * @returns {boolean} whether the given input is valid
+ * @returns {boolean}
  */
 function isValid(string) {
   if (string in stringToIsValidMap) return stringToIsValidMap[string];
 
-  let parenthesesCount = 0;
+  let stack = 0;
   for (let i = 0; i < string.length; i++) {
-    const char = string.charAt(i);
-    if (char === '(') parenthesesCount++;
-    if (char === ')') parenthesesCount--;
-    if (parenthesesCount < 0) {
+    const character = string.charAt(i);
+    if (character === '(') stack++;
+    if (character === ')') stack--;
+    if (stack < 0) {
       stringToIsValidMap[string] = false;
       return false;
     }
   }
 
-  stringToIsValidMap[string] = parenthesesCount === 0;
+  stringToIsValidMap[string] = stack === 0;
   return stringToIsValidMap[string];
 }
-
-// console.log(solveSanitizeParenthesesInExpression('((aaaa)())(()((a'));
-// console.log(solveSanitizeParenthesesInExpression('()(a()))))(a))())'));

@@ -28,7 +28,65 @@
  * Input: [3, [[0, 1], [0, 2], [1, 2]]]
  * Output: []
  *
- * @param {} input
- * @returns
+ * @param {[number, [number, number][]]} input
+ * @returns {number[]}
  */
-export function proper2ColoringOfAGraph(input) {}
+export function solveProper2ColoringOfAGraph(input) {
+  const [vertexCount, edges] = input;
+
+  const vertices = [...Array(vertexCount).keys()].map(
+    (value) => new Vertex(value)
+  );
+  for (const edge of edges) {
+    const [vertex1, vertex2] = edge.map((value) => vertices[value]);
+    vertex1.adjacentVertices.push(vertex2);
+    vertex2.adjacentVertices.push(vertex1);
+  }
+
+  for (const vertex of vertices) {
+    setColor(vertex);
+  }
+
+  const colors = [];
+  for (const vertex of vertices) {
+    for (const adjacentVertex of vertex.adjacentVertices) {
+      if (adjacentVertex.color === vertex.color) return [];
+    }
+    colors.push(vertex.color);
+  }
+  return colors;
+}
+
+/**
+ * @param {Vertex} vertex
+ * @returns {boolean} was successful
+ */
+function setColor(vertex) {
+  const verticesToSetColor = [];
+  for (const adjacentVertex of vertex.adjacentVertices) {
+    if (adjacentVertex.color === vertex.color) {
+      if (adjacentVertex.colorChangeCount === 2) return false;
+
+      adjacentVertex.color = vertex.color === 0 ? 1 : 0;
+      adjacentVertex.colorChangeCount++;
+      verticesToSetColor.push(adjacentVertex);
+    }
+  }
+
+  for (const adjacentVertex of verticesToSetColor) {
+    if (!setColor(adjacentVertex)) return false;
+  }
+  return true;
+}
+
+/** @typedef {0|1} Color */
+
+class Vertex {
+  /** @param {number} value */
+  constructor(value) {
+    /** @type {number} */ this.value = value;
+    /** @type {Color} */ this.color = 0;
+    /** @type {Vertex[]} */ this.adjacentVertices = [];
+    /** @type {number} */ this.colorChangeCount = 0;
+  }
+}

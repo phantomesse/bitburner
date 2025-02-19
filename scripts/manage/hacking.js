@@ -125,17 +125,21 @@ export async function main(ns) {
 
       // Weaken fastest to weaken server even if it's at the min security level
       // just for the hack skill gain.
+      if (!ns.fileExists(WEAKEN_JS, rootAccessServerName)) {
+        ns.scp(WEAKEN_JS, rootAccessServerName, HOME_SERVER_NAME);
+      }
       weakenThreadCount = getThreadsAvailableToRunScript(
         ns,
         WEAKEN_JS,
         rootAccessServerName
       );
       if (weakenThreadCount > 0) {
-        if (!ns.fileExists(WEAKEN_JS, rootAccessServerName)) {
-          ns.scp(WEAKEN_JS, rootAccessServerName, HOME_SERVER_NAME);
-        }
-
-        ns.run(WEAKEN_JS, weakenThreadCount, fastestToWeakenServerName);
+        ns.exec(
+          WEAKEN_JS,
+          rootAccessServerName,
+          weakenThreadCount,
+          fastestToWeakenServerName
+        );
       }
     }
 
@@ -220,7 +224,11 @@ function getThreadCountNeededToGrow(ns, targetServerName, cores = 1) {
   const availableMoney = ns.getServerMoneyAvailable(targetServerName);
   const maxMoney = ns.getServerMaxMoney(targetServerName);
   return Math.floor(
-    ns.growthAnalyze(targetServerName, maxMoney / availableMoney, cores)
+    ns.growthAnalyze(
+      targetServerName,
+      availableMoney === 0 ? 2 : maxMoney / availableMoney,
+      cores
+    )
   );
 }
 

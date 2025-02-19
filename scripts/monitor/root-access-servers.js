@@ -101,7 +101,7 @@ function getAvailableRamCell(ns, serverName) {
     'div',
     {},
     availableRamElement,
-    `${ns.formatNumber(availableRam, 2)} / ${ns.formatRam(maxRam, 0)}`
+    `${ns.formatRam(availableRam, 2)} / ${ns.formatRam(maxRam, 0)}`
   );
 
   return cell;
@@ -128,7 +128,7 @@ function getRunningScriptsCell(
       ...LEFT_ALIGN_STYLES,
       ...columnStyles,
       'align-items': 'flex-start',
-      width: '380px',
+      width: '420px',
     },
     rowId: serverName,
   };
@@ -162,7 +162,7 @@ function getRunningScriptsCell(
           'font-size': 'smaller',
         },
       },
-      ` (${threadCount} threads, started ${formatTime(
+      ` (${ns.formatNumber(threadCount, 0)} threads, started ${formatTime(
         totalRunningTime * 1000
       )} ago)`
     );
