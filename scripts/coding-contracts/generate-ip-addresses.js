@@ -27,7 +27,10 @@ export function solveGenerateIpAddresses(input) {
  * @returns {string[]}
  */
 function getIpAddresses(string, ipAddressThusFar = []) {
-  if (string === '') return [ipAddressThusFar.join('.')];
+  if (string === '') {
+    if (ipAddressThusFar.length === 4) return [ipAddressThusFar.join('.')];
+    return [];
+  }
   if (ipAddressThusFar.length === 4) return [];
 
   const octetList = [

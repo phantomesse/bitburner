@@ -7,8 +7,10 @@ import {
   solveArrayJumpingGame,
   solveArrayJumpingGameII,
 } from 'coding-contracts/array-jumping-game';
+import { solveCompressionI } from 'coding-contracts/compression-i';
 import { solveEncryptionI } from 'coding-contracts/encryption-i';
 import { solveEncryptionII } from 'coding-contracts/encryption-ii';
+import { solveFindAllValidMathExpressions } from 'coding-contracts/find-all-valid-math-expressions';
 import { solveFindLargestPrimeFactor } from 'coding-contracts/find-largest-prime-factor';
 import { solveGenerateIpAddresses } from 'coding-contracts/generate-ip-addresses';
 import { solveMergeOverlappingIntervals } from 'coding-contracts/merge-overlapping-intervals';
@@ -43,11 +45,11 @@ export const CODING_CONTRACT_TYPE_TO_SOLVER_MAP = {
   'Unique Paths in a Grid II': solveUniquePathsInAGridII,
   'Shortest Path in a Grid': null, //solveShortestPathInAGrid,
   'Sanitize Parentheses in Expression': solveSanitizeParenthesesInExpression,
-  'Find All Valid Math Expressions': null,
+  'Find All Valid Math Expressions': solveFindAllValidMathExpressions,
   'HammingCodes: Integer to Encoded Binary': null,
   'HammingCodes: Encoded Binary to Integer': null,
   'Proper 2-Coloring of a Graph': solveProper2ColoringOfAGraph,
-  'Compression I: RLE Compression': null,
+  'Compression I: RLE Compression': solveCompressionI,
   'Compression II: LZ Decompression': null,
   'Compression III: LZ Compression': null,
   'Encryption I: Caesar Cipher': solveEncryptionI,
