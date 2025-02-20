@@ -1,7 +1,7 @@
 export const GANG_DATA_FILE_NAME = 'data/gang.json';
 
 export class GangData {
-  /** @type {import("NetscriptDefinitions").GangTaskStats[]} */ taskStatsList;
+  /** @type {import("../../NetscriptDefinitions").GangTaskStats[]} */ taskStatsList;
   /** @type {GangEquipmentData[]} */ equipmentDataList;
 }
 
@@ -9,7 +9,7 @@ export class GangEquipmentData {
   /** @type {string} */ name;
   /** @type {string} */ type;
   /** @type {number} */ cost;
-  /** @type {import("NetscriptDefinitions").EquipmentStats} */ stats;
+  /** @type {import("../../NetscriptDefinitions").EquipmentStats} */ stats;
 }
 
 /**

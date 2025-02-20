@@ -16,6 +16,6 @@ declare global { const NS: NS; }
 
 ## TODOs
 
-[ ] Move `manage` and `monitor` scripts out of folders for better autocomplete and use VSCode custom icons or tagging to differentiate the files
 [ ] Add monitoring net worth to side bar
-[ ] Cache server information to `data/` (e.g. server name, is purchased)
+[ ] Fix proper 2-coloring coding contract solver
+[ ] Make total ways to sum coding contract solvers not take forever

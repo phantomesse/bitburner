@@ -7,12 +7,12 @@ export async function main(ns) {
   writeStockData(ns);
   writeGangData(ns);
 
-  runScript(ns, 'manage/hacknet.js');
-  runScript(ns, 'manage/purchase-servers.js');
-  runScript(ns, 'manage/upgrade-servers.js');
-  runScript(ns, 'manage/stocks.js');
+  runScript(ns, 'manage-hacknet.js');
+  runScript(ns, 'purchase-servers.js');
+  runScript(ns, 'upgrade-servers.js');
+  runScript(ns, 'manage-stocks.js');
   runScript(ns, 'manage-gang.js');
-  runScript(ns, 'manage/hacking.js');
+  runScript(ns, 'manage-hacking.js');
 }
 
 /**

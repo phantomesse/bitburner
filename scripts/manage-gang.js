@@ -2,10 +2,53 @@ import { GangEquipmentData, getGangData } from 'data/gang';
 import { GANG_MEMBER_NAMES, GangTaskName } from 'utils/gang';
 import { getMoneyAvailableToSpend } from 'utils/money';
 
+/**
+ * @typedef {Object<string, number>} TaskNameToMoneyGainMap
+ */
+
 /** @param {NS} ns */
 export async function main(ns) {
   const gangData = getGangData(ns);
-  const gangInfo = ns.gang.getGangInformation();
+
+  // Get equipment based on whether the gang is a hacking gang or a combat gang.
+  const equipmentDataList = gangData.equipmentDataList.filter(
+    (equipmentData) => {
+      // Always add equipment that increases charisma.
+      if (equipmentData.stats.cha) return true;
+
+      // Hacking gangs should only buy equipment that helps with hacking.
+      if (gangData.isHacking) return equipmentData.stats.hack !== undefined;
+
+      // Combat gangs should only buy equipment that helps with combat skills.
+      return (
+        equipmentData.stats.agi !== undefined ||
+        equipmentData.stats.def !== undefined ||
+        equipmentData.stats.dex !== undefined ||
+        equipmentData.stats.str !== undefined
+      );
+    }
+  );
+
+  // Get money making task list based on whether the gang is a hacking gang or a
+  // combat gang.
+  const moneyMakingTaskStatsList = gangData.taskStatsList
+    .filter((taskStats) => {
+      if (taskStats.baseMoney === 0) return false;
+      if (gangData.isHacking && !taskStats.isHacking) return false;
+      if (!gangData.isHacking && !taskStats.isCombat) return false;
+      return true;
+    })
+    .sort(
+      (taskStats1, taskStats2) => taskStats2.difficulty - taskStats1.difficulty
+    );
+
+  /** @type {Object<string, TaskNameToMoneyGainMap>} */
+  const gangMemberNameToTaskMoneyGainMap = {};
+  function resetTaskNameToMoneyGainMap(gangMemberName) {
+    gangMemberNameToTaskMoneyGainMap[gangMemberName] = Object.fromEntries(
+      moneyMakingTaskStatsList.map((taskStats) => [taskStats.name, -1])
+    );
+  }
 
   while (true) {
     // Attempt to recruit a new gang member.
@@ -15,9 +58,20 @@ export async function main(ns) {
     // Manage gang members.
     const gangMemberNames = ns.gang.getMemberNames();
     for (const gangMemberName of gangMemberNames) {
-      ascend(ns, gangMemberName);
-      buyEquipment(ns, gangMemberName, gangData.equipmentDataList);
-      // assignTask(ns, gangMemberName, gangData.taskStatsList);
+      if (ascend(ns, gangMemberName)) {
+        resetTaskNameToMoneyGainMap(gangMemberName);
+      }
+
+      if (buyEquipment(ns, gangMemberName, equipmentDataList)) {
+        resetTaskNameToMoneyGainMap(gangMemberName);
+      }
+
+      if (!(gangMemberName in gangMemberNameToTaskMoneyGainMap)) {
+        resetTaskNameToMoneyGainMap(gangMemberName);
+      }
+      const taskNameToMoneyGainMap =
+        gangMemberNameToTaskMoneyGainMap[gangMemberName];
+      assignTask(ns, gangMemberName, taskNameToMoneyGainMap);
     }
 
     await ns.gang.nextUpdate();
@@ -28,70 +82,61 @@ export async function main(ns) {
  * @param {NS} ns
  * @param {string} gangMemberName
  * @param {GangEquipmentData[]} equipmentDataList
+ * @returns {boolean} whether an equipment was purchased
  */
 function buyEquipment(ns, gangMemberName, equipmentDataList) {
+  let purchasedEquipment = false;
   for (const equipmentData of equipmentDataList) {
     if (equipmentData.cost <= getMoneyAvailableToSpend(ns)) {
-      ns.gang.purchaseEquipment(gangMemberName, equipmentData.name);
+      if (ns.gang.purchaseEquipment(gangMemberName, equipmentData.name)) {
+        purchasedEquipment = true;
+      }
     }
   }
+  return purchasedEquipment;
 }
 
 /**
  * @param {NS} ns
  * @param {string} gangMemberName
- * @param {import('NetscriptDefinitions').GangTaskStats[]} taskStatsList
+ * @param {TaskNameToMoneyGainMap} taskNameToMoneyGainMap
  */
-function assignTask(ns, gangMemberName, taskStatsList) {
+function assignTask(ns, gangMemberName, taskNameToMoneyGainMap) {
   const gangInfo = ns.gang.getGangInformation();
   const gangMemberInfo = ns.gang.getMemberInformation(gangMemberName);
 
-  if (gangMemberInfo.task === 'Unassigned') {
-    ns.gang.setMemberTask(gangMemberName, 'Train Combat');
-    return;
-  }
-
+  // Prioritize reducing want penalty.
   if (gangInfo.wantedPenalty > 0 && gangInfo.wantedLevel > 1) {
     ns.gang.setMemberTask(gangMemberName, GangTaskName.VIGILANTE_JUSTICE);
     return;
   }
 
-  let moneyMakingTaskStatsList = taskStatsList
-    .filter((taskStat) =>
-      gangInfo.isHacking ? taskStat.isHacking : taskStat.isCombat
-    )
-    .filter(
-      (taskStat) =>
-        ![
-          GangTaskName.UNASSIGNED,
-          GangTaskName.TRAIN_CHARISMA,
-          GangTaskName.TRAIN_COMBAT,
-          GangTaskName.TRAIN_HACKING,
-          GangTaskName.TERRITORY_WARFARE,
-          GangTaskName.TERRORISM,
-          GangTaskName.VIGILANTE_JUSTICE,
-        ].includes(taskStat.name)
-    )
-    .sort(
-      (taskStat1, taskStat2) => taskStat1.difficulty - taskStat2.difficulty
-    );
-  const moneyMakingTaskNames = moneyMakingTaskStatsList.map(
-    (taskStat) => taskStat.name
-  );
-
-  let newTaskName = gangInfo.isHacking
-    ? GangTaskName.TRAIN_HACKING
-    : GangTaskName.TRAIN_COMBAT;
-  const currentTaskIndex = moneyMakingTaskNames.indexOf(gangMemberInfo.task);
-  if (gangMemberInfo.moneyGain === 0) {
-    if (currentTaskIndex > 0) {
-      newTaskName = moneyMakingTaskNames[currentTaskIndex - 1];
-    }
-  } else {
-    if (currentTaskIndex === moneyMakingTaskNames.length - 1) return;
-    newTaskName = moneyMakingTaskNames[currentTaskIndex + 1];
+  // Try each money making task so we get information about how much money gain
+  // we can get per task.
+  if (gangMemberInfo.task in taskNameToMoneyGainMap) {
+    taskNameToMoneyGainMap[gangMemberInfo.task] = gangMemberInfo.moneyGain;
   }
-  ns.gang.setMemberTask(gangMemberName, newTaskName);
+  if (Object.values(taskNameToMoneyGainMap).includes(-1)) {
+    const taskName = Object.entries(taskNameToMoneyGainMap)
+      .filter(([_, moneyGain]) => moneyGain === -1)
+      .map(([taskName, _]) => taskName)[0];
+    ns.gang.setMemberTask(gangMemberName, taskName);
+    return;
+  }
+
+  // Assign the task with the most money gain or train the member if none of the
+  // money making tasks will make any money.
+  const nonZeroTaskNameToMoneyGainMap = Object.entries(
+    taskNameToMoneyGainMap
+  ).filter(([_, moneyGain]) => moneyGain > 0);
+  if (nonZeroTaskNameToMoneyGainMap.length > 0) {
+    const taskName = nonZeroTaskNameToMoneyGainMap
+      .sort((entry1, entry2) => entry2[1] - entry1[1])
+      .map(([taskName, _]) => taskName)[0];
+    ns.gang.setMemberTask(gangMemberName, taskName);
+  } else {
+    train(ns, gangMemberName);
+  }
 }
 
 /**
@@ -111,12 +156,13 @@ function train(ns, gangMemberName) {
  *
  * @param {NS} ns
  * @param {string} gangMemberName
+ * @returns {boolean} whether the gang member was ascened
  */
 function ascend(ns, gangMemberName) {
   const gangInfo = ns.gang.getGangInformation();
 
   const ascensionResult = ns.gang.getAscensionResult(gangMemberName);
-  if (ascensionResult === undefined) return;
+  if (ascensionResult === undefined) return false;
 
   const minMultiplier = [
     gangInfo.isHacking
@@ -131,7 +177,11 @@ function ascend(ns, gangMemberName) {
   ];
   if (minMultiplier < 10) return;
 
-  if (ns.gang.ascendMember(gangMemberName)) train(ns, gangMemberName);
+  if (ns.gang.ascendMember(gangMemberName)) {
+    train(ns, gangMemberName);
+    return true;
+  }
+  return false;
 }
 
 /** @param {NS} ns  */

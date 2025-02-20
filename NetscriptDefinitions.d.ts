@@ -6589,9 +6589,6 @@ export interface NS {
   /**
    * Open the tail window of a script. This function is deprecated and will be removed in a later version.
    *
-   * @deprecated
-   * Use {@link UserInterface.openTail | ns.ui.openTail} instead.
-   *
    * @remarks
    * RAM cost: 0 GB
    *

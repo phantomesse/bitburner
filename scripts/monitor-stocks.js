@@ -1,6 +1,5 @@
 import { getStockDataList } from 'data/stocks';
 import { formatMoney } from 'utils/format';
-import { getAllStockSymbols } from 'utils/stocks';
 import { LEFT_ALIGN_STYLES, printTable, Table } from 'utils/table';
 
 /** @param {NS} ns */
