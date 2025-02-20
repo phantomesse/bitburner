@@ -1,5 +1,6 @@
 import {
   solveAlgorithmicStockTraderI,
+  solveAlgorithmicStockTraderII,
   solveAlgorithmicStockTraderIII,
   solveAlgorithmicStockTraderIV,
 } from 'coding-contracts/algorithmic-stock-trader';
@@ -20,6 +21,7 @@ import { solveSanitizeParenthesesInExpression } from 'coding-contracts/sanitize-
 import { solveShortestPathInAGrid } from 'coding-contracts/shortest-path-in-a-grid';
 import { solveSpiralizeMatrix } from 'coding-contracts/spiralize-matrix';
 import { solveSubarrayWithMaximumSum } from 'coding-contracts/subarray-with-maximum-sum';
+import { solveTotalWaysToSum } from 'coding-contracts/total-ways-to-sum';
 import {
   solveUniquePathsInAGridI,
   solveUniquePathsInAGridII,
@@ -29,7 +31,7 @@ import {
 export const CODING_CONTRACT_TYPE_TO_SOLVER_MAP = {
   'Find Largest Prime Factor': solveFindLargestPrimeFactor,
   'Subarray with Maximum Sum': solveSubarrayWithMaximumSum,
-  'Total Ways to Sum': null,
+  'Total Ways to Sum': null, //solveTotalWaysToSum,
   'Total Ways to Sum II': null,
   'Spiralize Matrix': solveSpiralizeMatrix,
   'Array Jumping Game': solveArrayJumpingGame,
@@ -37,7 +39,7 @@ export const CODING_CONTRACT_TYPE_TO_SOLVER_MAP = {
   'Merge Overlapping Intervals': solveMergeOverlappingIntervals,
   'Generate IP Addresses': solveGenerateIpAddresses,
   'Algorithmic Stock Trader I': solveAlgorithmicStockTraderI,
-  'Algorithmic Stock Trader II': null,
+  'Algorithmic Stock Trader II': solveAlgorithmicStockTraderII,
   'Algorithmic Stock Trader III': solveAlgorithmicStockTraderIII,
   'Algorithmic Stock Trader IV': solveAlgorithmicStockTraderIV,
   'Minimum Path Sum in a Triangle': solveMinimumPathSumInATriangle,

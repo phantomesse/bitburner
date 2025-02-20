@@ -14,8 +14,6 @@ import {
   isHackable,
 } from 'utils/server';
 
-const MAX_THREAD_COUNT = Infinity;
-
 /** @param {NS} ns */
 export async function main(ns) {
   ns.disableLog('ALL');
@@ -158,8 +156,9 @@ function hack(ns, targetServer, rootAccessServerNames) {
     return;
   }
 
-  const maxThreadCount =
-    getTotalThreadsAcrossAllRootAccessServers(ns, HACK_JS) / 2;
+  const maxThreadCount = Math.floor(
+    getTotalThreadsAcrossAllRootAccessServers(ns, HACK_JS) / 2
+  );
   const neededThreadCount =
     Math.min(
       Math.floor(
@@ -194,8 +193,9 @@ function grow(ns, targetServerName, rootAccessServerNames) {
   const maxMoney = ns.getServerMaxMoney(targetServerName);
   if (availableMoney === maxMoney) return;
 
-  const maxThreadCount =
-    getTotalThreadsAcrossAllRootAccessServers(ns, GROW_JS) / 2;
+  const maxThreadCount = Math.floor(
+    getTotalThreadsAcrossAllRootAccessServers(ns, GROW_JS) / 2
+  );
   const neededThreadCount =
     Math.min(getThreadCountNeededToGrow(ns, targetServerName), maxThreadCount) -
     getAlreadyRunningThreadCount(
@@ -242,8 +242,9 @@ function weaken(ns, targetServerName, rootAccessServerNames) {
   const minSecurityLevel = ns.getServerMinSecurityLevel(targetServerName);
   if (currentSecurityLevel === minSecurityLevel) return;
 
-  const maxThreadCount =
-    getTotalThreadsAcrossAllRootAccessServers(ns, WEAKEN_JS) / 2;
+  const maxThreadCount = Math.floor(
+    getTotalThreadsAcrossAllRootAccessServers(ns, WEAKEN_JS) / 2
+  );
   const neededThreadCount =
     Math.min(
       getThreadCountNeededToWeaken(ns, targetServerName),

@@ -1,17 +1,9 @@
-const STOCK_DATA_FILE_NAME = 'data/stocks.json';
+export const STOCK_DATA_FILE_NAME = 'data/stocks.json';
 
 export class StockData {
   /** @type {string} */ symbol;
   /** @type {string} */ organization;
   /** @type {number} */ maxShares;
-}
-
-/**
- * @param {NS} ns
- * @param {StockData[]} stockDataList
- */
-export function writeStockDataList(ns, stockDataList) {
-  ns.write(STOCK_DATA_FILE_NAME, JSON.stringify(stockDataList), 'w');
 }
 
 /**

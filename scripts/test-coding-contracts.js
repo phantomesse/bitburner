@@ -62,13 +62,18 @@ function testContractType(ns, codingContractType) {
     };
     if (solver) {
       const answer = solver(input);
-      const reward = ns.codingcontract.attempt(answer, fileName);
-      if (reward) {
-        outputCell.content = `✅ ${answer}`;
-        outputCell.cellStyles = { color: ns.ui.getTheme().success };
+      if (answer === null) {
+        outputCell.content = 'No solver available';
+        outputCell.cellStyles = { color: ns.ui.getTheme().warning };
       } else {
-        outputCell.content = `❌ ${answer}`;
-        outputCell.cellStyles = { color: ns.ui.getTheme().error };
+        const reward = ns.codingcontract.attempt(answer, fileName);
+        if (reward) {
+          outputCell.content = `✅ ${answer}`;
+          outputCell.cellStyles = { color: ns.ui.getTheme().success };
+        } else {
+          outputCell.content = `❌ ${answer}`;
+          outputCell.cellStyles = { color: ns.ui.getTheme().error };
+        }
       }
     } else {
       outputCell.content = 'No solver available';
